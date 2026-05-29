@@ -7,5 +7,4 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/s&v")
 public class ConsumersController {
-    @GetMapping("/privado/verperfil")
 }
