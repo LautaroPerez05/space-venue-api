@@ -1,4 +1,4 @@
 package com.utn.space.venueaapi.Model;
 
-public class ServicesSelected {
+public class Comments {
 }
