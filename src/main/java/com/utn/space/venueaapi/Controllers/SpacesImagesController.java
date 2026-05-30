@@ -5,5 +5,5 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/s&v")
-public class Spaces_imagesController {
+public class SpacesImagesController {
 }
