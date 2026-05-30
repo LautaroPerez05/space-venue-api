@@ -5,6 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-
-public interface ServicesSelectedRepository extends JpaRepository<ServicesSelected,Integer> {
+public interface ServicesSelectedRepository extends JpaRepository<ServicesSelected,Long> {
 }
