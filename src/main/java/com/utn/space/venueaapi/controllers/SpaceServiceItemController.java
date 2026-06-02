@@ -4,10 +4,7 @@ import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
 import com.utn.space.venueaapi.service.SpaceServiceItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,5 +20,8 @@ public class SpaceServiceItemController {
         return ResponseEntity.ok(service.listOfServicesFromSpace(idSpace));
     }
 
-
+    @PostMapping("/insert")
+    public void insertServiceItem(@RequestBody SpaceServiceItemDTO serviceItemDTO){
+        service.insertServiceItem(serviceItemDTO);
+    }
 }
