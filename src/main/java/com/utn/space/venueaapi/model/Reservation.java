@@ -1,7 +1,6 @@
 package com.utn.space.venueaapi.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +11,8 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor @NoArgsConstructor
 public class Reservation {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
@@ -31,4 +32,17 @@ public class Reservation {
 
     private ReservationStatus status;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    private Boolean isActive;
+
+
+    @ManyToOne
+    @JoinColumn(name = "id_consumer")
+    private Consumer consumer;
+
+    @ManyToOne
+    @JoinColumn(name = "id_space")
+    private Space space;
 }

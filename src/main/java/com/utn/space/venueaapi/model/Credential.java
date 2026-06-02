@@ -20,7 +20,7 @@ public class Credential {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    private Role rol;
+    private UserRole rol;
 
     @OneToOne
     @JoinColumn(name = "id_customer")
