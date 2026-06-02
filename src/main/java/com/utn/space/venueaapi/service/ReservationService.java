@@ -4,6 +4,7 @@ import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.ExceptionInvalidDate;
 import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
+import com.utn.space.venueaapi.model.records.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.List;
 public class ReservationService {
     @Autowired
     private ReservationRepository reservationRepository;
+    private ReservationMapper reservationMapper;
 
     /// -------------------Metodos-------------------------------------------
 
@@ -36,8 +38,10 @@ public class ReservationService {
 
         ///validar las id?
 
+        Reservation aux= reservationMapper.toEntity(dto);
 
+//agregar los id
 
-        return reservationRepository.save()
+        return reservationRepository.save(aux);
     }
 }

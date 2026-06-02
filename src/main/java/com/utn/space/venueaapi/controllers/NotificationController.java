@@ -29,12 +29,6 @@ public class NotificationController {
                 .body(notificationService.findById(id));
     }
 
-    @ExceptionHandler(ExceptionIdNotFound.class)
-    public ResponseEntity<String> idNotFound (ExceptionIdNotFound e){
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(e.getMessage());
-    }
 
     @PostMapping("/{id}")
     public ResponseEntity<Notification> markAsSeen (@PathVariable Long id){

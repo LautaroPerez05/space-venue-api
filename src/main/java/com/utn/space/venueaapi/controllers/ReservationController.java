@@ -33,18 +33,12 @@ public class ReservationController {
                 .body(reservationService.findById(id));
     }
 
-    @ExceptionHandler(ExceptionIdNotFound.class)
-    public ResponseEntity<String> idNotFound (ExceptionIdNotFound e){
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(e.getMessage());
-    }
 
     @PostMapping
-    public ResponseEntity<Reservation> createReservation(@Validated(Create.class) @RequestBody ReservationDTO){
+    public ResponseEntity<Reservation> createReservation(@Validated(Create.class) @RequestBody ReservationDTO dto){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(reservationService.)
+                .body(reservationService.create(dto));
     }
 
 }
