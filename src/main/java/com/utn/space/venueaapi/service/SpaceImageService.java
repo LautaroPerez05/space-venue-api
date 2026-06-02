@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class SpaceImagesService {
+public class SpaceImageService {
     @Autowired
     SpaceImageRepository spaceImageRepository;
     @Autowired

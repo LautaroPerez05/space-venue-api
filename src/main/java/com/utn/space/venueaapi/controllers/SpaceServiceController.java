@@ -1,7 +1,7 @@
 package com.utn.space.venueaapi.controllers;
 
-import com.utn.space.venueaapi.model.records.SpaceServiceDTO;
-import com.utn.space.venueaapi.service.SpaceServiceService;
+import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
+import com.utn.space.venueaapi.service.SpaceServiceItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,10 +16,10 @@ import java.util.List;
 public class SpaceServiceController {
 
     @Autowired
-    SpaceServiceService service;
+    SpaceServiceItemService service;
 
     @GetMapping("/space/{idSpace}")
-    public ResponseEntity<List<SpaceServiceDTO>> listServicesFromSpace(@PathVariable Long idSpace){
+    public ResponseEntity<List<SpaceServiceItemDTO>> listServicesFromSpace(@PathVariable Long idSpace){
         return ResponseEntity.ok(service.listOfServicesFromSpace(idSpace));
     }
 

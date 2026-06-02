@@ -1,6 +1,6 @@
 package com.utn.space.venueaapi.model.records;
 
-public record SpaceServiceDTO (
+public record SpaceServiceItemDTO(
         Long id,
         String description,
         Double price,

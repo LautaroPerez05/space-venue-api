@@ -1,7 +1,7 @@
 package com.utn.space.venueaapi.repository;
 
 import com.utn.space.venueaapi.model.SpaceServiceItem;
-import com.utn.space.venueaapi.model.records.SpaceServiceDTO;
+import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SpaceServiceRepository extends JpaRepository<SpaceServiceItem,Long> {
+public interface SpaceServiceItemRepository extends JpaRepository<SpaceServiceItem,Long> {
     @Query("SELECT new SpaceServiceDTO(ss.id, ss.description, ss.price, sp.id) " +
             "FROM SpaceService ss " +
             "JOIN ss.space sp " +
             "WHERE sp.id = :idSpace")
-    List<SpaceServiceDTO> findAllSpaceServicesBySpaceId(@Param("idSpace") Long idSpace);
+    List<SpaceServiceItemDTO> findAllSpaceServicesBySpaceId(@Param("idSpace") Long idSpace);
 }

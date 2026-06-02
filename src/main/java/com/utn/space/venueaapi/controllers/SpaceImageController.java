@@ -2,7 +2,7 @@ package com.utn.space.venueaapi.controllers;
 
 import com.utn.space.venueaapi.model.records.SpaceImageDTO;
 import com.utn.space.venueaapi.model.SpaceImage;
-import com.utn.space.venueaapi.service.SpaceImagesService;
+import com.utn.space.venueaapi.service.SpaceImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import java.util.List;
 @RequestMapping("/s&v/spaceimages")
 public class SpaceImageController {
     @Autowired
-    SpaceImagesService spaceImagesService;
+    SpaceImageService spaceImagesService;
 
     @GetMapping
     public ResponseEntity<List<SpaceImage>> listSpaceImages(){
