@@ -40,6 +40,6 @@ public class NotificationController {
     public ResponseEntity<Notification> markAsSeen (@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(notificationService.);
+                .body(notificationService.markAsSeen(id));
     }
 }

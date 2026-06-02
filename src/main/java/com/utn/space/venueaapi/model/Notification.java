@@ -1,4 +1,31 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+
+@Entity
 public class Notification {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id_Notification;
+
+    private LocalDateTime fecha;
+    private String contenido;
+    private Boolean visto=false;
+
+    @ManyToOne
+    @JoinColumn(name = "id_consumer")
+    @JsonIgnore
+    private Consumer consumer;
+
+
 }

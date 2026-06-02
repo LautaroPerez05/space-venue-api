@@ -35,7 +35,7 @@ public class Reservation {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    private Boolean isActive;
+    private Boolean isActive=true;
 
 
     @ManyToOne

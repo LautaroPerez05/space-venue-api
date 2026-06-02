@@ -2,10 +2,13 @@ package com.utn.space.venueaapi.controllers;
 
 import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.model.Reservation;
+import com.utn.space.venueaapi.model.records.Create;
+import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,8 +39,12 @@ public class ReservationController {
                 .status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage());
     }
-    /*
+
     @PostMapping
-    public Reservations createReservation(@RequestBody )
-    */
+    public ResponseEntity<Reservation> createReservation(@Validated(Create.class) @RequestBody ReservationDTO){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(reservationService.)
+    }
+
 }
