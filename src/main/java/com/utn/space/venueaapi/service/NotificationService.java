@@ -22,4 +22,10 @@ public class NotificationService {
     public Notification findById(Long id){
         return notificationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound("Notificacion",id));
     }
+
+    public Notification markAsSeen (Long id){
+        Notification aux= notificationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound("Notificacion",id));
+        aux.set
+
+    }
 }

@@ -1,9 +1,45 @@
 package com.utn.space.venueaapi.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
+import com.utn.space.venueaapi.model.Notification;
+import com.utn.space.venueaapi.service.NotificationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
+    @Autowired
+    private NotificationService notificationService;
+
+
+    @GetMapping
+    public List<Notification> listAll (){
+        return notificationService.listAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Notification> findForId (@PathVariable Long id){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(notificationService.findById(id));
+    }
+
+    @ExceptionHandler(ExceptionIdNotFound.class)
+    public ResponseEntity<String> idNotFound (ExceptionIdNotFound e){
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(e.getMessage());
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<Notification> markAsSeen (@PathVariable Long id){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(notificationService.);
+    }
 }

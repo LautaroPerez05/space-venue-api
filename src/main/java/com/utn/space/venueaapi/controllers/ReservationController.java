@@ -24,8 +24,10 @@ public class ReservationController {
     }
 
     @GetMapping("/{id}")
-    public Reservation findById (@PathVariable Long id){
-        return reservationService.findById(id);
+    public ResponseEntity<Reservation> findById (@PathVariable Long id){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(reservationService.findById(id));
     }
 
     @ExceptionHandler(ExceptionIdNotFound.class)
