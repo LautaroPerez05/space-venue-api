@@ -1,6 +1,7 @@
 package com.utn.space.venueaapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.utn.space.venueaapi.model.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -24,11 +25,10 @@ public class Consumer {
 
     private String phone;
     private boolean isActive = true;
-    private String username;
 
-    @OneToOne(mappedBy = "username")
-    private Credential credential;
-
+    @OneToOne
+    @JoinColumn(name = "username")
+    private Credential credentials;
 
     @OneToMany(mappedBy = "consumers")
     @JsonIgnore

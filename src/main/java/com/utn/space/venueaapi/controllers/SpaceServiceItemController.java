@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/services")
-public class SpaceServiceController {
+public class SpaceServiceItemController {
 
     @Autowired
     SpaceServiceItemService service;

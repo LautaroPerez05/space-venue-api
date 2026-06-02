@@ -11,18 +11,12 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Credential {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     private String username;
 
     @Column(name = "password_hash")
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    private ERoles rol;
+    private ERoles rol = ERoles.ROLE_CLIENT;
 
-    @OneToOne
-    @JoinColumn(name = "id_customer")
-    private Consumer consumers;
 }
