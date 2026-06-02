@@ -1,6 +1,6 @@
 package com.utn.space.venueaapi.model;
 
-public enum UserRole {
+public enum ERoles {
     ROLE_ADMIN,
     ROLE_CLIENT;
 }

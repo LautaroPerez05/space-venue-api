@@ -8,7 +8,7 @@ import lombok.*;
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
 @EqualsAndHashCode @ToString
-public class SpaceService {
+public class SpaceServiceItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

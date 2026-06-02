@@ -18,7 +18,7 @@ public class ServiceSelected {
 
     @ManyToOne
     @JoinColumn(name = "id_service")
-    private SpaceService service;
+    private SpaceServiceItem service;
 
     @ManyToOne
     @JoinColumn(name = "id_reservation")

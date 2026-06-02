@@ -1,6 +1,5 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.model.SpaceService;
 import com.utn.space.venueaapi.model.records.SpaceServiceDTO;
 import com.utn.space.venueaapi.repository.SpaceServiceRepository;
 import org.springframework.stereotype.Service;
