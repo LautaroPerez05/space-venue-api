@@ -37,6 +37,7 @@ public class ReservationService {
         }
 
         ///validar las id?
+///desta
 
         Reservation aux= reservationMapper.toEntity(dto);
 
