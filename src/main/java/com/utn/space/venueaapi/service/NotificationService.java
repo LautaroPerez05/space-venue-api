@@ -28,4 +28,8 @@ public class NotificationService {
         aux.setVisto(true);
         return notificationRepository.save(aux);
     }
+
+    public List<Notification> listAllByIdConsumer (Long id){
+        return notificationRepository.findAllByIdConsumer(id);
+    }
 }
