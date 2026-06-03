@@ -16,4 +16,11 @@ public interface SpaceServiceItemRepository extends JpaRepository<SpaceServiceIt
             "JOIN ss.space sp " +
             "WHERE sp.id = :idSpace")
     List<SpaceServiceItemDTO> findAllSpaceServicesBySpaceId(@Param("idSpace") Long idSpace);
+
+    @Query("SELECT CASE WHEN EXISTS (" +
+                "SELECT s " +
+                "FROM SpaceServiceItem s JOIN s.space sp " +
+                "WHERE s.id = :idItem AND sp.id = :idSpace) " +
+            "THEN true ELSE false END")
+    boolean existsServiceItemInSpace(Long idItem, Long idSpace);
 }

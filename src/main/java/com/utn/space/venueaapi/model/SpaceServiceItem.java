@@ -15,6 +15,7 @@ public class SpaceServiceItem {
 
     private String description;
     private Double price;
+    private Boolean isActive;
 
     @ManyToOne
     @JoinColumn(name = "id_space")
