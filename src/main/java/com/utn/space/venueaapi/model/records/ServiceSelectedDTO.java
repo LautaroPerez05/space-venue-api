@@ -5,4 +5,8 @@ public record ServiceSelectedDTO(
         Double priceAtReservation,
         Long idService,
         Long idReservation
-) {}
+) {
+    public ServiceSelectedDTO(Double priceAtReservation, Long idService, Long idReservation) {
+        this(0L, priceAtReservation, idService, idReservation);
+    }
+}

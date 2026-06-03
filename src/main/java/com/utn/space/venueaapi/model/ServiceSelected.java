@@ -23,4 +23,11 @@ public class ServiceSelected {
     @ManyToOne
     @JoinColumn(name = "id_reservation")
     private Reservation reservation;
+
+    public ServiceSelected(Double priceAtReservation, SpaceServiceItem service, Reservation reservation) {
+        this.id = 0L;
+        this.priceAtReservation = priceAtReservation;
+        this.service = service;
+        this.reservation = reservation;
+    }
 }
