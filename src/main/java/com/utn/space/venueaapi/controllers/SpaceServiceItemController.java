@@ -24,4 +24,14 @@ public class SpaceServiceItemController {
     public void insertServiceItem(@RequestBody SpaceServiceItemDTO serviceItemDTO){
         service.insertServiceItem(serviceItemDTO);
     }
+
+    @PutMapping("/update/{id}")
+    public void updateServiceItem(@PathVariable Long id, @RequestBody SpaceServiceItemDTO serviceItemDTO){
+        service.updateServiceItem(id, serviceItemDTO);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void deleteServiceFromSpace(@PathVariable Long id){
+        service.deleteServiceItem(id);
+    }
 }

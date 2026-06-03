@@ -4,7 +4,7 @@ import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.ExceptionInvalidDate;
 import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
-import com.utn.space.venueaapi.model.records.ReservationMapper;
+import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class GobalExceptionHandler {
+public class GlobalExceptionHandler {
 
     @ExceptionHandler(ExceptionIdNotFound.class)
     public ResponseEntity<String> idNotFound (ExceptionIdNotFound e){

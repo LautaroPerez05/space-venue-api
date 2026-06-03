@@ -1,8 +1,7 @@
 package com.utn.space.venueaapi.controllers;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.model.Reservation;
-import com.utn.space.venueaapi.model.records.Create;
+import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
