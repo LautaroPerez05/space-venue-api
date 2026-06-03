@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.controllers;
 
+import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
 import com.utn.space.venueaapi.service.SpaceServiceItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class SpaceServiceItemController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public void deleteServiceFromSpace(@PathVariable Long id){
-        service.deleteServiceItem(id);
+    public void deleteServiceFromSpace(@PathVariable Long id, @RequestBody SpaceDTO spaceDTO){
+        service.deleteServiceItem(id, spaceDTO.id_space());
     }
 }

@@ -10,6 +10,7 @@ public class SpaceServiceItemMapper {
                 spaceServiceItem.getId(),
                 spaceServiceItem.getDescription(),
                 spaceServiceItem.getPrice(),
+                spaceServiceItem.getIsActive(),
                 spaceServiceItem.getSpace().getId_space()
         );
     }
@@ -19,6 +20,7 @@ public class SpaceServiceItemMapper {
                 serviceItemDTO.id(),
                 serviceItemDTO.description(),
                 serviceItemDTO.price(),
+                serviceItemDTO.isActive(),
                 space
         );
     }
@@ -28,6 +30,7 @@ public class SpaceServiceItemMapper {
                 id,
                 serviceItemDTO.description(),
                 serviceItemDTO.price(),
+                serviceItemDTO.isActive(),
                 space
         );
     }

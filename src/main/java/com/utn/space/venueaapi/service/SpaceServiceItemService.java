@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/// ADVERTENCIA: Solo se ha hecho un crud básico, falta validar en modificación y eliminación
-/// que el servicio pertenezca al espacio en el que dice estar
 @Service
 public class SpaceServiceItemService {
     private final SpaceServiceItemRepository repository;
@@ -42,8 +40,8 @@ public class SpaceServiceItemService {
 
     @Transactional
     public void updateServiceItem(Long id, SpaceServiceItemDTO serviceItemDTO){
-        if(!repository.existsById(id)){
-            throw new NotFoundException("No se ha encontrado el servicio a modificar");
+        if(!repository.existsServiceItemInSpace(id, serviceItemDTO.idSpace())){
+            throw new NotFoundException("No se ha encontrado el servicio a modificar en el espacio");
         }
 
         if(serviceItemDTO.price() <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
@@ -60,8 +58,8 @@ public class SpaceServiceItemService {
     }
 
     @Transactional
-    public void deleteServiceItem(Long id){
-        if(!repository.existsById(id)) throw new NotFoundException("No se ha encontrado el servicio a eiminar");
+    public void deleteServiceItem(Long id, Long idSpace){
+        if(!repository.existsServiceItemInSpace(id, idSpace)) throw new NotFoundException("No se ha encontrado el servicio a eiminar");
         repository.deleteById(id);
     }
 }
