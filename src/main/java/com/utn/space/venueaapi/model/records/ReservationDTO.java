@@ -23,6 +23,8 @@ public class ReservationDTO {
 
     @NotBlank(groups = {Create.class, Update.class})
     private String title;
+
+    @NotBlank(groups = {Create.class, Update.class})
     private String description;
 
     private String googleEventCode;
