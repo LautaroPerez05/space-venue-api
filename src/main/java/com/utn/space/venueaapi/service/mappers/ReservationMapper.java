@@ -1,10 +1,10 @@
-package com.utn.space.venueaapi.model.records;
+package com.utn.space.venueaapi.service.mappers;
 
 import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.Space;
+import com.utn.space.venueaapi.model.records.ReservationDTO;
 import org.mapstruct.Mapper;
-import org.springframework.web.bind.annotation.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ReservationMapper {

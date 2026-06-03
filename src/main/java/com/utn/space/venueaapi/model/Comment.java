@@ -3,6 +3,7 @@ package com.utn.space.venueaapi.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 @Data
 @Entity
 @Table(name = "Comments")
+@NoArgsConstructor
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

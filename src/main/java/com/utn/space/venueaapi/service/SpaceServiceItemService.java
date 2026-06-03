@@ -7,12 +7,14 @@ import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
 import com.utn.space.venueaapi.repository.SpaceRepository;
 import com.utn.space.venueaapi.repository.SpaceServiceItemRepository;
+import com.utn.space.venueaapi.service.mappers.SpaceServiceItemMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
+/// ADVERTENCIA: Solo se ha hecho un crud básico, falta validar en modificación y eliminación
+/// que el servicio pertenezca al espacio en el que dice estar
 @Service
 public class SpaceServiceItemService {
     private final SpaceServiceItemRepository repository;
@@ -33,13 +35,33 @@ public class SpaceServiceItemService {
 
         Space space = spaceRepository.findById(serviceItemDTO.idSpace()).orElseThrow(() -> new NotFoundException("No se ha encontrado el espacio al que se le quiere asociar un servicio"));
 
-        SpaceServiceItem serviceItem = new SpaceServiceItem(
-                serviceItemDTO.id(),
-                serviceItemDTO.description(),
-                serviceItemDTO.price(),
-                space
-        );
+        SpaceServiceItem serviceItem = SpaceServiceItemMapper.toEntity(serviceItemDTO, space);
 
         repository.save(serviceItem);
+    }
+
+    @Transactional
+    public void updateServiceItem(Long id, SpaceServiceItemDTO serviceItemDTO){
+        if(!repository.existsById(id)){
+            throw new NotFoundException("No se ha encontrado el servicio a modificar");
+        }
+
+        if(serviceItemDTO.price() <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
+
+
+
+        SpaceServiceItem serviceItem = SpaceServiceItemMapper.toEntity(
+                serviceItemDTO,
+                id,
+                spaceRepository.findById(serviceItemDTO.idSpace())
+                        .orElseThrow(() -> new NotFoundException("No se ha encontrado el espaacio del servicio a modificar")));
+
+        repository.save(serviceItem);
+    }
+
+    @Transactional
+    public void deleteServiceItem(Long id){
+        if(!repository.existsById(id)) throw new NotFoundException("No se ha encontrado el servicio a eiminar");
+        repository.deleteById(id);
     }
 }

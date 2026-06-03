@@ -1,20 +1,18 @@
 package com.utn.space.venueaapi.model.records;
 
-import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.model.ReservationStatus;
-import com.utn.space.venueaapi.model.Space;
-import jakarta.persistence.*;
+import com.utn.space.venueaapi.model.flags.Create;
+import com.utn.space.venueaapi.model.flags.Update;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 @Component
 public class ReservationDTO {
 
