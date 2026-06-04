@@ -4,6 +4,7 @@ import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.exceptions.NotFoundException;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
+import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
 import com.utn.space.venueaapi.repository.CancellationPolicyRepository;
 import com.utn.space.venueaapi.repository.ConsumerRepository;
 import com.utn.space.venueaapi.repository.LocationRepository;
@@ -97,5 +98,41 @@ public class SpaceService {
                 spaceDTO.buffer_time());
 
         spaceRepository.save(spaceToInsert);
+    }
+
+    /*
+    public List<Space> findAllByConsumerOwner(Long id){
+        if (!consumerRepository.existsById(id)){
+            throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
+        }
+        return spaceRepository.findAllByConsumerOwner_IdConsumer(id);
+    }
+
+    public List<Space> findAllByLocation(Long id){
+        if(!consumerRepository.existsById(id)){
+            throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
+        }
+        return spaceRepository.findAllByLocation_IdLocation(id);
+    }
+
+    public List<Space> findAllByNameSpace(String nameSpace){
+        return spaceRepository.findAllByNameSpace(nameSpace);
+    }
+
+    public List<Space> findAllByBasePrice(Double minPrice, Double maxPrice){
+        return spaceRepository.findAllByBasePriceBetween(minPrice,maxPrice);
+    }
+    */
+
+    public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
+        if((spaceFilterDTO.id_consumer_owner() != null) && !consumerRepository.existsById(spaceFilterDTO.id_consumer_owner())){
+            throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
+        }
+
+        if((spaceFilterDTO.id_location() != null) && !locationRepository.existsById(spaceFilterDTO.id_location())){
+            throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
+        }
+
+        return spaceRepository.findAllByFields(spaceFilterDTO.id_consumer_owner(), spaceFilterDTO.minPrice(),spaceFilterDTO.maxPrice(),spaceFilterDTO.name_space(), spaceFilterDTO.id_location());
     }
 }

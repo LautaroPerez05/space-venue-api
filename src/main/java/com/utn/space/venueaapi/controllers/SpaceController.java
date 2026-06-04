@@ -3,6 +3,7 @@ package com.utn.space.venueaapi.controllers;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.Space;
+import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
 import com.utn.space.venueaapi.service.SpaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/s&v/services")
+@RequestMapping("/s&v/spaces")
 public class SpaceController {
     @Autowired
     SpaceService spaceService;
@@ -39,5 +40,10 @@ public class SpaceController {
     @PutMapping("/{id}")
     public void modifySpace(@PathVariable Long id, @RequestBody SpaceDTO spaceDTO){
         spaceService.modifySpace(id,spaceDTO);
+    }
+
+    @GetMapping("/byfields")
+    public void findAllByFields(@RequestBody SpaceFilterDTO spaceFilterDTO){
+        spaceService.findAllByFields(spaceFilterDTO);
     }
 }
