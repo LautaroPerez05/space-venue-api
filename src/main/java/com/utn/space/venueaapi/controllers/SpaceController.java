@@ -43,7 +43,7 @@ public class SpaceController {
     }
 
     @GetMapping("/byfields")
-    public void findAllByFields(@RequestBody SpaceFilterDTO spaceFilterDTO){
-        spaceService.findAllByFields(spaceFilterDTO);
+    public ResponseEntity<List<Space>> findAllByFields(@RequestBody SpaceFilterDTO spaceFilterDTO){
+        return ResponseEntity.ok(spaceService.findAllByFields(spaceFilterDTO));
     }
 }
