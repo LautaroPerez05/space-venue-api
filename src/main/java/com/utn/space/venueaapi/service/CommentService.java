@@ -68,8 +68,8 @@ public class CommentService {
             throw new InvalidDataException("Por favor ingrese una descripcion para su comentario");
         }
 
-        if(commentDTO.score() < 0){ //Aca podriamos validar el tope de calificaciones cuando lo decidamos
-            throw new InvalidDataException("Un comentario no puede tener una calificacion negativa");
+        if((commentDTO.score()*2) % 1 != 0){
+            throw new InvalidDataException("El score ingresado es invalido");
         }
 
         Comment commentToInsert = new Comment(
