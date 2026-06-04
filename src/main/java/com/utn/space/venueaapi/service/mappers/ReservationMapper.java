@@ -5,17 +5,19 @@ import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ReservationMapper {
 
     @org.mapstruct.Mapping(target= "consumer",ignore = true)
     @org.mapstruct.Mapping(target= "space",ignore = true)
+    @org.mapstruct.Mapping(target= "services",ignore = true)
     ReservationDTO toDTO(Reservation reservation);
 
     @org.mapstruct.Mapping(target= "id_consumer",ignore = true)
     @org.mapstruct.Mapping(target= "id_space",ignore = true)
-            //(source = "id_space", target = "space")
+    @org.mapstruct.Mapping(target= "services",ignore = true)
     Reservation toEntity(ReservationDTO dto);
 
     default Consumer mapConsumer(Long id){

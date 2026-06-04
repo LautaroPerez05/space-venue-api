@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
-@AllArgsConstructor @NoArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,4 +47,7 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "id_space")
     private Space space;
+
+    @OneToMany(mappedBy = "reservation")
+    private List<SpaceServiceItem> services;
 }
