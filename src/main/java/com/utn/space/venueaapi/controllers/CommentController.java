@@ -49,4 +49,13 @@ public class CommentController {
     public ResponseEntity<List<Comment>> findAllByConsumerId(@PathVariable Long id){
         return ResponseEntity.ok(commentService.findAllByConsumerId(id));
     }
+    @GetMapping("/byscore/asc")
+    public ResponseEntity<List<Comment>> findAllByScoreASC(){
+        return ResponseEntity.ok(commentService.filterByScoreASC());
+    }
+
+    @GetMapping("/byscore/desc")
+    public ResponseEntity<List<Comment>> findAllByScoreDesc(){
+        return ResponseEntity.ok(commentService.filterByScoreDESC());
+    }
 }

@@ -10,7 +10,9 @@ import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -41,8 +43,8 @@ public class CommentService {
             throw new InvalidDataException("Por favor ingrese una descripcion para su comentario");
         }
 
-        if(commentDTO.score() < 0){ //Aca podriamos validar el tope de calificaciones cuando lo decidamos
-            throw new InvalidDataException("Un comentario no puede tener una calificacion negativa");
+        if((commentDTO.score()*2) % 1 != 0){
+            throw new InvalidDataException("El score ingresado es invalido");
         }
 
         Comment commentToInsert = new Comment(
@@ -93,5 +95,12 @@ public class CommentService {
             throw new NotFoundException("No se encontro el consumidor del cual se quieren buscar comentarios");
         }
         return commentRepository.findAllByConsumerIdConsumer(consumerId);
+    }
+    public List<Comment> filterByScoreASC(){
+        return commentRepository.findAllByOrderByScoreAsc();
+    }
+
+    public List<Comment> filterByScoreDESC(){
+        return commentRepository.findAllByOrderByScoreDesc();
     }
 }

@@ -11,4 +11,7 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment,Long> {
     List<Comment> findAllBySpaceIdSpace(Long id);
     List<Comment> findAllByConsumerIdConsumer(Long id);
+    List<Comment> findAllByOrderByScoreAsc();
+    List<Comment> findAllByOrderByScoreDesc();
+
 }
