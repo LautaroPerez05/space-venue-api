@@ -22,8 +22,17 @@ public class ReservationController {
     /// ---------------------Metodos-----------------------------------------------------
 
     @GetMapping
-    public List<Reservation> findAll (){
-        return reservationService.findAll();
+    public ResponseEntity<List<Reservation>> findAll (){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(reservationService.findAll());
+    }
+
+    @GetMapping ("/consumer/{id}")
+    public ResponseEntity<List<Reservation>> findAllByIdConsumer (@PathVariable Long id){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(reservationService.findAllByConsumerID(id));
     }
 
     @GetMapping("/{id}")

@@ -26,6 +26,7 @@ public class ReservationService {
 
     @Autowired
     private ConsumerRepository consumerRepository;
+    private ConsumerService consumerService;
     @Autowired
     private SpaceRepository spaceRepository;
 
@@ -35,6 +36,12 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+/*
+    public List<Reservation>findAllByConsumerID(Long id){
+        consumerRepository.findById(id);
+
+
+    }*/
     public Reservation findById (Long id){
         return reservationRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Reservacion",id));
     }
