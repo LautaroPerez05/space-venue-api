@@ -1,15 +1,18 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
-@AllArgsConstructor @NoArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +38,7 @@ public class Reservation {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     private Boolean isActive=true;
 
 
@@ -45,4 +49,7 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "id_space")
     private Space space;
+
+    @OneToMany(mappedBy = "reservation")
+    private List<SpaceServiceItem> services;
 }

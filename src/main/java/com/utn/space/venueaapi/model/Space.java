@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,4 +35,7 @@ public class Space {
     private Double base_price;
     private LocalDate publication_date;
     private Long buffer_time;
+
+    @OneToMany(mappedBy = "space")
+    private List<SpaceServiceItem> itemService;
 }
