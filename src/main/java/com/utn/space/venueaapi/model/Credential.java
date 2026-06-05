@@ -8,12 +8,17 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "credentials")
 @Entity
 public class Credential {
     @Id
     private String username;
 
-    @Column(name = "password_hash")
+
+    @Column(name = "isActive", nullable = false)
+    private Boolean isActive = true;
+
+    @Column(name = "passwordHash")
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)

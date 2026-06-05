@@ -5,20 +5,24 @@ import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ReservationMapper {
 
-    @org.mapstruct.Mapping(target= "consumer",ignore = true)
-    @org.mapstruct.Mapping(target= "space",ignore = true)
+    // Corrección de Mappings por errores de compilación (señalaban atributos inexistentes)
+    @Mapping(target = "id_consumer", source = "consumer.id_consumer")
+    @Mapping(target = "id_space", source = "space.id_space")
+    @Mapping(target = "id_servicesSelec", ignore = true)
     ReservationDTO toDTO(Reservation reservation);
 
-    @org.mapstruct.Mapping(target= "id_consumer",ignore = true)
-    @org.mapstruct.Mapping(target= "id_space",ignore = true)
-            //(source = "id_space", target = "space")
+    @Mapping(target = "consumer", ignore = true)
+    @Mapping(target = "space", ignore = true)
+    @Mapping(target = "services", ignore = true)
+    @Mapping(target = "googleEventCode", ignore = true)
     Reservation toEntity(ReservationDTO dto);
 
-    default Consumer mapConsumer(Long id){
+    default Consumer mapConsumer(Integer id){
         if(id == null) return null;
 
         Consumer c = new Consumer();
@@ -26,7 +30,7 @@ public interface ReservationMapper {
         return c;
     }
 
-    default Space mapSpace(Long id){
+    default Space mapSpace(Integer id){
         if(id == null) return null;
 
         Space s = new Space();

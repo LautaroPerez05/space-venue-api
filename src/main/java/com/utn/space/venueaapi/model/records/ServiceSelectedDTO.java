@@ -1,8 +1,14 @@
 package com.utn.space.venueaapi.model.records;
 
+import java.math.BigDecimal;
+
 public record ServiceSelectedDTO(
-        Long id,
-        Double priceAtReservation,
-        Long idService,
-        Long idReservation
-) {}
+        Integer id,
+        BigDecimal priceAtReservation,
+        Integer idService,
+        Integer idReservation
+) {
+    public ServiceSelectedDTO(BigDecimal priceAtReservation, Integer idService, Integer idReservation) {
+        this(0, priceAtReservation, idService, idReservation);
+    }
+}

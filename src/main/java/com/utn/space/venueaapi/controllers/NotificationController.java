@@ -22,8 +22,15 @@ public class NotificationController {
         return notificationService.listAll();
     }
 
+    @GetMapping("/consumer/{id}")
+    public ResponseEntity<List<Notification>>findAllByIdConsumer(@PathVariable Integer id){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(notificationService.listAllByIdConsumer(id));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Notification> findForId (@PathVariable Long id){
+    public ResponseEntity<Notification> findForId (@PathVariable Integer id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(notificationService.findById(id));
@@ -31,7 +38,7 @@ public class NotificationController {
 
 
     @PostMapping("/{id}")
-    public ResponseEntity<Notification> markAsSeen (@PathVariable Long id){
+    public ResponseEntity<Notification> markAsSeen (@PathVariable Integer id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(notificationService.markAsSeen(id));

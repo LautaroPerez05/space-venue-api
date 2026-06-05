@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -17,10 +18,12 @@ import java.time.LocalDateTime;
 public class ReservationDTO {
 
     @NotBlank(groups = Update.class)
-    private Long id;
+    private Integer id;
 
     @NotBlank(groups = {Create.class, Update.class})
     private String title;
+
+    @NotBlank(groups = {Create.class, Update.class})
     private String description;
 
     private String googleEventCode;
@@ -39,10 +42,19 @@ public class ReservationDTO {
     @NotBlank(groups = {Create.class, Update.class})
     private LocalDateTime createdAt;
     private Boolean isActive;
+    private Boolean saveToMyCalendar;
 
     @NotBlank(groups = {Create.class, Update.class})
-    private Long id_consumer;
+    private Integer id_consumer;
 
     @NotBlank(groups = {Create.class, Update.class})
-    private Long id_space;
+    private Integer id_space;
+
+    private List<Integer> id_servicesSelec;
+
+
+    public Boolean getSaveToMyCalendar() {
+        // Evita NullPointerException asignando falso por defecto si no es provisto en la petición JSON
+        return saveToMyCalendar != null ? saveToMyCalendar : false;
+    }
 }
