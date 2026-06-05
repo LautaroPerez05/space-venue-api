@@ -1,7 +1,9 @@
 package com.utn.space.venueaapi.model.records;
 
+import java.math.BigDecimal;
+
 public record ServiceSelectedWithoutReservationDTO(
-        Double priceAtReservation,
-        Long idService
+        BigDecimal priceAtReservation,
+        Integer idService
 ) {
 }

@@ -12,6 +12,7 @@ import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -30,11 +31,11 @@ public class SpaceService {
         return spaceRepository.findAll();
     }
 
-    public Space findById(Long id){
+    public Space findById(Integer id){
         return spaceRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el espacio buscado"));
     }
 
-    public void deleteById(Long id){
+    public void deleteById(Integer id){
         if(!spaceRepository.existsById(id)){
             throw new NotFoundException("No se encontro el espacio a eliminar");
         }
@@ -50,7 +51,7 @@ public class SpaceService {
             throw new InvalidDataException("Por favor ingrese una descripcion para su espacio");
         }
 
-        if(spaceDTO.base_price() <= 0){
+        if(spaceDTO.base_price().compareTo(BigDecimal.ZERO) <= 0){
             throw new InvalidDataException("Por favor ingrese un precio valido");
         }
 
@@ -59,6 +60,7 @@ public class SpaceService {
                 consumerRepository.findById(spaceDTO.id_consumer_owner()).orElseThrow(() -> new NotFoundException("No se encontro el consumidor duenio del servicio")),
                 locationRepository.findById(spaceDTO.id_location()).orElseThrow(()-> new NotFoundException("No se encontro la ubicacion asociada al espacio")),
                 cancellationPolicyRepository.findById(spaceDTO.id_cancellation_policies()).orElseThrow(()->new NotFoundException("No se encontraron las politicas de cancelacion asociadas al servicio")),
+                spaceDTO.google_calendar_id(),
                 spaceDTO.name_space(),
                 spaceDTO.description(),
                 spaceDTO.base_price(),
@@ -69,7 +71,7 @@ public class SpaceService {
     }
 
 
-    public void modifySpace(Long id, SpaceDTO spaceDTO){
+    public void modifySpace(Integer id, SpaceDTO spaceDTO){
         if(!spaceRepository.existsById(id)){
             throw new NotFoundException("No se encontro el espacio a actualizar");
         }
@@ -82,7 +84,7 @@ public class SpaceService {
             throw new InvalidDataException("Por favor ingrese una descripcion para el espacio");
         }
 
-        if(spaceDTO.base_price() <= 0){
+        if(spaceDTO.base_price().compareTo(BigDecimal.ZERO) <= 0){
             throw new InvalidDataException("Por favor ingrese un precio valido");
         }
 
@@ -91,6 +93,7 @@ public class SpaceService {
                 consumerRepository.findById(spaceDTO.id_consumer_owner()).orElseThrow(() -> new NotFoundException("No se encontro el consumidor duenio del servicio")),
                 locationRepository.findById(spaceDTO.id_location()).orElseThrow(()-> new NotFoundException("No se encontro la ubicacion asociada al espacio")),
                 cancellationPolicyRepository.findById(spaceDTO.id_cancellation_policies()).orElseThrow(()->new NotFoundException("No se encontraron las politicas de cancelacion asociadas al servicio")),
+                spaceDTO.google_calendar_id(),
                 spaceDTO.name_space(),
                 spaceDTO.description(),
                 spaceDTO.base_price(),

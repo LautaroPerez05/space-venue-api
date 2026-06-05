@@ -1,16 +1,18 @@
 package com.utn.space.venueaapi.model.records;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record SpaceDTO (
-        Long id_space,
-        Long id_consumer_owner,
-        Long id_location,
-        Long id_cancellation_policies,
+        Integer id_space,
+        Integer id_consumer_owner,
+        Integer id_location,
+        Integer id_cancellation_policies,
+        String google_calendar_id,
         String name_space,
         String description,
-        Double base_price,
+        BigDecimal base_price,
         LocalDate publication_date,
-        Long buffer_time) {
+        Integer buffer_time) {
 
 }

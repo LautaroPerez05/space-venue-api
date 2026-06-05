@@ -25,7 +25,7 @@ public class SpaceServiceItemMapper {
         );
     }
 
-    public static SpaceServiceItem toEntity(SpaceServiceItemDTO serviceItemDTO, Long id, Space space){
+    public static SpaceServiceItem toEntity(SpaceServiceItemDTO serviceItemDTO, Integer id, Space space){
         return new SpaceServiceItem(
                 id,
                 serviceItemDTO.description(),

@@ -4,18 +4,17 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "Comments")
+@Table(name = "comments")
 @NoArgsConstructor
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_comment;
+    private Integer id_comment;
 
     @ManyToOne
     @JoinColumn(name = "id_consumer")
@@ -28,7 +27,7 @@ public class Comment {
     private String description;
 
     @Column(name = "score", nullable = false)
-    private Double score;
+    private Byte score;
 
-    private LocalDate created_at;
+    private LocalDateTime created_at;
 }

@@ -21,12 +21,12 @@ public class CommentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Comment> findCommentById(@PathVariable Long id){
+    public ResponseEntity<Comment> findCommentById(@PathVariable Integer id){
         return ResponseEntity.ok(commentService.findById(id));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSpaceById(@PathVariable Long id){
+    public void deleteSpaceById(@PathVariable Integer id){
         commentService.deleteById(id);
     }
 
@@ -36,17 +36,17 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public void modifyComment(@PathVariable Long id, @RequestBody CommentDTO commentDTO){
+    public void modifyComment(@PathVariable Integer id, @RequestBody CommentDTO commentDTO){
         commentService.modifyComment(id,commentDTO);
     }
 
     @GetMapping("/byspaceid/{id}")
-    public ResponseEntity<List<Comment>> findAllBySpaceId(@PathVariable Long id){
+    public ResponseEntity<List<Comment>> findAllBySpaceId(@PathVariable Integer id){
         return ResponseEntity.ok(commentService.findAllBySpaceId(id));
     }
 
     @GetMapping("/byconsumerid/{id}")
-    public ResponseEntity<List<Comment>> findAllByConsumerId(@PathVariable Long id){
+    public ResponseEntity<List<Comment>> findAllByConsumerId(@PathVariable Integer id){
         return ResponseEntity.ok(commentService.findAllByConsumerId(id));
     }
     @GetMapping("/byscore/asc")

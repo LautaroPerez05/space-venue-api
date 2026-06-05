@@ -19,7 +19,7 @@ public class ServiceSelectedController {
     private ServiceSelectedService service;
 
     @GetMapping("/reservation/{idReservation}")
-    public ResponseEntity<List<ServiceSelectedDTO>> getServicesSelected(@PathVariable Long idReservation){
+    public ResponseEntity<List<ServiceSelectedDTO>> getServicesSelected(@PathVariable Integer idReservation){
         return ResponseEntity.ok(service.getServicesSelectedOfReservation(idReservation));
     }
 
@@ -29,12 +29,12 @@ public class ServiceSelectedController {
     }
 
     @PostMapping("/insert/list/{idReservation}")
-    public void selectListOfServicesSelectedOnReservation(@PathVariable Long idReservation, @RequestBody List<ServiceSelectedWithoutReservationDTO> servicesSelectedDTO){
+    public void selectListOfServicesSelectedOnReservation(@PathVariable Integer idReservation, @RequestBody List<ServiceSelectedWithoutReservationDTO> servicesSelectedDTO){
         service.insertListOfServicesSelectedInAReservation(idReservation, servicesSelectedDTO);
     }
 
     @DeleteMapping("/delete/{id}")
-    public void deselectOneServiceForAReservation(@PathVariable Long id){
+    public void deselectOneServiceForAReservation(@PathVariable Integer id){
         service.deleteServiceSelectedForAReservation(id);
     }
 }

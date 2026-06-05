@@ -27,11 +27,11 @@ public class CommentService {
         return commentRepository.findAll();
     }
 
-    public Comment findById(Long id){
+    public Comment findById(Integer id){
         return commentRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el comentario buscado"));
     }
 
-    public void deleteById(Long id){
+    public void deleteById(Integer id){
         if(!commentRepository.existsById(id)){
             throw new NotFoundException("No se encontro el espacio a eliminar");
         }
@@ -59,7 +59,7 @@ public class CommentService {
     }
 
 
-    public void modifyComment(Long id, CommentDTO commentDTO){
+    public void modifyComment(Integer id, CommentDTO commentDTO){
         if(!commentRepository.existsById(id)){
             throw new NotFoundException("No se encontro el comentario a eliminar");
         }
@@ -83,14 +83,14 @@ public class CommentService {
         commentRepository.save(commentToInsert);
     }
 
-    public List<Comment> findAllBySpaceId(Long spaceId){
+    public List<Comment> findAllBySpaceId(Integer spaceId){
         if(!spaceRepository.existsById(spaceId)){
             throw new NotFoundException("No se encontro el espacio del cual se quieren buscar comentarios");
         }
         return commentRepository.findAllBySpaceIdSpace(spaceId);
     }
 
-    public List<Comment> findAllByConsumerId(Long consumerId){
+    public List<Comment> findAllByConsumerId(Integer consumerId){
         if(!consumerRepository.existsById(consumerId)){
             throw new NotFoundException("No se encontro el consumidor del cual se quieren buscar comentarios");
         }

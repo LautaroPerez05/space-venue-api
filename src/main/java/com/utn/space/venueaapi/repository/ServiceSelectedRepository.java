@@ -10,11 +10,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ServiceSelectedRepository extends JpaRepository<ServiceSelected,Long> {
+public interface ServiceSelectedRepository extends JpaRepository<ServiceSelected,Integer> {
     @Query("SELECT new com.utn.space.venueaapi.model.records.ServiceSelectedDTO(ss.id, ss.priceAtReservation, s.id, r.id)" +
             "FROM ServiceSelected ss " +
             "JOIN ss.service s " +
             "JOIN ss.reservation r " +
             "WHERE r.id = :idReservation")
-    List<ServiceSelectedDTO> findServiceSelectedByIdReservation(@Param("idReservation") Long idReservation);
+    List<ServiceSelectedDTO> findServiceSelectedByIdReservation(@Param("idReservation") Integer idReservation);
 }

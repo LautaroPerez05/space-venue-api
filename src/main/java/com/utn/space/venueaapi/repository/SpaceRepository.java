@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface SpaceRepository extends JpaRepository<Space,Long> {
+public interface SpaceRepository extends JpaRepository<Space,Integer> {
     /*
     List<Space> findAllByConsumerOwner_IdConsumer(Long idConsumer);
     List<Space> findAllByLocation_IdLocation(Long idLocation);
@@ -25,14 +25,14 @@ public interface SpaceRepository extends JpaRepository<Space,Long> {
             "( :name_space IS NULL OR LOWER(s.name_space) LIKE LOWER(CONCAT('%', :name_space, '%')) ) AND " +
             "( :minPrice IS NULL OR s.base_price >= :minPrice ) AND " +
             "( :maxPrice IS NULL OR s.base_price <= :maxPrice ) AND " +
-            " :id_consumer_owner IS NULL OR s.id_consumer_owner = :id_consumer_owner AND " +
-            ":id_location IS NULL OR s.id_location = :id_location"
+            " :id_consumer_owner IS NULL OR s.consumer_owner.id_consumer = :id_consumer_owner AND " +
+            ":id_location IS NULL OR s.location.id_location = :id_location"
     )
     List<Space> findAllByFields(
-            @Param("id_consumer_owner") Long id_consumer_owner,
+            @Param("id_consumer_owner") Integer id_consumer_owner,
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice,
             @Param("name_space") Long name_space,
-            @Param("id_location") Long id_location
+            @Param("id_location") Integer id_location
     );
 }

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,10 +13,12 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "reservations")
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_reservation")
+    private Integer id;
 
     private String title;
     private String description;
@@ -30,14 +33,17 @@ public class Reservation {
     private LocalDateTime untilDate;
 
     @Column(name = "final_price")
-    private Double finalPrice;
+    private BigDecimal finalPrice;
 
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     private Boolean isActive=true;
+
+    private Boolean saveToMyCalendar;
 
 
     @ManyToOne
@@ -48,6 +54,7 @@ public class Reservation {
     @JoinColumn(name = "id_space")
     private Space space;
 
-    @OneToMany(mappedBy = "reservation")
-    private List<SpaceServiceItem> services;
+    // Cambiado de SpaceServiceItem a ServiceSelected. Mapea contra el atributo 'reservation' de la clase intermedia
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ServiceSelected> services;
 }

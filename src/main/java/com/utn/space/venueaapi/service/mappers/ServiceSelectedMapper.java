@@ -17,7 +17,7 @@ public class ServiceSelectedMapper {
         );
     }
 
-    public static ServiceSelectedDTO toDto(ServiceSelected serviceSelected, Long id){
+    public static ServiceSelectedDTO toDto(ServiceSelected serviceSelected, Integer id){
         return new ServiceSelectedDTO(
             id,
             serviceSelected.getPriceAtReservation(),
@@ -34,7 +34,7 @@ public class ServiceSelectedMapper {
         );
     }
 
-    public static ServiceSelected toEntity(Long id, ServiceSelectedDTO serviceSelectedDTO, SpaceServiceItem spaceServiceItem, Reservation reservation){
+    public static ServiceSelected toEntity(Integer id, ServiceSelectedDTO serviceSelectedDTO, SpaceServiceItem spaceServiceItem, Reservation reservation){
         return new ServiceSelected(
             id,
             serviceSelectedDTO.priceAtReservation(),
@@ -53,7 +53,7 @@ public class ServiceSelectedMapper {
         );
     }
 
-    public static ServiceSelected toEntity(Long id, ServiceSelectedWithoutReservationDTO serviceSelectedDTO, SpaceServiceItem spaceServiceItem, Reservation reservation){
+    public static ServiceSelected toEntity(Integer id, ServiceSelectedWithoutReservationDTO serviceSelectedDTO, SpaceServiceItem spaceServiceItem, Reservation reservation){
         return new ServiceSelected(
                 id,
                 serviceSelectedDTO.priceAtReservation(),

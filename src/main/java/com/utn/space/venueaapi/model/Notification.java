@@ -11,15 +11,18 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "notifications")
 @Entity
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_Notification;
+    private Integer id_notification;
 
-    private LocalDateTime fecha;
-    private String contenido;
-    private Boolean visto=false;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    private String message;
+    private Boolean isSeen=false;
 
     @ManyToOne
     @JoinColumn(name = "id_consumer")
