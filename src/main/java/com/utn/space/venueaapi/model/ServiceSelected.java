@@ -19,7 +19,6 @@ public class ServiceSelected {
     @Column(name = "price_at_reservation")
     BigDecimal price;
 
-
     private String description;
 
     @ManyToOne
