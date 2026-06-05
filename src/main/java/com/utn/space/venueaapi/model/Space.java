@@ -34,4 +34,5 @@ public class Space {
     private Double base_price;
     private LocalDate publication_date;
     private Long buffer_time;
+    private Boolean isActive;
 }
