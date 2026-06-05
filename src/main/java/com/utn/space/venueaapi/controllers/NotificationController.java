@@ -22,6 +22,13 @@ public class NotificationController {
         return notificationService.listAll();
     }
 
+    @GetMapping("/consumer/{id}")
+    public ResponseEntity<List<Notification>>findAllByIdConsumer(@PathVariable Long id){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(notificationService.listAllByIdConsumer(id));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Notification> findForId (@PathVariable Long id){
         return ResponseEntity
