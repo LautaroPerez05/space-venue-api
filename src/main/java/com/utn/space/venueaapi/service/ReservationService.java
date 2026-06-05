@@ -117,6 +117,36 @@ public class ReservationService {
 
     }
 
+    public Reservation modify (ReservationDTO dto){
+        if (dto.getUntilDate().isBefore(dto.getFromDate())) {
+            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+        }
+        if (dto.getFromDate().isBefore(LocalDateTime.now())) {
+            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+        }
+        if(!reservationRepository.existsById(dto.getId())){
+            throw new ExceptionIdNotFound ("Reservation", dto.getId());
+        }
+        Reservation aux= reservationMapper.toEntity(dto);
+
+        aux.setConsumer(consumerRepository.findById(dto.getId_consumer())
+                .orElseThrow(()->new ExceptionIdNotFound("Consumer", dto.getId_consumer())));
+
+        aux.setSpace(spaceRepository.findById(dto.getId_space())
+                .orElseThrow(()->new ExceptionIdNotFound("Space",dto.getId_space())));
+
+        List<SpaceServiceItem> list= new ArrayList<>();
+        list= aux.getSpace().getItemService().stream()
+                .filter(item->dto.getId_servicesSelec().contains(item.getId()))
+                .toList();
+        aux.setServices(list);
+        aux.setFinalPrice(aux.getSpace().getBase_price() +
+                aux.getServices().stream()
+                        .mapToDouble(SpaceServiceItem::getPrice)
+                        .sum());
+        return reservationRepository.save(aux);
+    }
+
 
     public Reservation confirmReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
