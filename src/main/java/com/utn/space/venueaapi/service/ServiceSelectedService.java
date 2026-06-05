@@ -30,7 +30,7 @@ public class ServiceSelectedService {
     public List<ServiceSelectedDTO> getServicesSelectedOfReservation(Integer idReservation){
         return repository.findServiceSelectedByIdReservation(idReservation);
     }
-
+/*
     // Este metodo será usado para la inserción de reservas del lado del front.
     // Una vez que se envían los datos de la reserva y los servicios seleccionados
     // El botón de envío apuntaríá primero a los endpoints que validaran e ingresaran la reserva
@@ -59,5 +59,5 @@ public class ServiceSelectedService {
         if(!repository.existsById(id)) throw new NotFoundException("No se encontró el servicio seleccionado para eliminarlo");
 
         repository.deleteById(id);
-    }
+    }*/
 }
