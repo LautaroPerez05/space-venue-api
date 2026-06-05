@@ -22,11 +22,11 @@ public class SpaceImageService {
         return spaceImageRepository.findAll();
     }
 
-    public SpaceImage findById(Long id){
+    public SpaceImage findById(Integer id){
         return spaceImageRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro la imagen buscada"));
     }
 
-    public void deleteById(Long id){
+    public void deleteById(Integer id){
         if(!spaceImageRepository.existsById(id)){
             throw new NotFoundException("No se encontro la imagen a eliminar");
         }
@@ -47,14 +47,14 @@ public class SpaceImageService {
                 spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado a la imagen")),
                 spaceImageDTO.file_name(),
                 spaceImageDTO.url_image(),
-                spaceImageDTO.date_sent()
+                spaceImageDTO.date_send()
         );
 
         spaceImageRepository.save(spaceImageToInsert);
     }
 
 
-    public void modifySpaceImage(Long id, SpaceImageDTO spaceImageDTO){
+    public void modifySpaceImage(Integer id, SpaceImageDTO spaceImageDTO){
         if(!spaceImageRepository.existsById(id)){
             throw new NotFoundException("No se encontro la imagen a actualizar");
         }
@@ -72,13 +72,13 @@ public class SpaceImageService {
                 spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado a la imagen")),
                 spaceImageDTO.file_name(),
                 spaceImageDTO.url_image(),
-                spaceImageDTO.date_sent()
+                spaceImageDTO.date_send()
         );
 
         spaceImageRepository.save(spaceImageToInsert);
     }
 
-    public List<SpaceImage> findAllBySpaceId(Long spaceId){
+    public List<SpaceImage> findAllBySpaceId(Integer spaceId){
         if(!spaceRepository.existsById(spaceId)){
             throw new NotFoundException("No se encontro el espacio del cual se quieren buscar imagenes");
         }

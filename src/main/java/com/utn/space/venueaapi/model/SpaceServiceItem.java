@@ -3,6 +3,8 @@ package com.utn.space.venueaapi.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "services")
 @Getter @Setter
@@ -11,10 +13,11 @@ import lombok.*;
 public class SpaceServiceItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_service")
+    private Integer id;
 
     private String description;
-    private Double price;
+    private BigDecimal price;
     private Boolean isActive;
 
     @ManyToOne

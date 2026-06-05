@@ -4,7 +4,6 @@ import com.utn.space.venueaapi.model.ReservationStatus;
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +18,7 @@ import java.util.List;
 public class ReservationDTO {
 
     @NotBlank(groups = Update.class)
-    private Long id;
+    private Integer id;
 
     @NotBlank(groups = {Create.class, Update.class})
     private String title;
@@ -37,18 +36,25 @@ public class ReservationDTO {
 
     private Double finalPrice;
 
-    @NotBlank(groups = Update.class)
+    @NotBlank(groups = {Create.class, Update.class})
     private ReservationStatus status;
 
-    @NotBlank(groups = Update.class)
+    @NotBlank(groups = {Create.class, Update.class})
     private LocalDateTime createdAt;
     private Boolean isActive;
+    private Boolean saveToMyCalendar;
 
     @NotBlank(groups = {Create.class, Update.class})
-    private Long id_consumer;
+    private Integer id_consumer;
 
     @NotBlank(groups = {Create.class, Update.class})
-    private Long id_space;
+    private Integer id_space;
 
-    private List<Long> id_servicesSelec;
+    private List<Integer> id_servicesSelec;
+
+
+    public Boolean getSaveToMyCalendar() {
+        // Evita NullPointerException asignando falso por defecto si no es provisto en la petición JSON
+        return saveToMyCalendar != null ? saveToMyCalendar : false;
+    }
 }

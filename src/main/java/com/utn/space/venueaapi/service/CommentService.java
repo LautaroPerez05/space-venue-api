@@ -10,7 +10,9 @@ import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -25,11 +27,11 @@ public class CommentService {
         return commentRepository.findAll();
     }
 
-    public Comment findById(Long id){
+    public Comment findById(Integer id){
         return commentRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el comentario buscado"));
     }
 
-    public void deleteById(Long id){
+    public void deleteById(Integer id){
         if(!commentRepository.existsById(id)){
             throw new NotFoundException("No se encontro el espacio a eliminar");
         }
@@ -41,8 +43,8 @@ public class CommentService {
             throw new InvalidDataException("Por favor ingrese una descripcion para su comentario");
         }
 
-        if(commentDTO.score() < 0){ //Aca podriamos validar el tope de calificaciones cuando lo decidamos
-            throw new InvalidDataException("Un comentario no puede tener una calificacion negativa");
+        if((commentDTO.score()*2) % 1 != 0){
+            throw new InvalidDataException("El score ingresado es invalido");
         }
 
         Comment commentToInsert = new Comment(
@@ -57,7 +59,7 @@ public class CommentService {
     }
 
 
-    public void modifyComment(Long id, CommentDTO commentDTO){
+    public void modifyComment(Integer id, CommentDTO commentDTO){
         if(!commentRepository.existsById(id)){
             throw new NotFoundException("No se encontro el comentario a eliminar");
         }
@@ -66,8 +68,8 @@ public class CommentService {
             throw new InvalidDataException("Por favor ingrese una descripcion para su comentario");
         }
 
-        if(commentDTO.score() < 0){ //Aca podriamos validar el tope de calificaciones cuando lo decidamos
-            throw new InvalidDataException("Un comentario no puede tener una calificacion negativa");
+        if((commentDTO.score()*2) % 1 != 0){
+            throw new InvalidDataException("El score ingresado es invalido");
         }
 
         Comment commentToInsert = new Comment(
@@ -81,17 +83,24 @@ public class CommentService {
         commentRepository.save(commentToInsert);
     }
 
-    public List<Comment> findAllBySpaceId(Long spaceId){
+    public List<Comment> findAllBySpaceId(Integer spaceId){
         if(!spaceRepository.existsById(spaceId)){
             throw new NotFoundException("No se encontro el espacio del cual se quieren buscar comentarios");
         }
         return commentRepository.findAllBySpaceIdSpace(spaceId);
     }
 
-    public List<Comment> findAllByConsumerId(Long consumerId){
+    public List<Comment> findAllByConsumerId(Integer consumerId){
         if(!consumerRepository.existsById(consumerId)){
             throw new NotFoundException("No se encontro el consumidor del cual se quieren buscar comentarios");
         }
         return commentRepository.findAllByConsumerIdConsumer(consumerId);
+    }
+    public List<Comment> filterByScoreASC(){
+        return commentRepository.findAllByOrderByScoreAsc();
+    }
+
+    public List<Comment> filterByScoreDESC(){
+        return commentRepository.findAllByOrderByScoreDesc();
     }
 }

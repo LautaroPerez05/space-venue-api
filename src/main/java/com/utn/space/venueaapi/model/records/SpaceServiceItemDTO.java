@@ -1,9 +1,11 @@
 package com.utn.space.venueaapi.model.records;
 
+import java.math.BigDecimal;
+
 public record SpaceServiceItemDTO(
-        Long id,
+        Integer id,
         String description,
-        Double price,
+        BigDecimal price,
         Boolean isActive,
-        Long idSpace
+        Integer idSpace
 ) {}

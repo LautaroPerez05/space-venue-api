@@ -4,10 +4,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -16,7 +17,7 @@ import java.util.List;
 public class Space {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_space;
+    private Integer id_space;
 
     @ManyToOne
     @JoinColumn(name = "id_consumer_owner")
@@ -30,12 +31,14 @@ public class Space {
     @JoinColumn(name = "id_cancellation_policies")
     private CancellationPolicy cancellation_Policy;
 
+    @Column(name = "google_calendar_id")
+    private String googleCalendarId;
+
     private String name_space;
     private String description;
-    private Double base_price;
+    private BigDecimal base_price;
     private LocalDate publication_date;
-    private Long buffer_time;
+    private Integer buffer_time;
+    private Boolean isActive;
 
-    @OneToMany(mappedBy = "space")
-    private List<SpaceServiceItem> itemService;
 }
