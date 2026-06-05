@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,6 +38,7 @@ public class Reservation {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @JsonIgnore
     private Boolean isActive=true;
 
 

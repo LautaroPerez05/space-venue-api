@@ -37,10 +37,10 @@ public class ReservationDTO {
 
     private Double finalPrice;
 
-    @NotBlank(groups = {Create.class, Update.class})
+    @NotBlank(groups = Update.class)
     private ReservationStatus status;
 
-    @NotBlank(groups = {Create.class, Update.class})
+    @NotBlank(groups = Update.class)
     private LocalDateTime createdAt;
     private Boolean isActive;
 
