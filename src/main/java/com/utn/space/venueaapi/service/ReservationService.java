@@ -145,4 +145,29 @@ public class ReservationService {
     }
   //  hola
 
+    public Reservation confirmReservation(Long id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setStatus(ReservationStatus.CONFIRMED);
+        return reservationRepository.save(aux);
+    }
+
+    public Reservation cancelReservation(Long id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setStatus(ReservationStatus.CANCELLED);
+        return reservationRepository.save(aux);
+    }
+
+    public Reservation completeReservation(Long id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setStatus(ReservationStatus.COMPLETED);
+        //falta sacarlo de googlecalendar
+        return reservationRepository.save(aux);
+    }
+
+    public Reservation softDelete(Long id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setIsActive(false);
+        return reservationRepository.save(aux);
+
+    }
 }
