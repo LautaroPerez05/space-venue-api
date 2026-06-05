@@ -135,5 +135,6 @@ public class ReservationService {
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
         aux.setIsActive(false);
         return reservationRepository.save(aux);
+
     }
 }
