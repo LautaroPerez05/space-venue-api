@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -35,7 +35,4 @@ public class Space {
     private Double base_price;
     private LocalDate publication_date;
     private Long buffer_time;
-
-    @OneToMany(mappedBy = "space")
-    private List<SpaceServiceItem> itemService;
 }
