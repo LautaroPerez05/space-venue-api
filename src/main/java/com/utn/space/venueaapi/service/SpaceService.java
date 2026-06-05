@@ -65,7 +65,8 @@ public class SpaceService {
                 spaceDTO.description(),
                 spaceDTO.base_price(),
                 spaceDTO.publication_date(),
-                spaceDTO.buffer_time());
+                spaceDTO.buffer_time(),
+                spaceDTO.isActive());
 
         spaceRepository.save(spaceToInsert);
     }
@@ -98,7 +99,8 @@ public class SpaceService {
                 spaceDTO.description(),
                 spaceDTO.base_price(),
                 spaceDTO.publication_date(),
-                spaceDTO.buffer_time());
+                spaceDTO.buffer_time(),
+                spaceDTO.isActive());
 
         spaceRepository.save(spaceToInsert);
     }
