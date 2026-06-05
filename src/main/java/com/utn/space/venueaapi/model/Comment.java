@@ -26,6 +26,9 @@ public class Comment {
     private Space space;
 
     private String description;
+
+    @Column(name = "score", nullable = false)
     private Double score;
+
     private LocalDate created_at;
 }
