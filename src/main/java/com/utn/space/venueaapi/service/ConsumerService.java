@@ -3,14 +3,22 @@ package com.utn.space.venueaapi.service;
 import com.utn.space.venueaapi.exceptions.NotFoundException;
 import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.repository.ConsumerRepository;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+@AllArgsConstructor
 @Service
 public class ConsumerService {
+    @Autowired
     private final ConsumerRepository consumerRepository;
 
-    public ConsumerService(ConsumerRepository consumerRepository) {
-        this.consumerRepository = consumerRepository;
+    public Boolean existsById(Integer id){
+        return consumerRepository.existsById(id);
+    }
+
+    public Consumer findById(Integer id){
+        return consumerRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el consumidor buscado"));
     }
 
     public Consumer findByCredentialsUsername(String username){

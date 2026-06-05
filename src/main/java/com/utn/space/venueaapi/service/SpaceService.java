@@ -20,15 +20,19 @@ public class SpaceService {
     @Autowired
     SpaceRepository spaceRepository;
     @Autowired
-    ConsumerRepository consumerRepository;
+    ConsumerService consumerService;
     @Autowired
-    LocationRepository locationRepository;
+    LocationService locationService;
     @Autowired
-    CancellationPolicyRepository cancellationPolicyRepository;
+    CancellationPolicyService cancellationPolicyService;
 
 
     public List<Space> findAll(){
         return spaceRepository.findAll();
+    }
+
+    public Boolean existsById(Integer id){
+        return spaceRepository.existsById(id);
     }
 
     public Space findById(Integer id){
@@ -57,9 +61,9 @@ public class SpaceService {
 
         Space spaceToInsert = new Space(
                 null,
-                consumerRepository.findById(spaceDTO.id_consumer_owner()).orElseThrow(() -> new NotFoundException("No se encontro el consumidor duenio del servicio")),
-                locationRepository.findById(spaceDTO.id_location()).orElseThrow(()-> new NotFoundException("No se encontro la ubicacion asociada al espacio")),
-                cancellationPolicyRepository.findById(spaceDTO.id_cancellation_policies()).orElseThrow(()->new NotFoundException("No se encontraron las politicas de cancelacion asociadas al servicio")),
+                consumerService.findById(spaceDTO.id_consumer_owner()),
+                locationService.findById(spaceDTO.id_location()),
+                cancellationPolicyService.findById(spaceDTO.id_cancellation_policies()),
                 spaceDTO.google_calendar_id(),
                 spaceDTO.name_space(),
                 spaceDTO.description(),
@@ -90,9 +94,9 @@ public class SpaceService {
 
         Space spaceToInsert = new Space(
                 id,
-                consumerRepository.findById(spaceDTO.id_consumer_owner()).orElseThrow(() -> new NotFoundException("No se encontro el consumidor duenio del servicio")),
-                locationRepository.findById(spaceDTO.id_location()).orElseThrow(()-> new NotFoundException("No se encontro la ubicacion asociada al espacio")),
-                cancellationPolicyRepository.findById(spaceDTO.id_cancellation_policies()).orElseThrow(()->new NotFoundException("No se encontraron las politicas de cancelacion asociadas al servicio")),
+                consumerService.findById(spaceDTO.id_consumer_owner()),
+                locationService.findById(spaceDTO.id_location()),
+                cancellationPolicyService.findById(spaceDTO.id_cancellation_policies()),
                 spaceDTO.google_calendar_id(),
                 spaceDTO.name_space(),
                 spaceDTO.description(),
@@ -128,11 +132,11 @@ public class SpaceService {
     */
 
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
-        if((spaceFilterDTO.id_consumer_owner() != null) && !consumerRepository.existsById(spaceFilterDTO.id_consumer_owner())){
+        if((spaceFilterDTO.id_consumer_owner() != null) && !consumerService.existsById(spaceFilterDTO.id_consumer_owner())){
             throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
         }
 
-        if((spaceFilterDTO.id_location() != null) && !locationRepository.existsById(spaceFilterDTO.id_location())){
+        if((spaceFilterDTO.id_location() != null) && !locationService.existsById(spaceFilterDTO.id_location())){
             throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
         }
 

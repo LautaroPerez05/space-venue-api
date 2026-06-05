@@ -19,9 +19,9 @@ public class CommentService {
     @Autowired
     CommentRepository commentRepository;
     @Autowired
-    ConsumerRepository consumerRepository;
+    ConsumerService consumerService;
     @Autowired
-    SpaceRepository spaceRepository;
+    SpaceService spaceService;
 
     public List<Comment> findAll(){
         return commentRepository.findAll();
@@ -49,8 +49,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 null,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new NotFoundException("No se encontro el consumidor asocidado al comentario")),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado al coemntario")),
+                consumerService.findById(commentDTO.id_consumer()),
+                spaceService.findById(commentDTO.id_space()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -74,8 +74,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 id,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new NotFoundException("No se encontro el consumidor asocidado al comentario")),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado al coemntario")),
+                consumerService.findById(commentDTO.id_consumer()),
+                spaceService.findById(commentDTO.id_space()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -84,14 +84,14 @@ public class CommentService {
     }
 
     public List<Comment> findAllBySpaceId(Integer spaceId){
-        if(!spaceRepository.existsById(spaceId)){
+        if(!spaceService.existsById(spaceId)){
             throw new NotFoundException("No se encontro el espacio del cual se quieren buscar comentarios");
         }
         return commentRepository.findAllBySpaceIdSpace(spaceId);
     }
 
     public List<Comment> findAllByConsumerId(Integer consumerId){
-        if(!consumerRepository.existsById(consumerId)){
+        if(!consumerService.existsById(consumerId)){
             throw new NotFoundException("No se encontro el consumidor del cual se quieren buscar comentarios");
         }
         return commentRepository.findAllByConsumerIdConsumer(consumerId);
