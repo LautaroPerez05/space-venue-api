@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ExceptionInvalidDate.class)
-    public ResponseEntity<String> idNotFound (ExceptionInvalidDate e){
+    public ResponseEntity<String> invalidDate(ExceptionInvalidDate e){
         return ResponseEntity
                 .badRequest()
                 .body(e.getMessage());
@@ -49,5 +49,10 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> RespuestaGenerica (Exception ex){
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(ex.getMessage());
+    }
 }
