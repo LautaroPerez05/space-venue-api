@@ -41,13 +41,13 @@ public class ReservationController {
                 .status(HttpStatus.OK)
                 .body(reservationService.findAll());
     }
-/*
+
     @GetMapping ("/consumer/{id}")
     public ResponseEntity<List<Reservation>> findAllByIdConsumer (@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.findAllByConsumerID(id));
-    }*/
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Reservation> findById (@PathVariable Integer id){
@@ -58,7 +58,7 @@ public class ReservationController {
 
 
     @PostMapping
-    public ResponseEntity<Reservation> createReservation(@Validated(Create.class) @RequestBody ReservationDTO dto){
+    public ResponseEntity<Reservation> createReservation(@Validated(Create.class) @RequestBody ReservationDTO dto) throws IOException {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(reservationService.create(dto));

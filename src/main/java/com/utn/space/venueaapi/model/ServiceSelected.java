@@ -14,24 +14,18 @@ public class ServiceSelected {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_service_selected")
-    private Integer id;
+    private Integer id_service_selected;
 
     @Column(name = "price_at_reservation")
-    BigDecimal priceAtReservation;
+    BigDecimal price;
 
-    @ManyToOne
-    @JoinColumn(name = "id_service")
-    private SpaceServiceItem service;
+
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "id_reservation")
     @ToString.Exclude
     private Reservation reservation;
 
-    public ServiceSelected(BigDecimal priceAtReservation, SpaceServiceItem service, Reservation reservation) {
-        this.id = 0;
-        this.priceAtReservation = priceAtReservation;
-        this.service = service;
-        this.reservation = reservation;
-    }
+
 }

@@ -136,7 +136,7 @@ public class ReservationService {
                 .orElseThrow(()->new ExceptionIdNotFound("Space",dto.getId_space())));
 
         List<SpaceServiceItem> list= new ArrayList<>();
-        list= aux.getSpace().getItemService().stream()
+        list= aux.getSpace().getServices().stream()
                 .filter(item->dto.getId_servicesSelec().contains(item.getId()))
                 .toList();
         aux.setServices(list);

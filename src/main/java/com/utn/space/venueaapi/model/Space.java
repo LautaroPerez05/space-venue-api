@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -40,5 +43,9 @@ public class Space {
     private LocalDate publication_date;
     private Integer buffer_time;
     private Boolean isActive;
+
+    @OneToMany(mappedBy = "space")
+    @JsonIgnore
+    private List<SpaceServiceItem> services;
 
 }
