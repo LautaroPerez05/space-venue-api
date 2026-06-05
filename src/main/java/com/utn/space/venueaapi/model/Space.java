@@ -39,4 +39,6 @@ public class Space {
     private BigDecimal base_price;
     private LocalDate publication_date;
     private Integer buffer_time;
+    private Boolean isActive;
+
 }
