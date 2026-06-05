@@ -27,13 +27,13 @@ public class ReservationController {
                 .status(HttpStatus.OK)
                 .body(reservationService.findAll());
     }
-
+/*
     @GetMapping ("/consumer/{id}")
     public ResponseEntity<List<Reservation>> findAllByIdConsumer (@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.findAllByConsumerID(id));
-    }
+    }*/
 
     @GetMapping("/{id}")
     public ResponseEntity<Reservation> findById (@PathVariable Long id){
