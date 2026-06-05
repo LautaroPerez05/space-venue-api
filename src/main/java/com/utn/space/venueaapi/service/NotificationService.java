@@ -19,13 +19,17 @@ public class NotificationService {
         return notificationRepository.findAll();
     }
 
-    public Notification findById(Long id){
+    public Notification findById(Integer id){
         return notificationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound("Notificacion",id));
     }
 
-    public Notification markAsSeen (Long id){
+    public Notification markAsSeen (Integer id){
         Notification aux= notificationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound("Notificacion",id));
-        aux.setVisto(true);
+        aux.setIsSeen(true);
         return notificationRepository.save(aux);
+    }
+
+    public List<Notification> listAllByIdConsumer (Integer id){
+        return notificationRepository.findAllByIdConsumer(id);
     }
 }

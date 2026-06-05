@@ -11,11 +11,12 @@ import java.util.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "consumers")
 @Entity
 public class Consumer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_consumer;
+    private Integer id_consumer;
 
     private String firstname;
     private String lastname;
@@ -24,25 +25,24 @@ public class Consumer {
     private String email;
 
     private String phone;
-    private boolean isActive = true;
 
     @OneToOne
     @JoinColumn(name = "username")
     private Credential credentials;
 
-    @OneToMany(mappedBy = "consumers")
+    @OneToMany(mappedBy = "consumer")
     @JsonIgnore
     private List<Notification> notificationsList;
 
-    @OneToMany(mappedBy = "consumerOwner")
+    @OneToMany(mappedBy = "consumer_owner")
     @JsonIgnore
     private List<Space> spacesList;
 
-    @OneToMany(mappedBy = "consumers")
+    @OneToMany(mappedBy = "consumer")
     @JsonIgnore
     private List<Comment> commentsList;
 
-    @OneToMany(mappedBy = "consumers")
+    @OneToMany(mappedBy = "consumer")
     @JsonIgnore
     private List<Reservation> reservationsList;
 }

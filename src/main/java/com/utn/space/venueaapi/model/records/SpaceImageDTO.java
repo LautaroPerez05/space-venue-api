@@ -1,11 +1,11 @@
 package com.utn.space.venueaapi.model.records;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record SpaceImageDTO (
-        Long id_space,
+        Integer id_space,
         String file_name,
         String url_image,
-        LocalDate date_sent){
+        LocalDateTime date_send){
 
 }

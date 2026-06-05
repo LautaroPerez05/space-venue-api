@@ -17,7 +17,7 @@ public class SpaceServiceItemController {
     SpaceServiceItemService service;
 
     @GetMapping("/space/{idSpace}")
-    public ResponseEntity<List<SpaceServiceItemDTO>> listServicesFromSpace(@PathVariable Long idSpace){
+    public ResponseEntity<List<SpaceServiceItemDTO>> listServicesFromSpace(@PathVariable Integer idSpace){
         return ResponseEntity.ok(service.listOfServicesFromSpace(idSpace));
     }
 
@@ -27,12 +27,12 @@ public class SpaceServiceItemController {
     }
 
     @PutMapping("/update/{id}")
-    public void updateServiceItem(@PathVariable Long id, @RequestBody SpaceServiceItemDTO serviceItemDTO){
+    public void updateServiceItem(@PathVariable Integer id, @RequestBody SpaceServiceItemDTO serviceItemDTO){
         service.updateServiceItem(id, serviceItemDTO);
     }
 
     @DeleteMapping("/delete/{id}")
-    public void deleteServiceFromSpace(@PathVariable Long id, @RequestBody SpaceDTO spaceDTO){
+    public void deleteServiceFromSpace(@PathVariable Integer id, @RequestBody SpaceDTO spaceDTO){
         service.deleteServiceItem(id, spaceDTO.id_space());
     }
 }

@@ -11,6 +11,7 @@ import com.utn.space.venueaapi.service.mappers.SpaceServiceItemMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -23,13 +24,13 @@ public class SpaceServiceItemService {
         this.spaceRepository = spaceRepository;
     }
 
-    public List<SpaceServiceItemDTO> listOfServicesFromSpace(Long id){
+    public List<SpaceServiceItemDTO> listOfServicesFromSpace(Integer id){
         return repository.findAllSpaceServicesBySpaceId(id);
     }
 
     @Transactional
     public void insertServiceItem(SpaceServiceItemDTO serviceItemDTO){
-        if(serviceItemDTO.price() <= 0) throw new InvalidDataException("No se permiten numeros negativos en el precio de un servicio");
+        if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en el precio de un servicio");
 
         Space space = spaceRepository.findById(serviceItemDTO.idSpace()).orElseThrow(() -> new NotFoundException("No se ha encontrado el espacio al que se le quiere asociar un servicio"));
 
@@ -39,12 +40,12 @@ public class SpaceServiceItemService {
     }
 
     @Transactional
-    public void updateServiceItem(Long id, SpaceServiceItemDTO serviceItemDTO){
+    public void updateServiceItem(Integer id, SpaceServiceItemDTO serviceItemDTO){
         if(!repository.existsServiceItemInSpace(id, serviceItemDTO.idSpace())){
             throw new NotFoundException("No se ha encontrado el servicio a modificar en el espacio");
         }
 
-        if(serviceItemDTO.price() <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
+        if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
 
 
 
@@ -58,7 +59,7 @@ public class SpaceServiceItemService {
     }
 
     @Transactional
-    public void deleteServiceItem(Long id, Long idSpace){
+    public void deleteServiceItem(Integer id, Integer idSpace){
         if(!repository.existsServiceItemInSpace(id, idSpace)) throw new NotFoundException("No se ha encontrado el servicio a eiminar");
         repository.deleteById(id);
     }

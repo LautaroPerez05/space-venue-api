@@ -21,12 +21,12 @@ public class SpaceImageController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SpaceImage> findSpaceImageById(@PathVariable Long id){
+    public ResponseEntity<SpaceImage> findSpaceImageById(@PathVariable Integer id){
         return ResponseEntity.ok(spaceImagesService.findById(id));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSapceImageById(@PathVariable Long id){
+    public void deleteSapceImageById(@PathVariable Integer id){
         spaceImagesService.deleteById(id);
     }
 
@@ -36,12 +36,12 @@ public class SpaceImageController {
     }
 
     @PutMapping("/{id}")
-    public void modifySpaceImage(@PathVariable Long id, @RequestBody SpaceImageDTO spaceImageDTO){
+    public void modifySpaceImage(@PathVariable Integer id, @RequestBody SpaceImageDTO spaceImageDTO){
         spaceImagesService.modifySpaceImage(id,spaceImageDTO);
     }
 
     @GetMapping("/byspaceid/{id}")
-    public ResponseEntity<List<SpaceImage>> findAllBySpaceId(@PathVariable Long id){
+    public ResponseEntity<List<SpaceImage>> findAllBySpaceId(@PathVariable Integer id){
         return ResponseEntity.ok(spaceImagesService.findAllBySpaceId(id));
     }
 }
