@@ -16,11 +16,13 @@ public class SpaceServiceItemController {
     @Autowired
     SpaceServiceItemService service;
 
+    //Con este metodo listamos los servicios de un espacio para que un consumer pueda seleccionar los que guste
     @GetMapping("/space/{idSpace}")
     public ResponseEntity<List<SpaceServiceItemDTO>> listServicesFromSpace(@PathVariable Integer idSpace){
         return ResponseEntity.ok(service.listOfServicesFromSpace(idSpace));
     }
 
+    //Este es el metodo que un Owner usaria para insertar servicios en uno de sus Espacios
     @PostMapping("/insert")
     public void insertServiceItem(@RequestBody SpaceServiceItemDTO serviceItemDTO){
         service.insertServiceItem(serviceItemDTO);

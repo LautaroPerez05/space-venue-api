@@ -4,19 +4,19 @@ import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.ServiceSelected;
 import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
-import com.utn.space.venueaapi.model.records.ServiceSelectedWithoutReservationDTO;
 
 public class ServiceSelectedMapper {
 
-    // Con reserva
     public static ServiceSelectedDTO toDto(ServiceSelected serviceSelected){
         return new ServiceSelectedDTO(
-          serviceSelected.getPriceAtReservation(),
-          serviceSelected.getService().getId(),
-          serviceSelected.getReservation().getId()
+                serviceSelected.getId(),
+                serviceSelected.getPriceAtReservation(),
+                serviceSelected.getReservation().getId(),
+                serviceSelected.getDescriptionFrozen()
         );
     }
 
+    /*
     public static ServiceSelectedDTO toDto(ServiceSelected serviceSelected, Integer id){
         return new ServiceSelectedDTO(
             id,
@@ -25,15 +25,18 @@ public class ServiceSelectedMapper {
             serviceSelected.getReservation().getId()
         );
     }
+    */
 
-    public static ServiceSelected toEntity(ServiceSelectedDTO serviceSelectedDTO, SpaceServiceItem spaceServiceItem, Reservation reservation){
+    public static ServiceSelected toEntity(ServiceSelectedDTO serviceSelectedDTO, Reservation reservation){
         return new ServiceSelected(
-          serviceSelectedDTO.priceAtReservation(),
-          spaceServiceItem,
-          reservation
+            null,
+                reservation,
+                serviceSelectedDTO.priceAtReservation(),
+                serviceSelectedDTO.descriptionFrozen()
         );
     }
 
+    /*
     public static ServiceSelected toEntity(Integer id, ServiceSelectedDTO serviceSelectedDTO, SpaceServiceItem spaceServiceItem, Reservation reservation){
         return new ServiceSelected(
             id,
@@ -42,9 +45,11 @@ public class ServiceSelectedMapper {
             reservation
         );
     }
+    */
 
     // Sin reserva
 
+    /*
     public static ServiceSelected toEntity(ServiceSelectedWithoutReservationDTO serviceSelectedDTO, SpaceServiceItem spaceServiceItem, Reservation reservation){
         return new ServiceSelected(
                 serviceSelectedDTO.priceAtReservation(),
@@ -61,4 +66,5 @@ public class ServiceSelectedMapper {
                 reservation
         );
     }
+    */
 }

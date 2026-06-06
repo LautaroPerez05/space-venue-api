@@ -19,7 +19,7 @@ import java.util.List;
 @Service
 public class ReservationService {
     @Autowired
-    private ReservationMapper reservationMapper;
+    private final ReservationMapper reservationMapper;
     @Autowired
     private final ReservationRepository reservationRepository;
     @Autowired
@@ -40,12 +40,13 @@ public class ReservationService {
         return reservationRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Reservacion",id));
     }
 
+
     public Reservation create (ReservationDTO dto) throws IOException {
         if (dto.getUntilDate().isBefore(dto.getFromDate())) {
             throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
         if (dto.getFromDate().isBefore(LocalDateTime.now())) {
-            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+            throw new ExceptionInvalidDate("La fecha de Inicio no puede del pasado");
         }
 
         Reservation aux = reservationMapper.toEntity(dto);
@@ -64,14 +65,16 @@ public class ReservationService {
         for (Integer idService : dto.getId_servicesSelec()) {
             SpaceServiceItem servicioCatalogo = spaceServiceItemService.findById(idService);
 
+            //Se verifica que cada uno de los servicios seleccionados de la reserva era efectivamente uno asociado al espacio de la reserva
             if (!servicioCatalogo.getSpace().getId_space().equals(space.getId_space())) {
                 throw new RuntimeException("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
             }
 
+            //Se crea un objeto de tipo ServiceSelected que guardara la info del servicio exacto que fue asociado a la reserva
             ServiceSelected selected = new ServiceSelected();
             selected.setReservation(aux);
-            selected.setService(servicioCatalogo);
             selected.setPriceAtReservation(servicioCatalogo.getPrice());
+            selected.setDescriptionFrozen(aux.getDescription());
 
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
             serviciosSeleccionados.add(selected);

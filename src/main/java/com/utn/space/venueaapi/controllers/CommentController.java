@@ -26,12 +26,12 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteSpaceById(@PathVariable Integer id){
+    public void deleteCommentById(@PathVariable Integer id){
         commentService.deleteById(id);
     }
 
     @PostMapping()
-    public void insertSpace(@RequestBody CommentDTO commentDTO){
+    public void insertComment(@RequestBody CommentDTO commentDTO){
         commentService.insertComment(commentDTO);
     }
 

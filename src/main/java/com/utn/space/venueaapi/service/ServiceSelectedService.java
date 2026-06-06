@@ -4,7 +4,6 @@ import com.utn.space.venueaapi.exceptions.NotFoundException;
 import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
-import com.utn.space.venueaapi.model.records.ServiceSelectedWithoutReservationDTO;
 import com.utn.space.venueaapi.repository.ServiceSelectedRepository;
 import com.utn.space.venueaapi.service.mappers.ServiceSelectedMapper;
 import jakarta.transaction.Transactional;
@@ -31,22 +30,21 @@ public class ServiceSelectedService {
     // Una vez que se envían los datos de la reserva y los servicios seleccionados
     // El botón de envío apuntaríá primero a los endpoints que validaran e ingresaran la reserva
     // Luego, con ese nuevo id de reserva se utilizaría este metodo de inserción de servicios seleccionados
+    /*
     @Transactional
-    public void insertServiceSelectedForAReservation(ServiceSelectedDTO serviceSelectedDTO){
+    public void insertServiceForAReservation(ServiceSelectedDTO serviceSelectedDTO){
+        //Este metodo recibe 1 servicio seleccionado para la reserva por DTO y lo guarda en la tabla de ServicesSelected
         Reservation reservation = reservationService.findById(serviceSelectedDTO.idReservation());
-        SpaceServiceItem serviceItem = spaceServiceItemService.findById(serviceSelectedDTO.idService());
-
-        serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO, serviceItem, reservation));
+        serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO, reservation));
     }
+    */
 
+    // Yo usaría solo un metod que inserta una lista de servicios para una reserva
     @Transactional
-    public void insertListOfServicesSelectedInAReservation(Integer idReservation, List<ServiceSelectedWithoutReservationDTO> servicesSelectedDTO){
-        Reservation reservation = reservationService.findById(idReservation);
-        for(ServiceSelectedWithoutReservationDTO serviceSelectedDTO : servicesSelectedDTO){
-            SpaceServiceItem serviceItem = spaceServiceItemService.findById(serviceSelectedDTO.idService());
-
-            serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO, serviceItem, reservation));
-
+    public void insertListOfServicesSelectedInAReservation(Integer idReservation, List<ServiceSelectedDTO> servicesSelectedDTO){
+        //Este metodo recibe el id de una reserva y una lista de servicios seleccionados (por servicesSelectedDTO) y los mete en la tabla ServicesSelected
+        for(ServiceSelectedDTO serviceSelectedDTO : servicesSelectedDTO){
+            serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO, reservationService.findById(idReservation)));
         }
     }
 
