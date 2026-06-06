@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/s&v/")
+@RequestMapping("/api/")
 public class ConsumerController {
     private final UserDetailsManager userDetailsManager;
     private final PasswordEncoder passwordEncoder;

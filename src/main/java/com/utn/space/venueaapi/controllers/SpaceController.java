@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/s&v/spaces")
+@RequestMapping("/api/spaces")
 public class SpaceController {
     @Autowired
     SpaceService spaceService;
