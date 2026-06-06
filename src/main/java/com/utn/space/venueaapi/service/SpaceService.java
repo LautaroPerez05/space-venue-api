@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SpaceService {
@@ -107,29 +108,6 @@ public class SpaceService {
         spaceRepository.save(spaceToInsert);
     }
 
-    /*
-    public List<Space> findAllByConsumerOwner(Long id){
-        if (!consumerRepository.existsById(id)){
-            throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
-        }
-        return spaceRepository.findAllByConsumerOwner_IdConsumer(id);
-    }
-
-    public List<Space> findAllByLocation(Long id){
-        if(!consumerRepository.existsById(id)){
-            throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
-        }
-        return spaceRepository.findAllByLocation_IdLocation(id);
-    }
-
-    public List<Space> findAllByNameSpace(String nameSpace){
-        return spaceRepository.findAllByNameSpace(nameSpace);
-    }
-
-    public List<Space> findAllByBasePrice(Double minPrice, Double maxPrice){
-        return spaceRepository.findAllByBasePriceBetween(minPrice,maxPrice);
-    }
-    */
 
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
         if((spaceFilterDTO.id_consumer_owner() != null) && !consumerService.existsById(spaceFilterDTO.id_consumer_owner())){
@@ -140,6 +118,26 @@ public class SpaceService {
             throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
         }
 
-        return spaceRepository.findAllByFields(spaceFilterDTO.id_consumer_owner(), spaceFilterDTO.minPrice(),spaceFilterDTO.maxPrice(),spaceFilterDTO.name_space(), spaceFilterDTO.id_location());
+        //Filtro inicial de mi base de datos
+        List<Space> spaces = spaceRepository.findAllByFields(
+                spaceFilterDTO.id_consumer_owner(),
+                spaceFilterDTO.minPrice(),
+                spaceFilterDTO.maxPrice(),
+                spaceFilterDTO.name_space(),
+                spaceFilterDTO.id_location() //Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
+        );
+
+        //Hago un filtro por proximidad al usuario, solo si este mando latitud y longitud
+        if(spaceFilterDTO.lat() != null && spaceFilterDTO.lng() != null){
+            //Si no encuentro un radio de filtrado en el DTO pongo 5Km de base
+            BigDecimal maxRadious = spaceFilterDTO.radious() != null ? spaceFilterDTO.radious() : new BigDecimal("5.0");
+            //Uso isSpaceNearBy para filtrar la lista de espacios, primero filtro los espacios que tengan datos de ubicacion incompletos para evitar errores
+            spaces = spaces.stream()
+                    .filter(space ->space.getLocation()!= null && space.getLocation().getLatitude() != null && space.getLocation().getLongitude() != null)
+                    .filter(space -> locationService.isSpaceNearby(spaceFilterDTO.lat(),spaceFilterDTO.lng(),maxRadious,space))
+                    .toList();
+        }
+
+        return spaces;
     }
 }
