@@ -1,7 +1,7 @@
 package com.utn.space.venueaapi.service;
 
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.NotFoundException;
 import com.utn.space.venueaapi.model.Comment;
 import com.utn.space.venueaapi.model.records.CommentDTO;
 import com.utn.space.venueaapi.repository.CommentRepository;
@@ -10,9 +10,7 @@ import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -28,12 +26,12 @@ public class CommentService {
     }
 
     public Comment findById(Integer id){
-        return commentRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el comentario buscado"));
+        return commentRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Comment", id));
     }
 
     public void deleteById(Integer id){
         if(!commentRepository.existsById(id)){
-            throw new NotFoundException("No se encontro el espacio a eliminar");
+            throw new ExceptionIdNotFound("Comment", id);
         }
         commentRepository.deleteById(id);
     }
@@ -49,8 +47,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 null,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new NotFoundException("No se encontro el consumidor asocidado al comentario")),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado al coemntario")),
+                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new ExceptionIdNotFound("Consummer", commentDTO.id_consumer())),
+                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new ExceptionIdNotFound("Space", commentDTO.id_space())),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -61,7 +59,7 @@ public class CommentService {
 
     public void modifyComment(Integer id, CommentDTO commentDTO){
         if(!commentRepository.existsById(id)){
-            throw new NotFoundException("No se encontro el comentario a eliminar");
+            throw new ExceptionIdNotFound("Comment", id);
         }
 
         if(commentDTO.description().isBlank()){
@@ -74,8 +72,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 id,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new NotFoundException("No se encontro el consumidor asocidado al comentario")),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado al coemntario")),
+                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new ExceptionIdNotFound("Consummer", commentDTO.id_consumer())),
+                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new ExceptionIdNotFound("Space", commentDTO.id_space())),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -85,14 +83,14 @@ public class CommentService {
 
     public List<Comment> findAllBySpaceId(Integer spaceId){
         if(!spaceRepository.existsById(spaceId)){
-            throw new NotFoundException("No se encontro el espacio del cual se quieren buscar comentarios");
+            throw new ExceptionIdNotFound("Space", spaceId);
         }
         return commentRepository.findAllBySpaceIdSpace(spaceId);
     }
 
     public List<Comment> findAllByConsumerId(Integer consumerId){
         if(!consumerRepository.existsById(consumerId)){
-            throw new NotFoundException("No se encontro el consumidor del cual se quieren buscar comentarios");
+            throw new ExceptionIdNotFound("Consumer", consumerId);
         }
         return commentRepository.findAllByConsumerIdConsumer(consumerId);
     }

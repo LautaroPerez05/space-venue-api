@@ -1,7 +1,7 @@
 package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.NotFoundException;
+import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
@@ -32,7 +32,7 @@ public class SpaceServiceItemService {
     public void insertServiceItem(SpaceServiceItemDTO serviceItemDTO){
         if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en el precio de un servicio");
 
-        Space space = spaceRepository.findById(serviceItemDTO.idSpace()).orElseThrow(() -> new NotFoundException("No se ha encontrado el espacio al que se le quiere asociar un servicio"));
+        Space space = spaceRepository.findById(serviceItemDTO.idSpace()).orElseThrow(() -> new ExceptionNameNotFound("No se ha encontrado el espacio al que se le quiere asociar un servicio"));
 
         SpaceServiceItem serviceItem = SpaceServiceItemMapper.toEntity(serviceItemDTO, space);
 
@@ -42,7 +42,7 @@ public class SpaceServiceItemService {
     @Transactional
     public void updateServiceItem(Integer id, SpaceServiceItemDTO serviceItemDTO){
         if(!repository.existsServiceItemInSpace(id, serviceItemDTO.idSpace())){
-            throw new NotFoundException("No se ha encontrado el servicio a modificar en el espacio");
+            throw new ExceptionNameNotFound("No se ha encontrado el servicio a modificar en el espacio");
         }
 
         if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
@@ -53,14 +53,14 @@ public class SpaceServiceItemService {
                 serviceItemDTO,
                 id,
                 spaceRepository.findById(serviceItemDTO.idSpace())
-                        .orElseThrow(() -> new NotFoundException("No se ha encontrado el espaacio del servicio a modificar")));
+                        .orElseThrow(() -> new ExceptionNameNotFound("No se ha encontrado el espaacio del servicio a modificar")));
 
         repository.save(serviceItem);
     }
 
     @Transactional
     public void deleteServiceItem(Integer id, Integer idSpace){
-        if(!repository.existsServiceItemInSpace(id, idSpace)) throw new NotFoundException("No se ha encontrado el servicio a eiminar");
+        if(!repository.existsServiceItemInSpace(id, idSpace)) throw new ExceptionNameNotFound("No se ha encontrado el servicio a eiminar");
         repository.deleteById(id);
     }
 }

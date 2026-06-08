@@ -48,4 +48,6 @@ public class Space {
     @JsonIgnore
     private List<SpaceServiceItem> services;
 
+    public Space(Integer id, Consumer consumer, Location location, CancellationPolicy cancellationPolicies, String s, String s1, String description, BigDecimal bigDecimal, LocalDate localDate, Integer integer) {
+    }
 }

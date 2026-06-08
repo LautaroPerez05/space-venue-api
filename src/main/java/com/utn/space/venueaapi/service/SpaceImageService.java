@@ -1,7 +1,7 @@
 package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.NotFoundException;
+import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.records.SpaceImageDTO;
 import com.utn.space.venueaapi.model.SpaceImage;
 import com.utn.space.venueaapi.repository.SpaceRepository;
@@ -23,12 +23,12 @@ public class SpaceImageService {
     }
 
     public SpaceImage findById(Integer id){
-        return spaceImageRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro la imagen buscada"));
+        return spaceImageRepository.findById(id).orElseThrow(()-> new ExceptionNameNotFound("No se encontro la imagen buscada"));
     }
 
     public void deleteById(Integer id){
         if(!spaceImageRepository.existsById(id)){
-            throw new NotFoundException("No se encontro la imagen a eliminar");
+            throw new ExceptionNameNotFound("No se encontro la imagen a eliminar");
         }
         spaceImageRepository.deleteById(id);
     }
@@ -44,7 +44,7 @@ public class SpaceImageService {
 
         SpaceImage spaceImageToInsert = new SpaceImage(
                 null,
-                spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado a la imagen")),
+                spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new ExceptionNameNotFound("No se encontro el espacio asociado a la imagen")),
                 spaceImageDTO.file_name(),
                 spaceImageDTO.url_image(),
                 spaceImageDTO.date_send()
@@ -56,7 +56,7 @@ public class SpaceImageService {
 
     public void modifySpaceImage(Integer id, SpaceImageDTO spaceImageDTO){
         if(!spaceImageRepository.existsById(id)){
-            throw new NotFoundException("No se encontro la imagen a actualizar");
+            throw new ExceptionNameNotFound("No se encontro la imagen a actualizar");
         }
 
         if(spaceImageDTO.file_name().isBlank()){
@@ -69,7 +69,7 @@ public class SpaceImageService {
 
         SpaceImage spaceImageToInsert = new SpaceImage(
                 id,
-                spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new NotFoundException("No se encontro el espacio asociado a la imagen")),
+                spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new ExceptionNameNotFound("No se encontro el espacio asociado a la imagen")),
                 spaceImageDTO.file_name(),
                 spaceImageDTO.url_image(),
                 spaceImageDTO.date_send()
@@ -80,7 +80,7 @@ public class SpaceImageService {
 
     public List<SpaceImage> findAllBySpaceId(Integer spaceId){
         if(!spaceRepository.existsById(spaceId)){
-            throw new NotFoundException("No se encontro el espacio del cual se quieren buscar imagenes");
+            throw new ExceptionNameNotFound("No se encontro el espacio del cual se quieren buscar imagenes");
         }
         return spaceImageRepository.findAllBySpaceIdSpace(spaceId);
     }

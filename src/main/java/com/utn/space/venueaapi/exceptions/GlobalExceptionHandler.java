@@ -35,6 +35,13 @@ public class GlobalExceptionHandler {
                 .body(e.getMessage());
     }
 
+    @ExceptionHandler(ExceptionNameNotFound.class)
+    public ResponseEntity<String> nameNotFound(ExceptionNameNotFound e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(e.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)///este lo copie de GPT
     public ResponseEntity<Map<String, String>> manejarValidaciones(
             MethodArgumentNotValidException ex) {
@@ -56,7 +63,7 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Exception.class)// un generico por si las dudas
     public ResponseEntity<String> RespuestaGenerica (Exception ex){
         return ResponseEntity
                 .status(HttpStatus.BAD_GATEWAY)

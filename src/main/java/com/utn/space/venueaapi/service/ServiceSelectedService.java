@@ -1,16 +1,9 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.NotFoundException;
-import com.utn.space.venueaapi.model.Reservation;
-import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
-import com.utn.space.venueaapi.model.records.ServiceSelectedWithoutReservationDTO;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import com.utn.space.venueaapi.repository.ServiceSelectedRepository;
 import com.utn.space.venueaapi.repository.SpaceServiceItemRepository;
-import com.utn.space.venueaapi.service.mappers.ServiceSelectedMapper;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
