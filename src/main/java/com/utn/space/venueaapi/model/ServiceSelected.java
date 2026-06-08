@@ -17,7 +17,7 @@ public class ServiceSelected {
     private Integer id_service_selected;
 
     @Column(name = "price_at_reservation")
-    BigDecimal price;
+    private BigDecimal price_at_reservation;
 
     private String description;
 
@@ -26,5 +26,9 @@ public class ServiceSelected {
     @ToString.Exclude
     private Reservation reservation;
 
-
+    public ServiceSelected(SpaceServiceItem item, Reservation res) {
+        this.price_at_reservation = item.getPrice();
+        this.description=item.getDescription();
+        this.reservation=res;
+    }
 }

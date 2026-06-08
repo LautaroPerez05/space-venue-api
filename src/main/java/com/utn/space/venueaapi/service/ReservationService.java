@@ -2,6 +2,7 @@ package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.ExceptionInvalidDate;
+import com.utn.space.venueaapi.exceptions.ExceptionServiceOutOfPlace;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.repository.ConsumerRepository;
@@ -74,15 +75,16 @@ public class ReservationService {
                     .orElseThrow(() -> new ExceptionIdNotFound("Servicio Catálogo", idService));
 
             if (!servicioCatalogo.getSpace().getId_space().equals(space.getId_space())) {
-                throw new RuntimeException("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
+                throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
             }
 
             ServiceSelected selected = new ServiceSelected();
             selected.setReservation(aux);
-            selected.setService(servicioCatalogo);
-            selected.setPriceAtReservation(servicioCatalogo.getPrice());
+            selected.setDescription(servicioCatalogo.getDescription());
+            selected.setPrice_at_reservation(servicioCatalogo.getPrice());
 
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
+
             serviciosSeleccionados.add(selected);
         }
 
@@ -134,16 +136,22 @@ public class ReservationService {
 
         aux.setSpace(spaceRepository.findById(dto.getId_space())
                 .orElseThrow(()->new ExceptionIdNotFound("Space",dto.getId_space())));
-
-        List<SpaceServiceItem> list= new ArrayList<>();
+//limpiar servicios anteriores
+        List<ServiceSelected> list= new ArrayList<>();
         list= aux.getSpace().getServices().stream()
-                .filter(item->dto.getId_servicesSelec().contains(item.getId()))
+                .filter(item->dto.getId_servicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
+                .map(item-> new ServiceSelected(item,aux))  //transformo los item en serviceSelected
                 .toList();
         aux.setServices(list);
-        aux.setFinalPrice(aux.getSpace().getBase_price() +
-                aux.getServices().stream()
-                        .mapToDouble(SpaceServiceItem::getPrice)
-                        .sum());
+
+        aux.setFinalPrice(
+                aux.getSpace().getBase_price().add(
+                        aux.getServices()
+                                .stream()
+                                .map(ServiceSelected::getPrice_at_reservation)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                )
+        );
         return reservationRepository.save(aux);
     }
 
