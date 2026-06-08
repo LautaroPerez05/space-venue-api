@@ -22,7 +22,11 @@ import java.util.List;
 
 @Service
 public class ReservationService {
+    @Autowired
     private ReservationMapper reservationMapper;
+
+    @Autowired
+    private ServiceSelectedService serviceSelectedService;
 
     private final ReservationRepository reservationRepository;
     private final ConsumerRepository consumerRepository;
@@ -38,7 +42,8 @@ public class ReservationService {
         this.googleCalendarService = googleCalendarService;
     }
 
-    
+    ///--------------------------------------------Metodos------------------------------------------------------------------------------
+
     public List<Reservation> findAll (){
         return reservationRepository.findAll();
     }
@@ -136,7 +141,12 @@ public class ReservationService {
 
         aux.setSpace(spaceRepository.findById(dto.getId_space())
                 .orElseThrow(()->new ExceptionIdNotFound("Space",dto.getId_space())));
-//limpiar servicios anteriores
+
+
+        //limpiar servicios seleccionados anteriores
+        serviceSelectedService.deleteSelectedServiceByReserveId(dto.getId());
+
+        //Los cargo de nuevo y actualizado
         List<ServiceSelected> list= new ArrayList<>();
         list= aux.getSpace().getServices().stream()
                 .filter(item->dto.getId_servicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
@@ -145,7 +155,7 @@ public class ReservationService {
         aux.setServices(list);
 
         aux.setFinalPrice(
-                aux.getSpace().getBase_price().add(
+                aux.getSpace().getBase_price().add( //el + no funciona con bigDecimal
                         aux.getServices()
                                 .stream()
                                 .map(ServiceSelected::getPrice_at_reservation)

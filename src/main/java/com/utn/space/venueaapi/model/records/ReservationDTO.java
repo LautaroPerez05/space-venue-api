@@ -18,7 +18,7 @@ import java.util.List;
 public class ReservationDTO {
 
     @NotBlank(groups = Update.class)
-    private Integer id;
+    private int id;
 
     @NotBlank(groups = {Create.class, Update.class})
     private String title;

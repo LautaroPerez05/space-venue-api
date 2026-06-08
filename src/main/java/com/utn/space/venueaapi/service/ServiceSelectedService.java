@@ -17,18 +17,23 @@ import java.util.List;
 
 @Service
 public class ServiceSelectedService {
-    private final ServiceSelectedRepository repository;
+    private final ServiceSelectedRepository serviceSelectedRepository;
     private final ReservationRepository reservationRepository;
     private final SpaceServiceItemRepository spaceServiceItemRepository;
 
     public ServiceSelectedService(ServiceSelectedRepository repository, ReservationRepository reservationRepository, SpaceServiceItemRepository spaceServiceItemRepository) {
-        this.repository = repository;
+        this.serviceSelectedRepository = repository;
         this.reservationRepository = reservationRepository;
         this.spaceServiceItemRepository = spaceServiceItemRepository;
     }
 
     public List<ServiceSelectedDTO> getServicesSelectedOfReservation(Integer idReservation){
-        return repository.findServiceSelectedByIdReservation(idReservation);
+        return serviceSelectedRepository.findServiceSelectedByIdReservation(idReservation);
+    }
+
+    //Borra todos los Selected Services por id_reserva
+    public void deleteSelectedServiceByReserveId (Integer id_reserva){
+        serviceSelectedRepository.deleteSelectedServiceByReserveId(id_reserva);
     }
 /*
     // Este metodo será usado para la inserción de reservas del lado del front.
