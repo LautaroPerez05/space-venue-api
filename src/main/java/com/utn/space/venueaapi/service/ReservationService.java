@@ -28,6 +28,9 @@ public class ReservationService {
     @Autowired
     private ServiceSelectedService serviceSelectedService;
 
+    @Autowired
+    private ConsumerService consumerService;
+
     private final ReservationRepository reservationRepository;
     private final ConsumerRepository consumerRepository;
     private final SpaceRepository spaceRepository;
@@ -50,6 +53,10 @@ public class ReservationService {
 
     public Reservation findById (Integer id){
         return reservationRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Reservacion",id));
+    }
+
+    public List<Reservation> findByIdConsumer(Integer id){
+        return consumerService.findById(id).getReservationsList();
     }
 
     public Reservation create (ReservationDTO dto) throws IOException {
@@ -164,7 +171,6 @@ public class ReservationService {
         );
         return reservationRepository.save(aux);
     }
-
 
     public Reservation confirmReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));

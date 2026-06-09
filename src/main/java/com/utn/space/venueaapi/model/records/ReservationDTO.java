@@ -25,6 +25,7 @@ public class ReservationDTO {
     @NotBlank(groups = {Create.class, Update.class})
     private String description;
 
+    @NotBlank(groups = {Create.class, Update.class})
     private String googleEventCode;
 
     @NotBlank(groups = {Create.class, Update.class})
@@ -40,6 +41,7 @@ public class ReservationDTO {
 
     @NotBlank(groups = {Create.class, Update.class})
     private LocalDateTime createdAt;
+
     private Boolean isActive;
     private Boolean saveToMyCalendar;
 
