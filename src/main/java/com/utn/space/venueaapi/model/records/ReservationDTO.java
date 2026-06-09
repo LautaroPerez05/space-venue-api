@@ -16,7 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 @Component
 public class ReservationDTO {
-
     @NotBlank(groups = Update.class)
     private int id;
 
