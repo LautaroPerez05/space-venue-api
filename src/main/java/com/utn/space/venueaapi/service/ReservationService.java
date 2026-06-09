@@ -5,6 +5,7 @@ import com.utn.space.venueaapi.exceptions.ExceptionInvalidDate;
 import com.utn.space.venueaapi.exceptions.ExceptionServiceOutOfPlace;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
+import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
 import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import lombok.AllArgsConstructor;
@@ -63,7 +64,8 @@ public class ReservationService {
         aux.setSpace(space);
 
         // Corrección: Validación contra el catálogo general y armado de seleccionados
-        List<ServiceSelected> serviciosSeleccionados = new ArrayList<>();
+        //Catalogo de servicios seleccionables para validar los elejidos
+        List<ServiceSelectedDTO> servicesSelectedDTO = new ArrayList<>();
         BigDecimal totalServicios = BigDecimal.ZERO;
 
         for (Integer idService : dto.getIdServicesSelec()) {
@@ -74,19 +76,18 @@ public class ReservationService {
                 throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
             }
 
-            //Se crea un objeto de tipo ServiceSelected que guardara la info del servicio exacto que fue asociado a la reserva
-            ServiceSelected selected = new ServiceSelected();
-            selected.setReservation(aux);
-            selected.setPriceAtReservation(servicioCatalogo.getPrice());
-            selected.setDescriptionFrozen(aux.getDescription());
-
+            // Crear DTO para el servicio seleccionado (con id=null porque se genera en la BDD)
+            ServiceSelectedDTO ssDto = new ServiceSelectedDTO(
+                    null,
+                    servicioCatalogo.getPrice(),
+                    null, // idReservation se asignará después de guardar
+                    servicioCatalogo.getDescription()
+            );
+            servicesSelectedDTO.add(ssDto);
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
-
-            serviciosSeleccionados.add(selected);
         }
 
-        aux.setServices(serviciosSeleccionados);
-
+        //Sumo al precio base el de los servicios
         aux.setFinalPrice(space.getBasePrice().add(totalServicios));
 
         // Extrae los datos dinámicos necesarios para configurar las invitaciones del evento
@@ -112,7 +113,13 @@ public class ReservationService {
         // 3. Setea el código hash único devuelto por Google en tu atributo de base de datos local
         aux.setGoogleEventCode(idEventoGoogle);
 
-        return reservationRepository.save(aux);
+        //Guardamos la reserva
+        Reservation saved = reservationRepository.save(aux);
+
+        //Guardamos los servicios seleccionados
+        serviceSelectedService.insertListOfServicesSelectedInAReservation(saved.getId(), servicesSelectedDTO);
+
+        return saved;
 
     }
 
@@ -126,33 +133,41 @@ public class ReservationService {
         if(!reservationRepository.existsById(dto.getId())){
             throw new ExceptionIdNotFound ("Reservation", dto.getId());
         }
-        Reservation aux= reservationMapper.toEntity(dto);
-
+        Reservation aux= reservationRepository.findById(dto.getId()).orElseThrow(() -> new ExceptionIdNotFound("Reservation", dto.getId()));
         aux.setConsumer(consumerService.findById(dto.getIdConsumer()));
-
         aux.setSpace(spaceService.findById(dto.getIdSpace()));
 
 
         //limpiar servicios seleccionados anteriores
         serviceSelectedService.deleteSelectedServiceByReserveId(dto.getId());
 
-        //Los cargo de nuevo y actualizado
-        List<ServiceSelected> list= new ArrayList<>();
-        list= aux.getSpace().getServices().stream()
-                .filter(item->dto.getIdServicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
-                .map(item-> new ServiceSelected(item,aux))  //transformo los item en serviceSelected
-                .toList();
-        aux.setServices(list);
+        //Cargo los servicios nuevos desde el catalogo
+        List<ServiceSelectedDTO> servicesSelectedDTO = new ArrayList<>();
+        BigDecimal totalServicios = BigDecimal.ZERO;
 
-        aux.setFinalPrice(
-                aux.getSpace().getBasePrice().add( //el + no funciona con bigDecimal
-                        aux.getServices()
-                                .stream()
-                                .map(ServiceSelected::getPriceAtReservation)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                )
-        );
-        return reservationRepository.save(aux);
+        for (Integer idService : dto.getIdServicesSelec()) {
+            SpaceServiceItem item = spaceServiceItemService.findById(idService);
+            if (!item.getSpace().getIdSpace().equals(aux.getSpace().getIdSpace())) {
+                throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
+            }
+
+            ServiceSelectedDTO ssDto = new ServiceSelectedDTO(
+                    null,
+                    item.getPrice(),
+                    dto.getId(),
+                    item.getDescription()
+            );
+            servicesSelectedDTO.add(ssDto);
+            totalServicios = totalServicios.add(item.getPrice());
+        }
+
+        //Recalculo el precio final
+        aux.setFinalPrice(aux.getSpace().getBasePrice().add(totalServicios));
+        //Guardo la reserva modificada
+        Reservation updated = reservationRepository.save(aux);
+        //Guardo la lista de servicios modificados de la reserva en la tabla de servicios
+        serviceSelectedService.insertListOfServicesSelectedInAReservation(updated.getId(), servicesSelectedDTO);
+        return updated;
     }
 
 

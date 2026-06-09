@@ -14,7 +14,7 @@ import java.util.List;
 public class SpaceServiceItemController {
 
     @Autowired
-    SpaceServiceItemService service;
+    private SpaceServiceItemService service;
 
     //Con este metodo listamos los servicios de un espacio para que un consumer pueda seleccionar los que guste
     @GetMapping("/space/{idSpace}")

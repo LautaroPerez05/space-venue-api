@@ -14,13 +14,13 @@ import java.util.List;
 @Repository
 public interface ServiceSelectedRepository extends JpaRepository<ServiceSelected,Integer> {
     //Este metodo hace una lista de todos los servicios que fueron contratados con una reserva
-    @Query("SELECT new com.utn.space.venueaapi.model.records.ServiceSelectedDTO(ss.id_service_selected,ss.price_at_reservation,ss.reservation.id,ss.descriptionFrozen)" +
+    @Query("SELECT new com.utn.space.venueaapi.model.records.ServiceSelectedDTO(ss.id,ss.priceAtReservation,ss.reservation.id,ss.descriptionFrozen) " +
             "FROM ServiceSelected ss " +
             "WHERE ss.reservation.id = :idReservation")
     List<ServiceSelectedDTO> findServiceSelectedByIdReservation(@Param("idReservation") Integer idReservation);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM ServiceSelected s WHERE s.reservation.id = :idReservation")
+    @Query("DELETE FROM ServiceSelected ss WHERE ss.reservation.id = :idReservation")
     void deleteSelectedServiceByReserveId (@Param("idReservation")Integer id);
 }
