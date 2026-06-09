@@ -5,42 +5,35 @@ import com.utn.space.venueaapi.exceptions.ExceptionInvalidDate;
 import com.utn.space.venueaapi.exceptions.ExceptionServiceOutOfPlace;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
-import com.utn.space.venueaapi.repository.ConsumerRepository;
-import com.utn.space.venueaapi.repository.SpaceRepository;
-import com.utn.space.venueaapi.repository.SpaceServiceItemRepository;
 import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+@AllArgsConstructor
 @Service
 public class ReservationService {
     @Autowired
-    private ReservationMapper reservationMapper;
-
+    private final ReservationMapper reservationMapper;
     @Autowired
     private ServiceSelectedService serviceSelectedService;
-
+    @Autowired
     private final ReservationRepository reservationRepository;
-    private final ConsumerRepository consumerRepository;
-    private final SpaceRepository spaceRepository;
-    private final SpaceServiceItemRepository spaceServiceItemRepository;
+    @Autowired
+    private final ConsumerService consumerService;
+    @Autowired
+    private final SpaceService spaceService;
+    @Autowired
+    private final SpaceServiceItemService spaceServiceItemService;
+    @Autowired
     private final GoogleCalendarService googleCalendarService;
 
-    public ReservationService(ReservationRepository reservationRepository, ConsumerRepository consumerRepository, SpaceRepository spaceRepository, SpaceServiceItemRepository spaceServiceItemRepository, GoogleCalendarService googleCalendarService) {
-        this.reservationRepository = reservationRepository;
-        this.consumerRepository = consumerRepository;
-        this.spaceServiceItemRepository = spaceServiceItemRepository;
-        this.spaceRepository = spaceRepository;
-        this.googleCalendarService = googleCalendarService;
-    }
 
     ///--------------------------------------------Metodos------------------------------------------------------------------------------
 
@@ -57,18 +50,16 @@ public class ReservationService {
             throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
         if (dto.getFromDate().isBefore(LocalDateTime.now())) {
-            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+            throw new ExceptionInvalidDate("La fecha de Inicio no puede del pasado");
         }
 
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
 
-        Consumer client = consumerRepository.findById(dto.getId_consumer())
-                .orElseThrow(() -> new ExceptionIdNotFound("Consumer", dto.getId_consumer()));
+        Consumer client = consumerService.findById(dto.getId_consumer());
         aux.setConsumer(client);
 
-        Space space = spaceRepository.findById(dto.getId_space())
-                .orElseThrow(() -> new ExceptionIdNotFound("Space", dto.getId_space()));
+        Space space = spaceService.findById(dto.getId_space());
         aux.setSpace(space);
 
         // Corrección: Validación contra el catálogo general y armado de seleccionados
@@ -76,17 +67,18 @@ public class ReservationService {
         BigDecimal totalServicios = BigDecimal.ZERO;
 
         for (Integer idService : dto.getId_servicesSelec()) {
-            SpaceServiceItem servicioCatalogo = spaceServiceItemRepository.findById(idService)
-                    .orElseThrow(() -> new ExceptionIdNotFound("Servicio Catálogo", idService));
+            SpaceServiceItem servicioCatalogo = spaceServiceItemService.findById(idService);
 
+            //Se verifica que cada uno de los servicios seleccionados de la reserva era efectivamente uno asociado al espacio de la reserva
             if (!servicioCatalogo.getSpace().getId_space().equals(space.getId_space())) {
                 throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
             }
 
+            //Se crea un objeto de tipo ServiceSelected que guardara la info del servicio exacto que fue asociado a la reserva
             ServiceSelected selected = new ServiceSelected();
             selected.setReservation(aux);
-            selected.setDescription(servicioCatalogo.getDescription());
-            selected.setPrice_at_reservation(servicioCatalogo.getPrice());
+            selected.setPriceAtReservation(servicioCatalogo.getPrice());
+            selected.setDescriptionFrozen(aux.getDescription());
 
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
 
@@ -136,11 +128,9 @@ public class ReservationService {
         }
         Reservation aux= reservationMapper.toEntity(dto);
 
-        aux.setConsumer(consumerRepository.findById(dto.getId_consumer())
-                .orElseThrow(()->new ExceptionIdNotFound("Consumer", dto.getId_consumer())));
+        aux.setConsumer(consumerService.findById(dto.getId_consumer()));
 
-        aux.setSpace(spaceRepository.findById(dto.getId_space())
-                .orElseThrow(()->new ExceptionIdNotFound("Space",dto.getId_space())));
+        aux.setSpace(spaceService.findById(dto.getId_space()));
 
 
         //limpiar servicios seleccionados anteriores

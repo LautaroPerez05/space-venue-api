@@ -2,16 +2,19 @@ package com.utn.space.venueaapi.controllers;
 
 import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.model.ERoles;
-import com.utn.space.venueaapi.repository.CredentialRepository; // Importa tu repositorio
+import com.utn.space.venueaapi.repository.CredentialRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.web.bind.annotation.*;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/s&v")
+@RequestMapping("/api/")
 public class ConsumerController {
 
     // Cambiamos el manager por tu repositorio real
@@ -35,10 +38,5 @@ public class ConsumerController {
         credentialRepository.save(credential);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuario creado exitosamente" + credential.getPassword());
-    }
-
-    @GetMapping("/usuarios")
-    public ResponseEntity<String> prueba(){
-        return ResponseEntity.ok("si");
     }
 }

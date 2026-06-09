@@ -1,7 +1,7 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
+import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.records.SpaceImageDTO;
 import com.utn.space.venueaapi.model.SpaceImage;
 import com.utn.space.venueaapi.repository.SpaceRepository;
@@ -16,7 +16,7 @@ public class SpaceImageService {
     @Autowired
     SpaceImageRepository spaceImageRepository;
     @Autowired
-    SpaceRepository spaceRepository;
+    SpaceService spaceService;
 
     public List<SpaceImage> findAll(){
         return spaceImageRepository.findAll();
@@ -44,7 +44,7 @@ public class SpaceImageService {
 
         SpaceImage spaceImageToInsert = new SpaceImage(
                 null,
-                spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new ExceptionNameNotFound("No se encontro el espacio asociado a la imagen")),
+                spaceService.findById(spaceImageDTO.id_space()),
                 spaceImageDTO.file_name(),
                 spaceImageDTO.url_image(),
                 spaceImageDTO.date_send()
@@ -69,7 +69,7 @@ public class SpaceImageService {
 
         SpaceImage spaceImageToInsert = new SpaceImage(
                 id,
-                spaceRepository.findById(spaceImageDTO.id_space()).orElseThrow(()-> new ExceptionNameNotFound("No se encontro el espacio asociado a la imagen")),
+                spaceService.findById(spaceImageDTO.id_space()),
                 spaceImageDTO.file_name(),
                 spaceImageDTO.url_image(),
                 spaceImageDTO.date_send()
@@ -79,7 +79,7 @@ public class SpaceImageService {
     }
 
     public List<SpaceImage> findAllBySpaceId(Integer spaceId){
-        if(!spaceRepository.existsById(spaceId)){
+        if(!spaceService.existsById(spaceId)){
             throw new ExceptionNameNotFound("No se encontro el espacio del cual se quieren buscar imagenes");
         }
         return spaceImageRepository.findAllBySpaceIdSpace(spaceId);

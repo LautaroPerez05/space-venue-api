@@ -10,16 +10,18 @@ import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
     @Autowired
     CommentRepository commentRepository;
     @Autowired
-    ConsumerRepository consumerRepository;
+    ConsumerService consumerService;
     @Autowired
-    SpaceRepository spaceRepository;
+    SpaceService spaceService;
 
     public List<Comment> findAll(){
         return commentRepository.findAll();
@@ -47,8 +49,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 null,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new ExceptionIdNotFound("Consummer", commentDTO.id_consumer())),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new ExceptionIdNotFound("Space", commentDTO.id_space())),
+                consumerService.findById(commentDTO.id_consumer()),
+                spaceService.findById(commentDTO.id_space()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -72,8 +74,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 id,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new ExceptionIdNotFound("Consummer", commentDTO.id_consumer())),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new ExceptionIdNotFound("Space", commentDTO.id_space())),
+                consumerService.findById(commentDTO.id_consumer()),
+                spaceService.findById(commentDTO.id_space()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -82,15 +84,15 @@ public class CommentService {
     }
 
     public List<Comment> findAllBySpaceId(Integer spaceId){
-        if(!spaceRepository.existsById(spaceId)){
-            throw new ExceptionIdNotFound("Space", spaceId);
+        if(!spaceService.existsById(spaceId)){
+            throw new ExceptionIdNotFound("Space",spaceId);
         }
         return commentRepository.findAllBySpaceIdSpace(spaceId);
     }
 
     public List<Comment> findAllByConsumerId(Integer consumerId){
-        if(!consumerRepository.existsById(consumerId)){
-            throw new ExceptionIdNotFound("Consumer", consumerId);
+        if(!consumerService.existsById(consumerId)){
+            throw new ExceptionIdNotFound("Consumer",consumerId);
         }
         return commentRepository.findAllByConsumerIdConsumer(consumerId);
     }

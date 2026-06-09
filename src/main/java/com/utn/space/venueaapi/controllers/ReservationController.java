@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/s&v/Reservaciones")
+@RequestMapping("/api/Reservaciones")
 public class ReservationController {
     @Autowired
     private ReservationService reservationService;
@@ -98,4 +98,6 @@ public class ReservationController {
                 .status(HttpStatus.OK)
                 .body(reservationService.softDelete(id));
     }
+
+
 }
