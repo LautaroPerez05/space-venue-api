@@ -1,8 +1,7 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
+import com.utn.space.venueaapi.exceptions.NotFoundException;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
@@ -15,30 +14,35 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SpaceService {
     @Autowired
     SpaceRepository spaceRepository;
     @Autowired
-    ConsumerRepository consumerRepository;
+    ConsumerService consumerService;
     @Autowired
-    LocationRepository locationRepository;
+    LocationService locationService;
     @Autowired
-    CancellationPolicyRepository cancellationPolicyRepository;
+    CancellationPolicyService cancellationPolicyService;
 
 
     public List<Space> findAll(){
         return spaceRepository.findAll();
     }
 
+    public Boolean existsById(Integer id){
+        return spaceRepository.existsById(id);
+    }
+
     public Space findById(Integer id){
-        return spaceRepository.findById(id).orElseThrow(()-> new ExceptionNameNotFound("No se encontro el espacio buscado"));
+        return spaceRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el espacio buscado"));
     }
 
     public void deleteById(Integer id){
         if(!spaceRepository.existsById(id)){
-            throw new ExceptionNameNotFound("No se encontro el espacio a eliminar");
+            throw new NotFoundException("No se encontro el espacio a eliminar");
         }
         spaceRepository.deleteById(id);
     }
@@ -58,9 +62,9 @@ public class SpaceService {
 
         Space spaceToInsert = new Space(
                 null,
-                consumerRepository.findById(spaceDTO.id_consumer_owner()).orElseThrow(() -> new ExceptionIdNotFound("Consumer",spaceDTO.id_consumer_owner())),
-                locationRepository.findById(spaceDTO.id_location()).orElseThrow(()-> new ExceptionIdNotFound("Location",spaceDTO.id_location())),
-                cancellationPolicyRepository.findById(spaceDTO.id_cancellation_policies()).orElseThrow(()-> new ExceptionIdNotFound("cancellation_policies",spaceDTO.id_cancellation_policies())),
+                consumerService.findById(spaceDTO.id_consumer_owner()),
+                locationService.findById(spaceDTO.id_location()),
+                cancellationPolicyService.findById(spaceDTO.id_cancellation_policies()),
                 spaceDTO.google_calendar_id(),
                 spaceDTO.name_space(),
                 spaceDTO.description(),
@@ -74,7 +78,7 @@ public class SpaceService {
 
     public void modifySpace(Integer id, SpaceDTO spaceDTO){
         if(!spaceRepository.existsById(id)){
-            throw new ExceptionNameNotFound("No se encontro el espacio a actualizar");
+            throw new NotFoundException("No se encontro el espacio a actualizar");
         }
 
         if(spaceDTO.name_space().isBlank()){
@@ -91,9 +95,9 @@ public class SpaceService {
 
         Space spaceToInsert = new Space(
                 id,
-                consumerRepository.findById(spaceDTO.id_consumer_owner()).orElseThrow(() -> new ExceptionIdNotFound("Consumer",spaceDTO.id_consumer_owner())),
-                locationRepository.findById(spaceDTO.id_location()).orElseThrow(()-> new ExceptionIdNotFound("Location",spaceDTO.id_location())),
-                cancellationPolicyRepository.findById(spaceDTO.id_cancellation_policies()).orElseThrow(()-> new ExceptionIdNotFound("cancellation_policies",spaceDTO.id_cancellation_policies())),
+                consumerService.findById(spaceDTO.id_consumer_owner()),
+                locationService.findById(spaceDTO.id_location()),
+                cancellationPolicyService.findById(spaceDTO.id_cancellation_policies()),
                 spaceDTO.google_calendar_id(),
                 spaceDTO.name_space(),
                 spaceDTO.description(),
@@ -104,39 +108,36 @@ public class SpaceService {
         spaceRepository.save(spaceToInsert);
     }
 
-    /*
-    public List<Space> findAllByConsumerOwner(Long id){
-        if (!consumerRepository.existsById(id)){
-            throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
-        }
-        return spaceRepository.findAllByConsumerOwner_IdConsumer(id);
-    }
-
-    public List<Space> findAllByLocation(Long id){
-        if(!consumerRepository.existsById(id)){
-            throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
-        }
-        return spaceRepository.findAllByLocation_IdLocation(id);
-    }
-
-    public List<Space> findAllByNameSpace(String nameSpace){
-        return spaceRepository.findAllByNameSpace(nameSpace);
-    }
-
-    public List<Space> findAllByBasePrice(Double minPrice, Double maxPrice){
-        return spaceRepository.findAllByBasePriceBetween(minPrice,maxPrice);
-    }
-    */
 
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
-        if((spaceFilterDTO.id_consumer_owner() != null) && !consumerRepository.existsById(spaceFilterDTO.id_consumer_owner())){
-            throw new ExceptionNameNotFound("No se encontro el owner del cual se quieren ver los espacios");
+        if((spaceFilterDTO.id_consumer_owner() != null) && !consumerService.existsById(spaceFilterDTO.id_consumer_owner())){
+            throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
         }
 
-        if((spaceFilterDTO.id_location() != null) && !locationRepository.existsById(spaceFilterDTO.id_location())){
-            throw new ExceptionNameNotFound("No se encontro la ubicacion de la cual se quieren ver los espacios");
+        if((spaceFilterDTO.id_location() != null) && !locationService.existsById(spaceFilterDTO.id_location())){
+            throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
         }
 
-        return spaceRepository.findAllByFields(spaceFilterDTO.id_consumer_owner(), spaceFilterDTO.minPrice(),spaceFilterDTO.maxPrice(),spaceFilterDTO.name_space(), spaceFilterDTO.id_location());
+        //Filtro inicial de mi base de datos
+        List<Space> spaces = spaceRepository.findAllByFields(
+                spaceFilterDTO.id_consumer_owner(),
+                spaceFilterDTO.minPrice(),
+                spaceFilterDTO.maxPrice(),
+                spaceFilterDTO.name_space(),
+                spaceFilterDTO.id_location() //Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
+        );
+
+        //Hago un filtro por proximidad al usuario, solo si este mando latitud y longitud
+        if(spaceFilterDTO.lat() != null && spaceFilterDTO.lng() != null){
+            //Si no encuentro un radio de filtrado en el DTO pongo 5Km de base
+            BigDecimal maxRadious = spaceFilterDTO.radious() != null ? spaceFilterDTO.radious() : new BigDecimal("5.0");
+            //Uso isSpaceNearBy para filtrar la lista de espacios, primero filtro los espacios que tengan datos de ubicacion incompletos para evitar errores
+            spaces = spaces.stream()
+                    .filter(space ->space.getLocation()!= null && space.getLocation().getLatitude() != null && space.getLocation().getLongitude() != null)
+                    .filter(space -> locationService.isSpaceNearby(spaceFilterDTO.lat(),spaceFilterDTO.lng(),maxRadious,space))
+                    .toList();
+        }
+
+        return spaces;
     }
 }
