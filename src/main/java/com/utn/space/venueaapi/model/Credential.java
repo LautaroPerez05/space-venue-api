@@ -14,7 +14,6 @@ public class Credential {
     @Id
     private String username;
 
-
     @Column(name = "isActive", nullable = false)
     private Boolean isActive = true;
 
