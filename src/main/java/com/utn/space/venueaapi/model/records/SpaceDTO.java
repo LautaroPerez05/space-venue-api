@@ -13,6 +13,7 @@ public record SpaceDTO (
         String description,
         BigDecimal base_price,
         LocalDate publication_date,
-        Integer buffer_time) {
+        Integer buffer_time,
+        Boolean isActive) {
 
 }

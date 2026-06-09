@@ -19,7 +19,7 @@ public class ConsumerService {
     }
 
     public Consumer findById(Integer id){
-        return consumerRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Consumer", id));
+        return consumerRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Consumer",id));
     }
 
     public Consumer findByCredentialsUsername(String username){

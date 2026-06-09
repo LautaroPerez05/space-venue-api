@@ -2,6 +2,7 @@ package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.ExceptionInvalidDate;
+import com.utn.space.venueaapi.exceptions.ExceptionServiceOutOfPlace;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.mappers.ReservationMapper;
@@ -21,11 +22,11 @@ public class ReservationService {
     @Autowired
     private final ReservationMapper reservationMapper;
     @Autowired
+    private ServiceSelectedService serviceSelectedService;
+    @Autowired
     private final ReservationRepository reservationRepository;
     @Autowired
     private final ConsumerService consumerService;
-    @Autowired
-    private final ServiceSelectedService serviceSelectedService;
     @Autowired
     private final SpaceService spaceService;
     @Autowired
@@ -34,6 +35,8 @@ public class ReservationService {
     private final GoogleCalendarService googleCalendarService;
 
 
+    ///--------------------------------------------Metodos------------------------------------------------------------------------------
+
     public List<Reservation> findAll (){
         return reservationRepository.findAll();
     }
@@ -41,7 +44,6 @@ public class ReservationService {
     public Reservation findById (Integer id){
         return reservationRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Reservacion",id));
     }
-
 
     public Reservation create (ReservationDTO dto) throws IOException {
         if (dto.getUntilDate().isBefore(dto.getFromDate())) {
@@ -69,16 +71,17 @@ public class ReservationService {
 
             //Se verifica que cada uno de los servicios seleccionados de la reserva era efectivamente uno asociado al espacio de la reserva
             if (!servicioCatalogo.getSpace().getId_space().equals(space.getId_space())) {
-                throw new RuntimeException("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
+                throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
             }
 
             //Se crea un objeto de tipo ServiceSelected que guardara la info del servicio exacto que fue asociado a la reserva
             ServiceSelected selected = new ServiceSelected();
             selected.setReservation(aux);
-            selected.setPrice_at_reservation(servicioCatalogo.getPrice());
+            selected.setPriceAtReservation(servicioCatalogo.getPrice());
             selected.setDescriptionFrozen(aux.getDescription());
 
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
+
             serviciosSeleccionados.add(selected);
         }
 
@@ -110,6 +113,7 @@ public class ReservationService {
         aux.setGoogleEventCode(idEventoGoogle);
 
         return reservationRepository.save(aux);
+
     }
 
     public Reservation modify (ReservationDTO dto){

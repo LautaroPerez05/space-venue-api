@@ -4,6 +4,7 @@ import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.records.SpaceImageDTO;
 import com.utn.space.venueaapi.model.SpaceImage;
+import com.utn.space.venueaapi.repository.SpaceRepository;
 import com.utn.space.venueaapi.repository.SpaceImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
