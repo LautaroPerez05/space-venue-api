@@ -77,7 +77,7 @@ public class ReservationService {
             //Se crea un objeto de tipo ServiceSelected que guardara la info del servicio exacto que fue asociado a la reserva
             ServiceSelected selected = new ServiceSelected();
             selected.setReservation(aux);
-            selected.setPriceAtReservation(servicioCatalogo.getPrice());
+            selected.setPrice_at_reservation(servicioCatalogo.getPrice());
             selected.setDescriptionFrozen(aux.getDescription());
 
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
