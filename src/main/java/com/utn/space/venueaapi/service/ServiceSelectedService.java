@@ -2,6 +2,7 @@ package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
+import com.utn.space.venueaapi.repository.ReservationRepository;
 import com.utn.space.venueaapi.repository.ServiceSelectedRepository;
 import com.utn.space.venueaapi.service.mappers.ServiceSelectedMapper;
 import jakarta.transaction.Transactional;
@@ -16,7 +17,7 @@ public class ServiceSelectedService {
     @Autowired
     private final ServiceSelectedRepository serviceSelectedRepository;
     @Autowired
-    private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
     @Autowired
     private final SpaceServiceItemService spaceServiceItemService;
 
@@ -42,7 +43,10 @@ public class ServiceSelectedService {
     public void insertListOfServicesSelectedInAReservation(Integer idReservation, List<ServiceSelectedDTO> servicesSelectedDTO){
         //Este metodo recibe el id de una reserva y una lista de servicios seleccionados (por servicesSelectedDTO) y los mete en la tabla ServicesSelected
         for(ServiceSelectedDTO serviceSelectedDTO : servicesSelectedDTO){
-            serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO, reservationService.findById(idReservation)));
+            serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO,
+                    reservationRepository.findById(idReservation)
+                            .orElseThrow(() -> new ExceptionIdNotFound(
+                                    "No se ha encontrado la reserva para insertar lista de servicios seleccionados: ", idReservation))));
         }
     }
 
