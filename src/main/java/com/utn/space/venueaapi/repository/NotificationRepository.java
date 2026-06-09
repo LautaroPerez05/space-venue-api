@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification,Integer> {
-    @Query("SELECT n FROM Notification n WHERE n.consumer.id_consumer = :idConsumer")
+    @Query("SELECT n FROM Notification n WHERE n.consumer.idConsumer = :idConsumer")
     List<Notification>findAllByIdConsumer(Integer id);
 }

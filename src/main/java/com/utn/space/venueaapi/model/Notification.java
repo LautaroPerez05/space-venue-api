@@ -25,7 +25,7 @@ public class Notification {
     private Boolean isSeen=false;
 
     @ManyToOne
-    @JoinColumn(name = "id_consumer")
+    @JoinColumn(name = "idConsumer")
     @JsonIgnore
     private Consumer consumer;
 

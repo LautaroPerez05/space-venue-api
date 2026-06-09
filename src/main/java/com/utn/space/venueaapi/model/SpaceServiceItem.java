@@ -21,6 +21,6 @@ public class SpaceServiceItem {
     private Boolean isActive;
 
     @ManyToOne
-    @JoinColumn(name = "id_space")
+    @JoinColumn(name = "idSpace")
     private Space space;
 }

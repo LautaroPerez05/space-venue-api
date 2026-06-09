@@ -49,11 +49,11 @@ public class Reservation {
 
 
     @ManyToOne
-    @JoinColumn(name = "id_consumer")
+    @JoinColumn(name = "idConsumer")
     private Consumer consumer;
 
     @ManyToOne
-    @JoinColumn(name = "id_space")
+    @JoinColumn(name = "idSpace")
     private Space space;
 
     // Cambiado de SpaceServiceItem a ServiceSelected. Mapea contra el atributo 'reservation' de la clase intermedia

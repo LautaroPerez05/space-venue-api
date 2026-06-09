@@ -11,8 +11,8 @@ import org.mapstruct.Mapping;
 public interface ReservationMapper {
 
     // Corrección de Mappings por errores de compilación (señalaban atributos inexistentes)
-    @Mapping(target = "id_consumer", source = "consumer.id_consumer")
-    @Mapping(target = "id_space", source = "space.id_space")
+    @Mapping(target = "idConsumer", source = "consumer.idConsumer")
+    @Mapping(target = "idSpace", source = "space.idSpace")
     @Mapping(target = "id_servicesSelec", ignore = true)
     ReservationDTO toDTO(Reservation reservation);
 

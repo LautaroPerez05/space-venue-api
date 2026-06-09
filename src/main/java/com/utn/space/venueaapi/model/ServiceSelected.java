@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class ServiceSelected {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_service_selected")
+    @Column(name = "idServiceSelected")
     private Integer id;
 
     @ManyToOne

@@ -56,17 +56,17 @@ public class ReservationService {
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
 
-        Consumer client = consumerService.findById(dto.getId_consumer());
+        Consumer client = consumerService.findById(dto.getIdConsumer());
         aux.setConsumer(client);
 
-        Space space = spaceService.findById(dto.getId_space());
+        Space space = spaceService.findById(dto.getIdSpace());
         aux.setSpace(space);
 
         // Corrección: Validación contra el catálogo general y armado de seleccionados
         List<ServiceSelected> serviciosSeleccionados = new ArrayList<>();
         BigDecimal totalServicios = BigDecimal.ZERO;
 
-        for (Integer idService : dto.getId_servicesSelec()) {
+        for (Integer idService : dto.getIdServicesSelec()) {
             SpaceServiceItem servicioCatalogo = spaceServiceItemService.findById(idService);
 
             //Se verifica que cada uno de los servicios seleccionados de la reserva era efectivamente uno asociado al espacio de la reserva
@@ -128,9 +128,9 @@ public class ReservationService {
         }
         Reservation aux= reservationMapper.toEntity(dto);
 
-        aux.setConsumer(consumerService.findById(dto.getId_consumer()));
+        aux.setConsumer(consumerService.findById(dto.getIdConsumer()));
 
-        aux.setSpace(spaceService.findById(dto.getId_space()));
+        aux.setSpace(spaceService.findById(dto.getIdSpace()));
 
 
         //limpiar servicios seleccionados anteriores
@@ -139,7 +139,7 @@ public class ReservationService {
         //Los cargo de nuevo y actualizado
         List<ServiceSelected> list= new ArrayList<>();
         list= aux.getSpace().getServices().stream()
-                .filter(item->dto.getId_servicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
+                .filter(item->dto.getIdServicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
                 .map(item-> new ServiceSelected(item,aux))  //transformo los item en serviceSelected
                 .toList();
         aux.setServices(list);

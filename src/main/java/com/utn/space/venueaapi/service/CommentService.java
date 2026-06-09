@@ -5,14 +5,10 @@ import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.Comment;
 import com.utn.space.venueaapi.model.records.CommentDTO;
 import com.utn.space.venueaapi.repository.CommentRepository;
-import com.utn.space.venueaapi.repository.ConsumerRepository;
-import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -49,8 +45,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 null,
-                consumerService.findById(commentDTO.id_consumer()),
-                spaceService.findById(commentDTO.id_space()),
+                consumerService.findById(commentDTO.idConsumer()),
+                spaceService.findById(commentDTO.idSpace()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -74,8 +70,8 @@ public class CommentService {
 
         Comment commentToInsert = new Comment(
                 id,
-                consumerService.findById(commentDTO.id_consumer()),
-                spaceService.findById(commentDTO.id_space()),
+                consumerService.findById(commentDTO.idConsumer()),
+                spaceService.findById(commentDTO.idSpace()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());

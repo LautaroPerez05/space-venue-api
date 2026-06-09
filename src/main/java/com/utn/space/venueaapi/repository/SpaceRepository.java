@@ -12,17 +12,17 @@ import java.util.List;
 public interface SpaceRepository extends JpaRepository<Space, Integer> {
 
     @Query("SELECT s FROM Space s WHERE " +
-            "( :name_space IS NULL OR LOWER(s.name_space) LIKE LOWER(CONCAT('%', :name_space, '%')) ) AND " +
-            "( :minPrice IS NULL OR s.base_price >= :minPrice ) AND " +
-            "( :maxPrice IS NULL OR s.base_price <= :maxPrice ) AND " +
-            "( :id_consumer_owner IS NULL OR s.consumer_owner.id_consumer = :id_consumer_owner ) AND " +
-            "( :id_location IS NULL OR s.location.id_location = :id_location )"
+            "( :nameSpace IS NULL OR LOWER(s.nameSpace) LIKE LOWER(CONCAT('%', :nameSpace, '%')) ) AND " +
+            "( :minPrice IS NULL OR s.basePrice >= :minPrice ) AND " +
+            "( :maxPrice IS NULL OR s.basePrice <= :maxPrice ) AND " +
+            "( :idConsumerOwner IS NULL OR s.consumer_owner.idConsumer = :idConsumerOwner ) AND " +
+            "( :idLocation IS NULL OR s.location.idLocation = :idLocation )"
     )
     List<Space> findAllByFields(
-            @Param("id_consumer_owner") Integer id_consumer_owner,
+            @Param("idConsumerOwner") Integer id_consumer_owner,
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice,
-            @Param("name_space") String name_space, // <- Corregido a String
-            @Param("id_location") Integer id_location
+            @Param("nameSpace") String name_space, // <- Corregido a String
+            @Param("idLocation") Integer id_location
     );
 }

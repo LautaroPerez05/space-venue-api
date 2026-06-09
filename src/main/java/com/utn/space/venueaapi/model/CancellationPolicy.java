@@ -15,11 +15,14 @@ import java.math.BigDecimal;
 public class CancellationPolicy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_cancellation_policies; // Se cambió de Long a Integer por exigencias de Hibernate
+    @Column(name = "id_cancellation_policies")
+    private Integer idCancellationPolicies; // Se cambió de Long a Integer por exigencias de Hibernate
 
     @Enumerated(EnumType.STRING)
     private EPolicyType type;
 
-    private Integer days_anticipation;
-    private BigDecimal refund_percentage;
+    @Column(name = "days_anticipation")
+    private Integer daysAnticipation;
+    @Column(name = "refund_percentage")
+    private BigDecimal refundPercentage;
 }

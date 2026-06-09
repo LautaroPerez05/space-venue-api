@@ -6,16 +6,12 @@ import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
-import com.utn.space.venueaapi.repository.CancellationPolicyRepository;
-import com.utn.space.venueaapi.repository.ConsumerRepository;
-import com.utn.space.venueaapi.repository.LocationRepository;
 import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SpaceService {
@@ -49,7 +45,7 @@ public class SpaceService {
     }
 
     public void insertSpace(SpaceDTO spaceDTO){
-        if(spaceDTO.name_space().isBlank()){
+        if(spaceDTO.nameSpace().isBlank()){
             throw new InvalidDataException("Por favor ingrese un nombre para su espacio");
         }
 
@@ -57,21 +53,21 @@ public class SpaceService {
             throw new InvalidDataException("Por favor ingrese una descripcion para su espacio");
         }
 
-        if(spaceDTO.base_price().compareTo(BigDecimal.ZERO) <= 0){
+        if(spaceDTO.basePrice().compareTo(BigDecimal.ZERO) <= 0){
             throw new InvalidDataException("Por favor ingrese un precio valido");
         }
 
         Space spaceToInsert = new Space(
                 null,
-                consumerService.findById(spaceDTO.id_consumer_owner()),
-                locationService.findById(spaceDTO.id_location()),
-                cancellationPolicyService.findById(spaceDTO.id_cancellation_policies()),
-                spaceDTO.google_calendar_id(),
-                spaceDTO.name_space(),
+                consumerService.findById(spaceDTO.idConsumerOwner()),
+                locationService.findById(spaceDTO.idLocation()),
+                cancellationPolicyService.findById(spaceDTO.idCancellationPolicies()),
+                spaceDTO.googleCalendarId(),
+                spaceDTO.nameSpace(),
                 spaceDTO.description(),
-                spaceDTO.base_price(),
-                spaceDTO.publication_date(),
-                spaceDTO.buffer_time());
+                spaceDTO.basePrice(),
+                spaceDTO.publicationDate(),
+                spaceDTO.bufferTime());
 
         spaceRepository.save(spaceToInsert);
     }
@@ -82,7 +78,7 @@ public class SpaceService {
             throw new ExceptionNameNotFound("No se encontro el espacio a actualizar");
         }
 
-        if(spaceDTO.name_space().isBlank()){
+        if(spaceDTO.nameSpace().isBlank()){
             throw new InvalidDataException("Por favor ingrese un nombre para el espacio");
         }
 
@@ -90,42 +86,42 @@ public class SpaceService {
             throw new InvalidDataException("Por favor ingrese una descripcion para el espacio");
         }
 
-        if(spaceDTO.base_price().compareTo(BigDecimal.ZERO) <= 0){
+        if(spaceDTO.basePrice().compareTo(BigDecimal.ZERO) <= 0){
             throw new InvalidDataException("Por favor ingrese un precio valido");
         }
 
         Space spaceToInsert = new Space(
                 id,
-                consumerService.findById(spaceDTO.id_consumer_owner()),
-                locationService.findById(spaceDTO.id_location()),
-                cancellationPolicyService.findById(spaceDTO.id_cancellation_policies()),
-                spaceDTO.google_calendar_id(),
-                spaceDTO.name_space(),
+                consumerService.findById(spaceDTO.idConsumerOwner()),
+                locationService.findById(spaceDTO.idLocation()),
+                cancellationPolicyService.findById(spaceDTO.idCancellationPolicies()),
+                spaceDTO.googleCalendarId(),
+                spaceDTO.nameSpace(),
                 spaceDTO.description(),
-                spaceDTO.base_price(),
-                spaceDTO.publication_date(),
-                spaceDTO.buffer_time());
+                spaceDTO.basePrice(),
+                spaceDTO.publicationDate(),
+                spaceDTO.bufferTime());
 
         spaceRepository.save(spaceToInsert);
     }
 
 
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
-        if((spaceFilterDTO.id_consumer_owner() != null) && !consumerService.existsById(spaceFilterDTO.id_consumer_owner())){
-            throw new ExceptionIdNotFound("Consumer",spaceFilterDTO.id_consumer_owner());
+        if((spaceFilterDTO.idConsumerOwner() != null) && !consumerService.existsById(spaceFilterDTO.idConsumerOwner())){
+            throw new ExceptionIdNotFound("Consumer",spaceFilterDTO.idConsumerOwner());
         }
 
-        if((spaceFilterDTO.id_location() != null) && !locationService.existsById(spaceFilterDTO.id_location())){
-            throw new ExceptionIdNotFound("Location",spaceFilterDTO.id_location());
+        if((spaceFilterDTO.idLocation() != null) && !locationService.existsById(spaceFilterDTO.idLocation())){
+            throw new ExceptionIdNotFound("Location",spaceFilterDTO.idLocation());
         }
 
         //Filtro inicial de mi base de datos
         List<Space> spaces = spaceRepository.findAllByFields(
-                spaceFilterDTO.id_consumer_owner(),
+                spaceFilterDTO.idConsumerOwner(),
                 spaceFilterDTO.minPrice(),
                 spaceFilterDTO.maxPrice(),
-                spaceFilterDTO.name_space(),
-                spaceFilterDTO.id_location() //Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
+                spaceFilterDTO.nameSpace(),
+                spaceFilterDTO.idLocation() //Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
         );
 
         //Hago un filtro por proximidad al usuario, solo si este mando latitud y longitud

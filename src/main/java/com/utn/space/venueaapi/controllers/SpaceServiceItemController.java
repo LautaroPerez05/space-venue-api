@@ -35,6 +35,6 @@ public class SpaceServiceItemController {
 
     @DeleteMapping("/delete/{id}")
     public void deleteServiceFromSpace(@PathVariable Integer id, @RequestBody SpaceDTO spaceDTO){
-        service.deleteServiceItem(id, spaceDTO.id_space());
+        service.deleteServiceItem(id, spaceDTO.idSpace());
     }
 }

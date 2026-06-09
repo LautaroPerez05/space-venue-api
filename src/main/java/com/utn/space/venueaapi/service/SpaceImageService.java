@@ -4,7 +4,6 @@ import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.records.SpaceImageDTO;
 import com.utn.space.venueaapi.model.SpaceImage;
-import com.utn.space.venueaapi.repository.SpaceRepository;
 import com.utn.space.venueaapi.repository.SpaceImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,20 +33,20 @@ public class SpaceImageService {
     }
 
     public void insertSpaceImage(SpaceImageDTO spaceImageDTO){
-        if(spaceImageDTO.file_name().isBlank()){
+        if(spaceImageDTO.fileName().isBlank()){
             throw new InvalidDataException("Por favor ingrese un nombre para la imagen");
         }
 
-        if(spaceImageDTO.url_image().isBlank()){
+        if(spaceImageDTO.urlImage().isBlank()){
             throw new InvalidDataException("Por favor ingrese un URL para la imagen");
         }
 
         SpaceImage spaceImageToInsert = new SpaceImage(
                 null,
-                spaceService.findById(spaceImageDTO.id_space()),
-                spaceImageDTO.file_name(),
-                spaceImageDTO.url_image(),
-                spaceImageDTO.date_send()
+                spaceService.findById(spaceImageDTO.idSpace()),
+                spaceImageDTO.fileName(),
+                spaceImageDTO.urlImage(),
+                spaceImageDTO.dateSend()
         );
 
         spaceImageRepository.save(spaceImageToInsert);
@@ -59,20 +58,20 @@ public class SpaceImageService {
             throw new ExceptionNameNotFound("No se encontro la imagen a actualizar");
         }
 
-        if(spaceImageDTO.file_name().isBlank()){
+        if(spaceImageDTO.fileName().isBlank()){
             throw new InvalidDataException("Por favor ingrese un nombre para la imagen");
         }
 
-        if(spaceImageDTO.url_image().isBlank()){
+        if(spaceImageDTO.urlImage().isBlank()){
             throw new InvalidDataException("Por favor ingrese un URL para la imagen");
         }
 
         SpaceImage spaceImageToInsert = new SpaceImage(
                 id,
-                spaceService.findById(spaceImageDTO.id_space()),
-                spaceImageDTO.file_name(),
-                spaceImageDTO.url_image(),
-                spaceImageDTO.date_send()
+                spaceService.findById(spaceImageDTO.idSpace()),
+                spaceImageDTO.fileName(),
+                spaceImageDTO.urlImage(),
+                spaceImageDTO.dateSend()
         );
 
         spaceImageRepository.save(spaceImageToInsert);

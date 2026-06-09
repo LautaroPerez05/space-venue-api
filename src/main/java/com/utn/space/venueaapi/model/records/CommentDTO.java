@@ -7,8 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record CommentDTO (
-        Integer id_consumer,
-        Integer id_space,
+        Integer idConsumer,
+        Integer idSpace,
         String description,
 
         @NotNull

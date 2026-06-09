@@ -21,18 +21,18 @@ public class Space {
     private Integer id_space;
 
     @ManyToOne
-    @JoinColumn(name = "id_consumer_owner")
+    @JoinColumn(name = "idConsumerOwner")
     private Consumer consumer_owner;
 
     @ManyToOne
-    @JoinColumn(name = "id_location")
+    @JoinColumn(name = "idLocation")
     private Location location;
 
     @OneToOne
-    @JoinColumn(name = "id_cancellation_policies")
+    @JoinColumn(name = "idCancellationPolicies")
     private CancellationPolicy cancellation_Policy;
 
-    @Column(name = "google_calendar_id")
+    @Column(name = "googleCalendarId")
     private String googleCalendarId;
 
     private String name_space;
