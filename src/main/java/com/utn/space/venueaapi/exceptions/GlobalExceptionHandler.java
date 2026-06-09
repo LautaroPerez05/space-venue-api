@@ -42,7 +42,7 @@ public class GlobalExceptionHandler {
                 .body(e.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)///este lo copie de GPT
+    @ExceptionHandler(MethodArgumentNotValidException.class)    ///este lo copie de GPT, maneja la validacion de la API
     public ResponseEntity<Map<String, String>> manejarValidaciones(
             MethodArgumentNotValidException ex) {
 
@@ -53,7 +53,9 @@ public class GlobalExceptionHandler {
                         errores.put(error.getField(),
                                 error.getDefaultMessage()));
 
-        return ResponseEntity.badRequest().body(errores);
+        return ResponseEntity
+                .badRequest()
+                .body(errores);
     }
 
     @ExceptionHandler(IOException.class)/// revisar

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_notification;
+    private Integer idNotification;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

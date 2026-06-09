@@ -18,6 +18,7 @@ public record SpaceImageDTO (
 
         @NotBlank(groups = {Create.class, Update.class})
         String url_image,
-        LocalDateTime date_send){
 
+        @NotBlank(groups = Update.class)
+        LocalDateTime date_send){
 }

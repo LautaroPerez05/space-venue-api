@@ -46,12 +46,12 @@ public class ReservationDTO {
     private Boolean saveToMyCalendar;
 
     @NotBlank(groups = {Create.class, Update.class})
-    private Integer id_consumer;
+    private Integer idConsumer;
 
     @NotBlank(groups = {Create.class, Update.class})
-    private Integer id_space;
+    private Integer idSpace;
 
-    private List<Integer> id_servicesSelec;
+    private List<Integer> idServicesSelec;
 
 
     public Boolean getSaveToMyCalendar() {
