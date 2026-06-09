@@ -112,11 +112,11 @@ public class SpaceService {
 
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
         if((spaceFilterDTO.id_consumer_owner() != null) && !consumerService.existsById(spaceFilterDTO.id_consumer_owner())){
-            throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
+            throw new ExceptionIdNotFound("Consumer",spaceFilterDTO.id_consumer_owner());
         }
 
         if((spaceFilterDTO.id_location() != null) && !locationService.existsById(spaceFilterDTO.id_location())){
-            throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
+            throw new ExceptionIdNotFound("Location",spaceFilterDTO.id_location());
         }
 
         //Filtro inicial de mi base de datos

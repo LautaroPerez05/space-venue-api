@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.service;
 
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.repository.ConsumerRepository;
@@ -18,7 +19,7 @@ public class ConsumerService {
     }
 
     public Consumer findById(Integer id){
-        return consumerRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el consumidor buscado"));
+        return consumerRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Consumer",id));
     }
 
     public Consumer findByCredentialsUsername(String username){

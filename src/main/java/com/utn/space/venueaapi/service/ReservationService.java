@@ -148,7 +148,7 @@ public class ReservationService {
                 aux.getSpace().getBase_price().add( //el + no funciona con bigDecimal
                         aux.getServices()
                                 .stream()
-                                .map(ServiceSelected::getPrice_at_reservation)
+                                .map(ServiceSelected::getPriceAtReservation)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 )
         );
