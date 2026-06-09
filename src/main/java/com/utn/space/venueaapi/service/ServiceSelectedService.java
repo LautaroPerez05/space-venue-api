@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.service;
 
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import com.utn.space.venueaapi.repository.ServiceSelectedRepository;
@@ -28,14 +29,14 @@ public class ServiceSelectedService {
     public void deleteSelectedServiceByReserveId (Integer id_reserva){
         serviceSelectedRepository.deleteSelectedServiceByReserveId(id_reserva);
     }
-/*
+
     // Este metodo será usado para la inserción de reservas del lado del front.
     // Una vez que se envían los datos de la reserva y los servicios seleccionados
     // El botón de envío apuntaríá primero a los endpoints que validaran e ingresaran la reserva
     // Luego, con ese nuevo id de reserva se utilizaría este metodo de inserción de servicios seleccionados
     @Transactional
     public void insertServiceSelectedForAReservation(ServiceSelectedDTO serviceSelectedDTO){
-        Reservation reservation = reservationRepository.findById(serviceSelectedDTO.idReservation()).orElseThrow(() -> new NotFoundException("No se ha encontrado la reserva cuyo servicio quiere seleccionarse"));
+        Reservation reservation = reservationRepository.findById(serviceSelectedDTO.idReservation()).orElseThrow(() -> new ExceptionIdNotFound("Reserva",serviceSelectedDTO.idReservation()));
         SpaceServiceItem serviceItem = spaceServiceItemRepository.findById(serviceSelectedDTO.idService()).orElseThrow(() -> new NotFoundException("No se ha encontrado el servicio que se quiere seleccionar en una reserva"));
 
         repository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO, serviceItem, reservation));
@@ -57,5 +58,5 @@ public class ServiceSelectedService {
         if(!repository.existsById(id)) throw new NotFoundException("No se encontró el servicio seleccionado para eliminarlo");
 
         repository.deleteById(id);
-    }*/
+    }
 }

@@ -70,19 +70,19 @@ public class ReservationService {
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
 
-        Consumer client = consumerRepository.findById(dto.getId_consumer())
-                .orElseThrow(() -> new ExceptionIdNotFound("Consumer", dto.getId_consumer()));
+        Consumer client = consumerRepository.findById(dto.getIdConsumer())
+                .orElseThrow(() -> new ExceptionIdNotFound("Consumer", dto.getIdConsumer()));
         aux.setConsumer(client);
 
-        Space space = spaceRepository.findById(dto.getId_space())
-                .orElseThrow(() -> new ExceptionIdNotFound("Space", dto.getId_space()));
+        Space space = spaceRepository.findById(dto.getIdSpace())
+                .orElseThrow(() -> new ExceptionIdNotFound("Space", dto.getIdSpace()));
         aux.setSpace(space);
 
         // Corrección: Validación contra el catálogo general y armado de seleccionados
         List<ServiceSelected> serviciosSeleccionados = new ArrayList<>();
         BigDecimal totalServicios = BigDecimal.ZERO;
 
-        for (Integer idService : dto.getId_servicesSelec()) {
+        for (Integer idService : dto.getIdServicesSelec()) {
             SpaceServiceItem servicioCatalogo = spaceServiceItemRepository.findById(idService)
                     .orElseThrow(() -> new ExceptionIdNotFound("Servicio Catálogo", idService));
 
@@ -143,11 +143,11 @@ public class ReservationService {
         }
         Reservation aux= reservationMapper.toEntity(dto);
 
-        aux.setConsumer(consumerRepository.findById(dto.getId_consumer())
-                .orElseThrow(()->new ExceptionIdNotFound("Consumer", dto.getId_consumer())));
+        aux.setConsumer(consumerRepository.findById(dto.getIdConsumer())
+                .orElseThrow(()->new ExceptionIdNotFound("Consumer", dto.getIdConsumer())));
 
-        aux.setSpace(spaceRepository.findById(dto.getId_space())
-                .orElseThrow(()->new ExceptionIdNotFound("Space",dto.getId_space())));
+        aux.setSpace(spaceRepository.findById(dto.getIdSpace())
+                .orElseThrow(()->new ExceptionIdNotFound("Space",dto.getIdSpace())));
 
 
         //limpiar servicios seleccionados anteriores
@@ -156,7 +156,7 @@ public class ReservationService {
         //Los cargo de nuevo y actualizado
         List<ServiceSelected> list= new ArrayList<>();
         list= aux.getSpace().getServices().stream()
-                .filter(item->dto.getId_servicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
+                .filter(item->dto.getIdServicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
                 .map(item-> new ServiceSelected(item,aux))  //transformo los item en serviceSelected
                 .toList();
         aux.setServices(list);

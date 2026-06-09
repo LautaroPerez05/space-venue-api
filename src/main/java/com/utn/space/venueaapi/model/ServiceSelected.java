@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,6 +25,7 @@ public class ServiceSelected {
     @ManyToOne
     @JoinColumn(name = "id_reservation")
     @ToString.Exclude
+    @JsonIgnore
     private Reservation reservation;
 
     public ServiceSelected(SpaceServiceItem item, Reservation res) {
