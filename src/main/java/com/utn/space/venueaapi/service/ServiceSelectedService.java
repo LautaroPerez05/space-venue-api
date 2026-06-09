@@ -1,8 +1,6 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.NotFoundException;
-import com.utn.space.venueaapi.model.Reservation;
-import com.utn.space.venueaapi.model.SpaceServiceItem;
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
 import com.utn.space.venueaapi.repository.ServiceSelectedRepository;
 import com.utn.space.venueaapi.service.mappers.ServiceSelectedMapper;
@@ -50,8 +48,14 @@ public class ServiceSelectedService {
 
     @Transactional
     public void deleteServiceSelectedForAReservation(Integer id){
-        if(!serviceSelectedRepository.existsById(id)) throw new NotFoundException("No se encontró el servicio seleccionado para eliminarlo");
+        if(!serviceSelectedRepository.existsById(id)) throw new ExceptionIdNotFound("No se encontró el servicio seleccionado para eliminarlo: ", id);
 
         serviceSelectedRepository.deleteById(id);
+    }
+
+    //Borra todos los Selected Services por id_reserva
+    @Transactional
+    public void deleteSelectedServiceByReserveId (Integer id_reserva){
+        serviceSelectedRepository.deleteSelectedServiceByReserveId(id_reserva);
     }
 }

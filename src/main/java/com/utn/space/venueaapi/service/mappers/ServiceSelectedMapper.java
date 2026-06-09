@@ -9,8 +9,8 @@ public class ServiceSelectedMapper {
 
     public static ServiceSelectedDTO toDto(ServiceSelected serviceSelected){
         return new ServiceSelectedDTO(
-                serviceSelected.getId(),
-                serviceSelected.getPriceAtReservation(),
+                serviceSelected.getId_service_selected(),
+                serviceSelected.getPrice_at_reservation(),
                 serviceSelected.getReservation().getId(),
                 serviceSelected.getDescriptionFrozen()
         );
@@ -29,10 +29,10 @@ public class ServiceSelectedMapper {
 
     public static ServiceSelected toEntity(ServiceSelectedDTO serviceSelectedDTO, Reservation reservation){
         return new ServiceSelected(
-            null,
-                reservation,
+                null,
                 serviceSelectedDTO.priceAtReservation(),
-                serviceSelectedDTO.descriptionFrozen()
+                serviceSelectedDTO.descriptionFrozen(),
+                reservation
         );
     }
 

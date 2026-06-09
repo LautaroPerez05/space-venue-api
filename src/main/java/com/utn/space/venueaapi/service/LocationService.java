@@ -1,6 +1,6 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.NotFoundException;
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.model.Location;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.repository.LocationRepository;
@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -21,7 +19,7 @@ public class LocationService {
     private static final BigDecimal EARTH_RADIOUS = new BigDecimal("6371.0");
 
     public Location findById(Integer id){
-        return locationRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro la ubicacion"));
+        return locationRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("No se encontro la ubicacion: ", id));
     }
 
     public boolean existsById(Integer id){

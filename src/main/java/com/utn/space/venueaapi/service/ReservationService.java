@@ -25,6 +25,8 @@ public class ReservationService {
     @Autowired
     private final ConsumerService consumerService;
     @Autowired
+    private final ServiceSelectedService serviceSelectedService;
+    @Autowired
     private final SpaceService spaceService;
     @Autowired
     private final SpaceServiceItemService spaceServiceItemService;
@@ -73,7 +75,7 @@ public class ReservationService {
             //Se crea un objeto de tipo ServiceSelected que guardara la info del servicio exacto que fue asociado a la reserva
             ServiceSelected selected = new ServiceSelected();
             selected.setReservation(aux);
-            selected.setPriceAtReservation(servicioCatalogo.getPrice());
+            selected.setPrice_at_reservation(servicioCatalogo.getPrice());
             selected.setDescriptionFrozen(aux.getDescription());
 
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
@@ -108,5 +110,71 @@ public class ReservationService {
         aux.setGoogleEventCode(idEventoGoogle);
 
         return reservationRepository.save(aux);
+    }
+
+    public Reservation modify (ReservationDTO dto){
+        if (dto.getUntilDate().isBefore(dto.getFromDate())) {
+            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+        }
+        if (dto.getFromDate().isBefore(LocalDateTime.now())) {
+            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+        }
+        if(!reservationRepository.existsById(dto.getId())){
+            throw new ExceptionIdNotFound ("Reservation", dto.getId());
+        }
+        Reservation aux= reservationMapper.toEntity(dto);
+
+        aux.setConsumer(consumerService.findById(dto.getId_consumer()));
+
+        aux.setSpace(spaceService.findById(dto.getId_space()));
+
+
+        //limpiar servicios seleccionados anteriores
+        serviceSelectedService.deleteSelectedServiceByReserveId(dto.getId());
+
+        //Los cargo de nuevo y actualizado
+        List<ServiceSelected> list= new ArrayList<>();
+        list= aux.getSpace().getServices().stream()
+                .filter(item->dto.getId_servicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
+                .map(item-> new ServiceSelected(item,aux))  //transformo los item en serviceSelected
+                .toList();
+        aux.setServices(list);
+
+        aux.setFinalPrice(
+                aux.getSpace().getBase_price().add( //el + no funciona con bigDecimal
+                        aux.getServices()
+                                .stream()
+                                .map(ServiceSelected::getPrice_at_reservation)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                )
+        );
+        return reservationRepository.save(aux);
+    }
+
+
+    public Reservation confirmReservation(Integer id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setStatus(ReservationStatus.CONFIRMED);
+        return reservationRepository.save(aux);
+    }
+
+    public Reservation cancelReservation(Integer id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setStatus(ReservationStatus.CANCELLED);
+        return reservationRepository.save(aux);
+    }
+
+    public Reservation completeReservation(Integer id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setStatus(ReservationStatus.COMPLETED);
+        //falta sacarlo de googlecalendar
+        return reservationRepository.save(aux);
+    }
+
+    public Reservation softDelete(Integer id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        aux.setIsActive(false);
+        return reservationRepository.save(aux);
+
     }
 }

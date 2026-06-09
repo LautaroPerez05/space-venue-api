@@ -1,20 +1,16 @@
 package com.utn.space.venueaapi.service;
 
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.NotFoundException;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
-import com.utn.space.venueaapi.repository.CancellationPolicyRepository;
-import com.utn.space.venueaapi.repository.ConsumerRepository;
-import com.utn.space.venueaapi.repository.LocationRepository;
 import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SpaceService {
@@ -37,12 +33,12 @@ public class SpaceService {
     }
 
     public Space findById(Integer id){
-        return spaceRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro el espacio buscado"));
+        return spaceRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Space", id));
     }
 
     public void deleteById(Integer id){
         if(!spaceRepository.existsById(id)){
-            throw new NotFoundException("No se encontro el espacio a eliminar");
+            throw new ExceptionIdNotFound("Space", id);
         }
         spaceRepository.deleteById(id);
     }
@@ -78,7 +74,7 @@ public class SpaceService {
 
     public void modifySpace(Integer id, SpaceDTO spaceDTO){
         if(!spaceRepository.existsById(id)){
-            throw new NotFoundException("No se encontro el espacio a actualizar");
+            throw new ExceptionIdNotFound("Space: ", id);
         }
 
         if(spaceDTO.name_space().isBlank()){
@@ -111,11 +107,11 @@ public class SpaceService {
 
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
         if((spaceFilterDTO.id_consumer_owner() != null) && !consumerService.existsById(spaceFilterDTO.id_consumer_owner())){
-            throw new NotFoundException("No se encontro el owner del cual se quieren ver los espacios");
+            throw new ExceptionIdNotFound("No se encontro el owner del cual se quieren ver los espacios: ", spaceFilterDTO.id_consumer_owner());
         }
 
         if((spaceFilterDTO.id_location() != null) && !locationService.existsById(spaceFilterDTO.id_location())){
-            throw new NotFoundException("No se encontro la ubicacion de la cual se quieren ver los espacios");
+            throw new ExceptionIdNotFound("No se encontro la ubicacion de la cual se quieren ver los espacios: ", spaceFilterDTO.id_location());
         }
 
         //Filtro inicial de mi base de datos

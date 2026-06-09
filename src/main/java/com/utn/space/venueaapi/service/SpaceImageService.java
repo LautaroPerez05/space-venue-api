@@ -1,10 +1,9 @@
 package com.utn.space.venueaapi.service;
 
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.NotFoundException;
 import com.utn.space.venueaapi.model.records.SpaceImageDTO;
 import com.utn.space.venueaapi.model.SpaceImage;
-import com.utn.space.venueaapi.repository.SpaceRepository;
 import com.utn.space.venueaapi.repository.SpaceImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,12 +22,12 @@ public class SpaceImageService {
     }
 
     public SpaceImage findById(Integer id){
-        return spaceImageRepository.findById(id).orElseThrow(()-> new NotFoundException("No se encontro la imagen buscada"));
+        return spaceImageRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("No se encontro la imagen buscada: ", id));
     }
 
     public void deleteById(Integer id){
         if(!spaceImageRepository.existsById(id)){
-            throw new NotFoundException("No se encontro la imagen a eliminar");
+            throw new ExceptionIdNotFound("No se encontro la imagen a eliminar: ", id);
         }
         spaceImageRepository.deleteById(id);
     }
@@ -56,7 +55,7 @@ public class SpaceImageService {
 
     public void modifySpaceImage(Integer id, SpaceImageDTO spaceImageDTO){
         if(!spaceImageRepository.existsById(id)){
-            throw new NotFoundException("No se encontro la imagen a actualizar");
+            throw new ExceptionIdNotFound("No se encontro la imagen a actualizar: ", id);
         }
 
         if(spaceImageDTO.file_name().isBlank()){
@@ -80,7 +79,7 @@ public class SpaceImageService {
 
     public List<SpaceImage> findAllBySpaceId(Integer spaceId){
         if(!spaceService.existsById(spaceId)){
-            throw new NotFoundException("No se encontro el espacio del cual se quieren buscar imagenes");
+            throw new ExceptionIdNotFound("No se encontro el espacio del cual se quieren buscar imagenes: ", spaceId);
         }
         return spaceImageRepository.findAllBySpaceIdSpace(spaceId);
     }
