@@ -6,12 +6,16 @@ import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
+import com.utn.space.venueaapi.repository.CancellationPolicyRepository;
+import com.utn.space.venueaapi.repository.ConsumerRepository;
+import com.utn.space.venueaapi.repository.LocationRepository;
 import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SpaceService {
@@ -34,12 +38,12 @@ public class SpaceService {
     }
 
     public Space findById(Integer id){
-        return spaceRepository.findById(id).orElseThrow(()-> new ExceptionNameNotFound("No se encontro el espacio buscado"));
+        return spaceRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Space", id));
     }
 
     public void deleteById(Integer id){
         if(!spaceRepository.existsById(id)){
-            throw new ExceptionNameNotFound("No se encontro el espacio a eliminar");
+            throw new ExceptionIdNotFound("Space", id);
         }
         spaceRepository.deleteById(id);
     }
@@ -75,7 +79,7 @@ public class SpaceService {
 
     public void modifySpace(Integer id, SpaceDTO spaceDTO){
         if(!spaceRepository.existsById(id)){
-            throw new ExceptionNameNotFound("No se encontro el espacio a actualizar");
+            throw new ExceptionIdNotFound("Space: ", id);
         }
 
         if(spaceDTO.nameSpace().isBlank()){

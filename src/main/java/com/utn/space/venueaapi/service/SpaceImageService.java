@@ -1,6 +1,6 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
+import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.records.SpaceImageDTO;
 import com.utn.space.venueaapi.model.SpaceImage;
@@ -22,12 +22,12 @@ public class SpaceImageService {
     }
 
     public SpaceImage findById(Integer id){
-        return spaceImageRepository.findById(id).orElseThrow(()-> new ExceptionNameNotFound("No se encontro la imagen buscada"));
+        return spaceImageRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("No se encontro la imagen buscada: ", id));
     }
 
     public void deleteById(Integer id){
         if(!spaceImageRepository.existsById(id)){
-            throw new ExceptionNameNotFound("No se encontro la imagen a eliminar");
+            throw new ExceptionIdNotFound("No se encontro la imagen a eliminar: ", id);
         }
         spaceImageRepository.deleteById(id);
     }
@@ -55,7 +55,7 @@ public class SpaceImageService {
 
     public void modifySpaceImage(Integer id, SpaceImageDTO spaceImageDTO){
         if(!spaceImageRepository.existsById(id)){
-            throw new ExceptionNameNotFound("No se encontro la imagen a actualizar");
+            throw new ExceptionIdNotFound("No se encontro la imagen a actualizar: ", id);
         }
 
         if(spaceImageDTO.fileName().isBlank()){
@@ -79,7 +79,7 @@ public class SpaceImageService {
 
     public List<SpaceImage> findAllBySpaceId(Integer spaceId){
         if(!spaceService.existsById(spaceId)){
-            throw new ExceptionNameNotFound("No se encontro el espacio del cual se quieren buscar imagenes");
+            throw new ExceptionIdNotFound("No se encontro el espacio del cual se quieren buscar imagenes: ", spaceId);
         }
         return spaceImageRepository.findAllBySpaceIdSpace(spaceId);
     }

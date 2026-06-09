@@ -16,15 +16,20 @@ public class ServiceSelected {
     @Column(name = "idServiceSelected")
     private Integer id;
 
+    @Column(name = "price_at_reservation")
+    private BigDecimal price_at_reservation;
+
+    @Column(name = "descriptionFrozen")
+    String descriptionFrozen;
+
     @ManyToOne
     @JoinColumn(name = "id_reservation")
     @ToString.Exclude
     private Reservation reservation;
 
-    @Column(name = "price_at_reservation")
-    BigDecimal priceAtReservation;
-
-    @Column(name = "description_frozen")
-    String descriptionFrozen;
-
+    public ServiceSelected(SpaceServiceItem item, Reservation res) {
+        this.price_at_reservation = item.getPrice();
+        this.descriptionFrozen=item.getDescription();
+        this.reservation=res;
+    }
 }

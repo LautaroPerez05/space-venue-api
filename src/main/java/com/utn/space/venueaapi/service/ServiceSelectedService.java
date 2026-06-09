@@ -1,9 +1,8 @@
 package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
-import com.utn.space.venueaapi.model.Reservation;
-import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
+import com.utn.space.venueaapi.repository.ReservationRepository;
 import com.utn.space.venueaapi.repository.ServiceSelectedRepository;
 import com.utn.space.venueaapi.service.mappers.ServiceSelectedMapper;
 import jakarta.transaction.Transactional;
@@ -18,7 +17,7 @@ public class ServiceSelectedService {
     @Autowired
     private final ServiceSelectedRepository serviceSelectedRepository;
     @Autowired
-    private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
     @Autowired
     private final SpaceServiceItemService spaceServiceItemService;
 
@@ -26,11 +25,6 @@ public class ServiceSelectedService {
         return serviceSelectedRepository.findServiceSelectedByIdReservation(idReservation);
     }
 
-    //Borra todos los Selected Services por id_reserva
-    public void deleteSelectedServiceByReserveId (Integer id_reserva){
-        serviceSelectedRepository.deleteSelectedServiceByReserveId(id_reserva);
-    }
-/*
     // Este metodo será usado para la inserción de reservas del lado del front.
     // Una vez que se envían los datos de la reserva y los servicios seleccionados
     // El botón de envío apuntaríá primero a los endpoints que validaran e ingresaran la reserva
@@ -49,14 +43,23 @@ public class ServiceSelectedService {
     public void insertListOfServicesSelectedInAReservation(Integer idReservation, List<ServiceSelectedDTO> servicesSelectedDTO){
         //Este metodo recibe el id de una reserva y una lista de servicios seleccionados (por servicesSelectedDTO) y los mete en la tabla ServicesSelected
         for(ServiceSelectedDTO serviceSelectedDTO : servicesSelectedDTO){
-            serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO, reservationService.findById(idReservation)));
+            serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO,
+                    reservationRepository.findById(idReservation)
+                            .orElseThrow(() -> new ExceptionIdNotFound(
+                                    "No se ha encontrado la reserva para insertar lista de servicios seleccionados: ", idReservation))));
         }
     }
 
     @Transactional
     public void deleteServiceSelectedForAReservation(Integer id){
-        if(!serviceSelectedRepository.existsById(id)) throw new ExceptionIdNotFound("ServiceSelected",id);
+        if(!serviceSelectedRepository.existsById(id)) throw new ExceptionIdNotFound("No se encontró el servicio seleccionado para eliminarlo: ", id);
 
         serviceSelectedRepository.deleteById(id);
+    }
+
+    //Borra todos los Selected Services por id_reserva
+    @Transactional
+    public void deleteSelectedServiceByReserveId (Integer id_reserva){
+        serviceSelectedRepository.deleteSelectedServiceByReserveId(id_reserva);
     }
 }

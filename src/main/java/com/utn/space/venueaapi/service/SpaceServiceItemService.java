@@ -1,12 +1,10 @@
 package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
-import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
-import com.utn.space.venueaapi.repository.SpaceRepository;
 import com.utn.space.venueaapi.repository.SpaceServiceItemRepository;
 import com.utn.space.venueaapi.service.mappers.SpaceServiceItemMapper;
 import jakarta.transaction.Transactional;
@@ -46,7 +44,7 @@ public class SpaceServiceItemService {
     @Transactional
     public void updateServiceItem(Integer id, SpaceServiceItemDTO serviceItemDTO){
         if(!spaceServiceItemRepository.existsServiceItemInSpace(id, serviceItemDTO.idSpace())){
-            throw new ExceptionNameNotFound("No se ha encontrado el servicio a modificar en el espacio");
+            throw new ExceptionIdNotFound("No se ha encontrado el servicio a modificar en el espacio: ", id);
         }
 
         if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
@@ -63,7 +61,7 @@ public class SpaceServiceItemService {
 
     @Transactional
     public void deleteServiceItem(Integer id, Integer idSpace){
-        if(!spaceServiceItemRepository.existsServiceItemInSpace(id, idSpace)) throw new ExceptionNameNotFound("No se ha encontrado el servicio a eiminar");
+        if(!spaceServiceItemRepository.existsServiceItemInSpace(id, idSpace)) throw new ExceptionIdNotFound("No se ha encontrado el servicio a eliminar: ", id);
         spaceServiceItemRepository.deleteById(id);
     }
 }

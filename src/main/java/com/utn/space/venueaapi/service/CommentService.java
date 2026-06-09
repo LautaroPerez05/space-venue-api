@@ -24,12 +24,12 @@ public class CommentService {
     }
 
     public Comment findById(Integer id){
-        return commentRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Comment", id));
+        return commentRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("No se encontro el comentario buscado: ", id));
     }
 
     public void deleteById(Integer id){
         if(!commentRepository.existsById(id)){
-            throw new ExceptionIdNotFound("Comment", id);
+            throw new ExceptionIdNotFound("No se encontro el espacio a eliminar: ", id);
         }
         commentRepository.deleteById(id);
     }
@@ -57,7 +57,7 @@ public class CommentService {
 
     public void modifyComment(Integer id, CommentDTO commentDTO){
         if(!commentRepository.existsById(id)){
-            throw new ExceptionIdNotFound("Comment", id);
+            throw new ExceptionIdNotFound("No se encontro el comentario a eliminar: ", id);
         }
 
         if(commentDTO.description().isBlank()){
@@ -81,14 +81,14 @@ public class CommentService {
 
     public List<Comment> findAllBySpaceId(Integer spaceId){
         if(!spaceService.existsById(spaceId)){
-            throw new ExceptionIdNotFound("Space",spaceId);
+            throw new ExceptionIdNotFound("No se encontro el espacio del cual se quieren buscar comentarios: ", spaceId);
         }
         return commentRepository.findAllBySpaceIdSpace(spaceId);
     }
 
     public List<Comment> findAllByConsumerId(Integer consumerId){
         if(!consumerService.existsById(consumerId)){
-            throw new ExceptionIdNotFound("Consumer",consumerId);
+            throw new ExceptionIdNotFound("No se encontro el consumidor del cual se quieren buscar comentarios: ", consumerId);
         }
         return commentRepository.findAllByConsumerIdConsumer(consumerId);
     }

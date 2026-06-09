@@ -42,12 +42,13 @@ public class ReservationController {
                 .body(reservationService.findAll());
     }
 
-    @GetMapping ("/consumer/{id}")
+    /* @GetMapping ("/consumer/{id}")
     public ResponseEntity<List<Reservation>> findAllByIdConsumer (@PathVariable Long id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.findAllByConsumerID(id));
-    }
+    } <-------------- findAllByConsumerID no está implementado en ReservationService
+    */
 
     @GetMapping("/{id}")
     public ResponseEntity<Reservation> findById (@PathVariable Integer id){
