@@ -11,7 +11,7 @@ public class SpaceServiceItemMapper {
                 spaceServiceItem.getDescription(),
                 spaceServiceItem.getPrice(),
                 spaceServiceItem.getIsActive(),
-                spaceServiceItem.getSpace().getId_space()
+                spaceServiceItem.getSpace().getIdSpace()
         );
     }
 

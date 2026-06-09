@@ -17,7 +17,7 @@ public class ServiceSelected {
     private Integer id;
 
     @Column(name = "price_at_reservation")
-    private BigDecimal price_at_reservation;
+    private BigDecimal priceAtReservation;
 
     @Column(name = "descriptionFrozen")
     String descriptionFrozen;
@@ -28,7 +28,7 @@ public class ServiceSelected {
     private Reservation reservation;
 
     public ServiceSelected(SpaceServiceItem item, Reservation res) {
-        this.price_at_reservation = item.getPrice();
+        this.priceAtReservation = item.getPrice();
         this.descriptionFrozen=item.getDescription();
         this.reservation=res;
     }

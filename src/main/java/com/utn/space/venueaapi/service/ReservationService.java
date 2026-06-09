@@ -70,14 +70,14 @@ public class ReservationService {
             SpaceServiceItem servicioCatalogo = spaceServiceItemService.findById(idService);
 
             //Se verifica que cada uno de los servicios seleccionados de la reserva era efectivamente uno asociado al espacio de la reserva
-            if (!servicioCatalogo.getSpace().getId_space().equals(space.getId_space())) {
+            if (!servicioCatalogo.getSpace().getIdSpace().equals(space.getIdSpace())) {
                 throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
             }
 
             //Se crea un objeto de tipo ServiceSelected que guardara la info del servicio exacto que fue asociado a la reserva
             ServiceSelected selected = new ServiceSelected();
             selected.setReservation(aux);
-            selected.setPrice_at_reservation(servicioCatalogo.getPrice());
+            selected.setPriceAtReservation(servicioCatalogo.getPrice());
             selected.setDescriptionFrozen(aux.getDescription());
 
             totalServicios = totalServicios.add(servicioCatalogo.getPrice());
@@ -87,14 +87,14 @@ public class ReservationService {
 
         aux.setServices(serviciosSeleccionados);
 
-        aux.setFinalPrice(space.getBase_price().add(totalServicios));
+        aux.setFinalPrice(space.getBasePrice().add(totalServicios));
 
         // Extrae los datos dinámicos necesarios para configurar las invitaciones del evento
         String googleCalendarId = space.getGoogleCalendarId(); // ID del calendario guardado en el modelo Space
         String emailCliente = client.getEmail();                 // Email del consumidor para mandarle la invitación
-        String emailOferente = space.getConsumer_owner().getEmail(); // Email del dueño/oferente del salón
+        String emailOferente = space.getConsumerOwner().getEmail(); // Email del dueño/oferente del salón
 
-        String tituloEvento = "Reserva: " + space.getName_space();
+        String tituloEvento = "Reserva: " + space.getNameSpace();
         String descripcionEvento = "Reserva confirmada de espacio. Cliente: " + client.getFirstname() + " " + client.getLastname();
 
         // Invoca el metodo remoto de sincronización múltiple pasando los parámetros correspondientes
@@ -145,10 +145,10 @@ public class ReservationService {
         aux.setServices(list);
 
         aux.setFinalPrice(
-                aux.getSpace().getBase_price().add( //el + no funciona con bigDecimal
+                aux.getSpace().getBasePrice().add( //el + no funciona con bigDecimal
                         aux.getServices()
                                 .stream()
-                                .map(ServiceSelected::getPrice_at_reservation)
+                                .map(ServiceSelected::getPriceAtReservation)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 )
         );

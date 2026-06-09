@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -16,13 +15,17 @@ import java.time.LocalDateTime;
 public class SpaceImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_space_images;
+    @Column(name = "id_space_images")
+    private Integer idSpaceImages;
 
     @ManyToOne
     @JoinColumn(name = "idSpace")
     private Space space;
 
-    private String file_name;
-    private String url_image;
-    private LocalDateTime date_send;
+    @Column(name = "file_name")
+    private String fileName;
+    @Column(name = "url_image")
+    private String urlImage;
+    @Column(name = "date_send")
+    private LocalDateTime dateSend;
 }

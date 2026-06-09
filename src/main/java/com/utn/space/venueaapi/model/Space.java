@@ -18,11 +18,12 @@ import java.util.List;
 public class Space {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_space;
+    @Column(name = "id_space")
+    private Integer idSpace;
 
     @ManyToOne
     @JoinColumn(name = "idConsumerOwner")
-    private Consumer consumer_owner;
+    private Consumer consumerOwner;
 
     @ManyToOne
     @JoinColumn(name = "idLocation")
@@ -30,16 +31,20 @@ public class Space {
 
     @OneToOne
     @JoinColumn(name = "idCancellationPolicies")
-    private CancellationPolicy cancellation_Policy;
+    private CancellationPolicy cancellationPolicy;
 
     @Column(name = "googleCalendarId")
     private String googleCalendarId;
 
-    private String name_space;
+    @Column(name = "name_space")
+    private String nameSpace;
     private String description;
-    private BigDecimal base_price;
-    private LocalDate publication_date;
-    private Integer buffer_time;
+    @Column(name = "base_price")
+    private BigDecimal basePrice;
+    @Column(name = "publication_date")
+    private LocalDate publicationDate;
+    @Column(name = "buffer_time")
+    private Integer bufferTime;
     private Boolean isActive;
 
     @OneToMany(mappedBy = "space")

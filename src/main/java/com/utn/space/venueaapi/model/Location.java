@@ -15,12 +15,15 @@ import java.math.BigDecimal;
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_location;
-
-    private String street_name;
-    private String street_number;
+    @Column(name = "id_location")
+    private Integer idLocation;
+    @Column(name = "street_name")
+    private String streetName;
+    @Column(name = "street_number")
+    private String streetNumber;
     private String municipality;
-    private String zip_code;
+    @Column(name = "zip_code")
+    private String zipCode;
     private String city;
     private BigDecimal longitude;
     private BigDecimal latitude;
