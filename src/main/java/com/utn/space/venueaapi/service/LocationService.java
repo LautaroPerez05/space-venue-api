@@ -1,6 +1,6 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
+import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.model.Location;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.repository.LocationRepository;
@@ -19,7 +19,7 @@ public class LocationService {
     private static final BigDecimal EARTH_RADIOUS = new BigDecimal("6371.0");
 
     public Location findById(Integer id){
-        return locationRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("No se encontro la ubicacion: ", id));
+        return locationRepository.findById(id).orElseThrow(()-> new IdNotFoundException("No se encontro la ubicacion: ", id));
     }
 
     public boolean existsById(Integer id){

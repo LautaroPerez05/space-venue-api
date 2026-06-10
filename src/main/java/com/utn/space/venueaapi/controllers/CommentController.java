@@ -5,6 +5,7 @@ import com.utn.space.venueaapi.model.records.CommentDTO;
 import com.utn.space.venueaapi.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,11 +27,13 @@ public class CommentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     public void deleteCommentById(@PathVariable Integer id){
         commentService.deleteById(id);
     }
 
     @PostMapping()
+    @PreAuthorize("hasRole('CLIENT')")
     public void insertComment(@RequestBody CommentDTO commentDTO){
         commentService.insertComment(commentDTO);
     }

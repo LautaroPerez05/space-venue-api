@@ -1,21 +1,17 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
+import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
-import com.utn.space.venueaapi.repository.CancellationPolicyRepository;
-import com.utn.space.venueaapi.repository.ConsumerRepository;
-import com.utn.space.venueaapi.repository.LocationRepository;
 import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SpaceService {
@@ -38,16 +34,17 @@ public class SpaceService {
     }
 
     public Space findById(Integer id){
-        return spaceRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Space", id));
+        return spaceRepository.findById(id).orElseThrow(()-> new IdNotFoundException("Space", id));
     }
 
     public void deleteById(Integer id){
         if(!spaceRepository.existsById(id)){
-            throw new ExceptionIdNotFound("Space", id);
+            throw new IdNotFoundException("Space", id);
         }
         spaceRepository.deleteById(id);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void insertSpace(SpaceDTO spaceDTO){
         if(spaceDTO.nameSpace().isBlank()){
             throw new InvalidDataException("Por favor ingrese un nombre para su espacio");
@@ -78,9 +75,10 @@ public class SpaceService {
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     public void modifySpace(Integer id, SpaceDTO spaceDTO){
         if(!spaceRepository.existsById(id)){
-            throw new ExceptionIdNotFound("Space: ", id);
+            throw new IdNotFoundException("Space: ", id);
         }
 
         if(spaceDTO.nameSpace().isBlank()){
@@ -114,11 +112,11 @@ public class SpaceService {
 
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
         if((spaceFilterDTO.idConsumerOwner() != null) && !consumerService.existsById(spaceFilterDTO.idConsumerOwner())){
-            throw new ExceptionIdNotFound("Consumer",spaceFilterDTO.idConsumerOwner());
+            throw new IdNotFoundException("Consumer",spaceFilterDTO.idConsumerOwner());
         }
 
         if((spaceFilterDTO.idLocation() != null) && !locationService.existsById(spaceFilterDTO.idLocation())){
-            throw new ExceptionIdNotFound("Location",spaceFilterDTO.idLocation());
+            throw new IdNotFoundException("Location",spaceFilterDTO.idLocation());
         }
 
         //Filtro inicial de mi base de datos

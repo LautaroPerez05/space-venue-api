@@ -1,8 +1,6 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
-import com.utn.space.venueaapi.exceptions.ExceptionInvalidDate;
-import com.utn.space.venueaapi.exceptions.ExceptionServiceOutOfPlace;
+import com.utn.space.venueaapi.exceptions.*;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
@@ -10,13 +8,19 @@ import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 @AllArgsConstructor
 @Service
 public class ReservationService {
@@ -43,157 +47,170 @@ public class ReservationService {
     }
 
     public Reservation findById (Integer id){
-        return reservationRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Reservacion",id));
+        return reservationRepository.findById(id).orElseThrow(()-> new IdNotFoundException("Reservacion",id));
     }
 
-    public Reservation create (ReservationDTO dto) throws IOException {
-        if (dto.getUntilDate().isBefore(dto.getFromDate())) {
-            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+    private void validateReservationDates(LocalDateTime from, LocalDateTime until) {
+        if (from.isBefore(LocalDateTime.now())) {
+            throw new InvalidDateException("La fecha de inicio no puede ser una fecha del pasado");
         }
-        if (dto.getFromDate().isBefore(LocalDateTime.now())) {
-            throw new ExceptionInvalidDate("La fecha de Inicio no puede del pasado");
+        if (until.isBefore(from)) {
+            throw new InvalidDateException("La fecha final no puede ser antes que la fecha de inicio");
         }
+    }
 
-        Reservation aux = reservationMapper.toEntity(dto);
-        aux.setCreatedAt(LocalDateTime.now());
+    private BigDecimal calculateAndUpdateFinalPrice(Reservation reservation, List<ServiceSelectedDTO> services) {
+        BigDecimal totalServices = services.stream()
+                .map(ServiceSelectedDTO::priceAtReservation) // O .getPrice() según tu DTO
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        Consumer client = consumerService.findById(dto.getIdConsumer());
-        aux.setConsumer(client);
+        BigDecimal finalPrice = reservation.getSpace().getBasePrice().add(totalServices);
+        reservation.setFinalPrice(finalPrice);
+        return finalPrice;
+    }
 
-        Space space = spaceService.findById(dto.getIdSpace());
-        aux.setSpace(space);
-
-        // Corrección: Validación contra el catálogo general y armado de seleccionados
-        //Catalogo de servicios seleccionables para validar los elejidos
-        List<ServiceSelectedDTO> servicesSelectedDTO = new ArrayList<>();
-        BigDecimal totalServicios = BigDecimal.ZERO;
-
-        for (Integer idService : dto.getIdServicesSelec()) {
-            SpaceServiceItem servicioCatalogo = spaceServiceItemService.findById(idService);
-
-            //Se verifica que cada uno de los servicios seleccionados de la reserva era efectivamente uno asociado al espacio de la reserva
-            if (!servicioCatalogo.getSpace().getIdSpace().equals(space.getIdSpace())) {
-                throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
-            }
-
-            // Crear DTO para el servicio seleccionado (con id=null porque se genera en la BDD)
-            ServiceSelectedDTO ssDto = new ServiceSelectedDTO(
-                    null,
-                    servicioCatalogo.getPrice(),
-                    null, // idReservation se asignará después de guardar
-                    servicioCatalogo.getDescription()
-            );
-            servicesSelectedDTO.add(ssDto);
-            totalServicios = totalServicios.add(servicioCatalogo.getPrice());
+    private void validateSpaceAvailability(Space space, Integer idConsumer) {
+        if (space.getConsumerOwner().getIdConsumer().equals(idConsumer)) {
+            throw new InvalidReservationException("No puedes realizar una reserva sobre tu propio espacio disponible.");
         }
 
-        //Sumo al precio base el de los servicios
-        aux.setFinalPrice(space.getBasePrice().add(totalServicios));
+        if (!space.getIsActive()) {
+            throw new SpaceUnavailableException("El espacio seleccionado no se encuentra activo o disponible para nuevas reservas.");
+        }
+    }
 
-        // Extrae los datos dinámicos necesarios para configurar las invitaciones del evento
-        String googleCalendarId = space.getGoogleCalendarId(); // ID del calendario guardado en el modelo Space
-        String emailCliente = client.getEmail();                 // Email del consumidor para mandarle la invitación
-        String emailOferente = space.getConsumerOwner().getEmail(); // Email del dueño/oferente del salón
-
+    private String infoAndSyncGoogleCalendar(Reservation reservation, Consumer client, Space space, Boolean saveToMyCalendar) throws IOException {
         String tituloEvento = "Reserva: " + space.getNameSpace();
         String descripcionEvento = "Reserva confirmada de espacio. Cliente: " + client.getFirstname() + " " + client.getLastname();
 
-        // Invoca el metodo remoto de sincronización múltiple pasando los parámetros correspondientes
-        String idEventoGoogle = googleCalendarService.sincronizarReservaMultiplesCalendarios(
-                googleCalendarId,
+        return googleCalendarService.sincronizarReservaMultiplesCalendarios(
+                space.getGoogleCalendarId(),
                 tituloEvento,
                 descripcionEvento,
-                aux.getFromDate(),
-                aux.getUntilDate(),
-                emailCliente,
-                emailOferente,
-                dto.getSaveToMyCalendar() // Campo booleano provisto por el DTO para respetar la decisión del usuario
+                reservation.getFromDate(),
+                reservation.getUntilDate(),
+                client.getEmail(),
+                space.getConsumerOwner().getEmail(),
+                saveToMyCalendar
         );
+    }
 
-        // 3. Setea el código hash único devuelto por Google en tu atributo de base de datos local
-        aux.setGoogleEventCode(idEventoGoogle);
+    @Transactional(rollbackFor = Exception.class)
+    @PreAuthorize("hasRole('CLIENT') " +
+            "and @securityUtils.isCurrentConsumer(#dto.getIdConsumer(), authentication.name)")
+    public Reservation createReservation(ReservationDTO dto) throws IOException {
+        validateReservationDates(dto.getFromDate(), dto.getUntilDate());
 
-        //Guardamos la reserva
-        Reservation saved = reservationRepository.save(aux);
+        if (reservationRepository.existsOverlappingReservation(dto.getIdSpace(), dto.getFromDate(), dto.getUntilDate())) {
+            throw new SpaceUnavailableException("El espacio ya se encuentra reservado en el rango de fechas seleccionado.");
+        }
 
-        //Guardamos los servicios seleccionados
+        Consumer client = consumerService.findById(dto.getIdConsumer());
+        Space space = spaceService.findById(dto.getIdSpace());
+
+        validateSpaceAvailability(space, client.getIdConsumer());
+
+        Reservation reservation = reservationMapper.toEntity(dto);
+        reservation.setCreatedAt(LocalDateTime.now());
+        reservation.setConsumer(client);
+        reservation.setSpace(space);
+
+        List<ServiceSelectedDTO> servicesSelectedDTO = new ArrayList<>();
+        calculateAndUpdateFinalPrice(reservation, servicesSelectedDTO);
+
+        String idEventGoogle = infoAndSyncGoogleCalendar(reservation, client, space, dto.getSaveToMyCalendar());
+        reservation.setGoogleEventCode(idEventGoogle);
+
+        Reservation saved = reservationRepository.save(reservation);
         serviceSelectedService.insertListOfServicesSelectedInAReservation(saved.getId(), servicesSelectedDTO);
 
         return saved;
-
     }
 
-    public Reservation modify (ReservationDTO dto){
-        if (dto.getUntilDate().isBefore(dto.getFromDate())) {
-            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
+    private void checkModificationPermission(Reservation reservation) {
+        boolean isAdmin = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication())
+                .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !reservation.getStatus().equals(ReservationStatus.TENTATIVE)) {
+            throw new AccessDeniedException("No se puede modificar una reserva procesada.");
         }
-        if (dto.getFromDate().isBefore(LocalDateTime.now())) {
-            throw new ExceptionInvalidDate("La Fecha Final no puede ser antes que la Fecha de Inicio");
-        }
-        if(!reservationRepository.existsById(dto.getId())){
-            throw new ExceptionIdNotFound ("Reservation", dto.getId());
-        }
-        Reservation aux= reservationRepository.findById(dto.getId()).orElseThrow(() -> new ExceptionIdNotFound("Reservation", dto.getId()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('CLIENT') " +
+            "and @securityUtils.isReservationOwner(#dto.id, authentication.name))")
+    public Reservation modifyReservation(ReservationDTO dto){
+        validateReservationDates(dto.getFromDate(), dto.getUntilDate());
+
+        Reservation aux= reservationRepository.findById(dto.getId()).orElseThrow(
+                () -> new IdNotFoundException("No se encontró la reserva al querer modificarla", dto.getId()));
+
+        // Si es un CLIENT, solo puede modificarla si está TENTATIVE
+        checkModificationPermission(aux);
+
         aux.setConsumer(consumerService.findById(dto.getIdConsumer()));
         aux.setSpace(spaceService.findById(dto.getIdSpace()));
-
 
         //limpiar servicios seleccionados anteriores
         serviceSelectedService.deleteSelectedServiceByReserveId(dto.getId());
 
         //Cargo los servicios nuevos desde el catalogo
         List<ServiceSelectedDTO> servicesSelectedDTO = new ArrayList<>();
-        BigDecimal totalServicios = BigDecimal.ZERO;
+        calculateAndUpdateFinalPrice(aux, servicesSelectedDTO);
 
-        for (Integer idService : dto.getIdServicesSelec()) {
-            SpaceServiceItem item = spaceServiceItemService.findById(idService);
-            if (!item.getSpace().getIdSpace().equals(aux.getSpace().getIdSpace())) {
-                throw new ExceptionServiceOutOfPlace("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
-            }
-
-            ServiceSelectedDTO ssDto = new ServiceSelectedDTO(
-                    null,
-                    item.getPrice(),
-                    dto.getId(),
-                    item.getDescription()
-            );
-            servicesSelectedDTO.add(ssDto);
-            totalServicios = totalServicios.add(item.getPrice());
-        }
-
-        //Recalculo el precio final
-        aux.setFinalPrice(aux.getSpace().getBasePrice().add(totalServicios));
-        //Guardo la reserva modificada
         Reservation updated = reservationRepository.save(aux);
+
         //Guardo la lista de servicios modificados de la reserva en la tabla de servicios
-        serviceSelectedService.insertListOfServicesSelectedInAReservation(updated.getId(), servicesSelectedDTO);
+        serviceSelectedService.insertListOfServicesSelectedInAReservation(
+                updated.getId(), servicesSelectedDTO);
+
         return updated;
     }
 
-
+    @PreAuthorize("@securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
     public Reservation confirmReservation(Integer id){
-        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        Reservation aux= reservationRepository.findById(id).orElseThrow(
+                ()->new IdNotFoundException("Reservation", id));
+
         aux.setStatus(ReservationStatus.CONFIRMED);
         return reservationRepository.save(aux);
     }
 
+    @PreAuthorize("@securityUtils.isConsumerOfReservation(#id, authentication.name)" +
+            "&& @securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
     public Reservation cancelReservation(Integer id){
-        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        Reservation aux= reservationRepository.findById(id).orElseThrow(
+                ()->new IdNotFoundException("Reservation", id));
+
         aux.setStatus(ReservationStatus.CANCELLED);
         return reservationRepository.save(aux);
     }
 
+    @PreAuthorize("@securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
     public Reservation completeReservation(Integer id){
-        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        Reservation aux= reservationRepository.findById(id).orElseThrow(
+                ()->new IdNotFoundException("Reservation", id));
+
         aux.setStatus(ReservationStatus.COMPLETED);
         //falta sacarlo de googlecalendar
         return reservationRepository.save(aux);
     }
 
     public Reservation softDelete(Integer id){
-        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new ExceptionIdNotFound ("Reservation", id));
+        Reservation aux= reservationRepository.findById(id).orElseThrow(
+                ()->new IdNotFoundException("Reservation", id));
+
         aux.setIsActive(false);
         return reservationRepository.save(aux);
 
+    }
+
+    @PreAuthorize("@securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
+    public Reservation rejectReservation(Integer id) {
+        Reservation aux= reservationRepository.findById(id).orElseThrow(
+                ()->new IdNotFoundException("Reservation", id));
+
+        aux.setStatus(ReservationStatus.CANCELLED);
+        return reservationRepository.save(aux);
     }
 }

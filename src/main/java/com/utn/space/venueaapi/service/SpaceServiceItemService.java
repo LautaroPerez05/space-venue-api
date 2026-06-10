@@ -1,6 +1,6 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
+import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.SpaceServiceItem;
@@ -23,7 +23,7 @@ public class SpaceServiceItemService {
     private final SpaceService spaceService;
 
     public SpaceServiceItem findById(Integer id){
-        return spaceServiceItemRepository.findById(id).orElseThrow(() -> new ExceptionIdNotFound("Servicio Catálogo", id));
+        return spaceServiceItemRepository.findById(id).orElseThrow(() -> new IdNotFoundException("Servicio Catálogo", id));
     }
 
     public List<SpaceServiceItemDTO> listOfServicesFromSpace(Integer id){
@@ -44,7 +44,7 @@ public class SpaceServiceItemService {
     @Transactional
     public void updateServiceItem(Integer id, SpaceServiceItemDTO serviceItemDTO){
         if(!spaceServiceItemRepository.existsServiceItemInSpace(id, serviceItemDTO.idSpace())){
-            throw new ExceptionIdNotFound("No se ha encontrado el servicio a modificar en el espacio: ", id);
+            throw new IdNotFoundException("No se ha encontrado el servicio a modificar en el espacio: ", id);
         }
 
         if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
@@ -61,7 +61,7 @@ public class SpaceServiceItemService {
 
     @Transactional
     public void deleteServiceItem(Integer id, Integer idSpace){
-        if(!spaceServiceItemRepository.existsServiceItemInSpace(id, idSpace)) throw new ExceptionIdNotFound("No se ha encontrado el servicio a eliminar: ", id);
+        if(!spaceServiceItemRepository.existsServiceItemInSpace(id, idSpace)) throw new IdNotFoundException("No se ha encontrado el servicio a eliminar: ", id);
         spaceServiceItemRepository.deleteById(id);
     }
 }

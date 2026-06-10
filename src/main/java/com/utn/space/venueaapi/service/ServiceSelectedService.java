@@ -1,6 +1,6 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
+import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import com.utn.space.venueaapi.repository.ServiceSelectedRepository;
@@ -45,14 +45,14 @@ public class ServiceSelectedService {
         for(ServiceSelectedDTO serviceSelectedDTO : servicesSelectedDTO){
             serviceSelectedRepository.save(ServiceSelectedMapper.toEntity(serviceSelectedDTO,
                     reservationRepository.findById(idReservation)
-                            .orElseThrow(() -> new ExceptionIdNotFound(
+                            .orElseThrow(() -> new IdNotFoundException(
                                     "No se ha encontrado la reserva para insertar lista de servicios seleccionados: ", idReservation))));
         }
     }
 
     @Transactional
     public void deleteServiceSelectedForAReservation(Integer id){
-        if(!serviceSelectedRepository.existsById(id)) throw new ExceptionIdNotFound("No se encontró el servicio seleccionado para eliminarlo: ", id);
+        if(!serviceSelectedRepository.existsById(id)) throw new IdNotFoundException("No se encontró el servicio seleccionado para eliminarlo: ", id);
 
         serviceSelectedRepository.deleteById(id);
     }

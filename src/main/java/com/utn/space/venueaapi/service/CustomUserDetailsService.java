@@ -1,9 +1,8 @@
-package com.utn.space.venueaapi.config;
+package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.repository.CredentialRepository;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

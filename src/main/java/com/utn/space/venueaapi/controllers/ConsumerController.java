@@ -3,22 +3,25 @@ package com.utn.space.venueaapi.controllers;
 import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.model.ERoles;
 import com.utn.space.venueaapi.repository.CredentialRepository;
+import com.utn.space.venueaapi.service.CredentialService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/")
 public class ConsumerController {
 
-    // Cambiamos el manager por tu repositorio real
-    private final CredentialRepository credentialRepository;
+    private final CredentialService credentialService;
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/usuarios")
@@ -35,8 +38,22 @@ public class ConsumerController {
         // 3. Guardas directamente en la tabla 'credentials' usando JPA
         credential.setRol(ERoles.ROLE_CLIENT);
         credential.setIsActive(Boolean.TRUE);
-        credentialRepository.save(credential);
+        credentialService.saveCredential(credential);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuario creado exitosamente" + credential.getPassword());
+    }
+
+    @GetMapping("/admin/usuarios")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Credential>> listAllUsers() {
+        return ResponseEntity.ok(credentialService.findAll());
+    }
+
+    // Lógica sin desarrollar
+    @PutMapping("/admin/usuarios/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> toggleUserStatus(@PathVariable Integer id, @RequestParam Boolean active) {
+        // Lógica para activar/desactivar el usuario mediante service
+        return ResponseEntity.ok("Estado del usuario actualizado");
     }
 }

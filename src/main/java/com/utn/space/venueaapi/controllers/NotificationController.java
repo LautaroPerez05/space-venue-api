@@ -1,6 +1,5 @@
 package com.utn.space.venueaapi.controllers;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
 import com.utn.space.venueaapi.model.Notification;
 import com.utn.space.venueaapi.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;

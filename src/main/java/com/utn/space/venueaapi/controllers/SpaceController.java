@@ -7,6 +7,7 @@ import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
 import com.utn.space.venueaapi.service.SpaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,11 +34,13 @@ public class SpaceController {
     }
 
     @PostMapping()
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     public void insertSpace(@RequestBody SpaceDTO spaceDTO){
         spaceService.insertSpace(spaceDTO);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('CLIENT')")
     public void modifySpace(@PathVariable Integer id, @RequestBody SpaceDTO spaceDTO){
         spaceService.modifySpace(id,spaceDTO);
     }
