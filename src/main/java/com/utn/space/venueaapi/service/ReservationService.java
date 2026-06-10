@@ -4,6 +4,7 @@ import com.utn.space.venueaapi.exceptions.*;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
+import com.utn.space.venueaapi.repository.PaymentRepository;
 import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import lombok.AllArgsConstructor;
@@ -38,6 +39,10 @@ public class ReservationService {
     private final SpaceServiceItemService spaceServiceItemService;
     @Autowired
     private final GoogleCalendarService googleCalendarService;
+    @Autowired
+    private final PaymentRepository paymentRepository;
+    @Autowired
+    private final RefundService refundService;
 
 
     ///--------------------------------------------Metodos------------------------------------------------------------------------------
@@ -57,6 +62,25 @@ public class ReservationService {
         if (until.isBefore(from)) {
             throw new InvalidDateException("La fecha final no puede ser antes que la fecha de inicio");
         }
+    }
+
+    @PreAuthorize("@securityUtils.isConsumerOfReservation(#id, authentication.name)" +
+            "and @securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
+    public Reservation cancelReservation(Integer id) {
+        Reservation aux = reservationRepository.findById(id).orElseThrow(
+                () -> new IdNotFoundException("Reservacion",id));
+
+        // Si la reserva estaba confirmada, significa que hubo un pago asociado
+        if (aux.getStatus().equals(ReservationStatus.CONFIRMED)) {
+            // Buscamos el registro del pago asociado en nuestra tabla
+            PaymentModel payment = paymentRepository.findByReservationId(aux.getId());
+
+            // Ejecutamos el reembolso total usando el servicio adquirido
+            refundService.refundPayment(payment.getIdPayment(), payment.getTransactionAmount());
+        }
+
+        aux.setStatus(ReservationStatus.CANCELLED);
+        return reservationRepository.save(aux);
     }
 
     private BigDecimal calculateAndUpdateFinalPrice(Reservation reservation, List<ServiceSelectedDTO> services) {
@@ -176,16 +200,6 @@ public class ReservationService {
         return reservationRepository.save(aux);
     }
 
-    @PreAuthorize("@securityUtils.isConsumerOfReservation(#id, authentication.name)" +
-            "&& @securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
-    public Reservation cancelReservation(Integer id){
-        Reservation aux= reservationRepository.findById(id).orElseThrow(
-                ()->new IdNotFoundException("Reservation", id));
-
-        aux.setStatus(ReservationStatus.CANCELLED);
-        return reservationRepository.save(aux);
-    }
-
     @PreAuthorize("@securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
     public Reservation completeReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(
@@ -203,14 +217,5 @@ public class ReservationService {
         aux.setIsActive(false);
         return reservationRepository.save(aux);
 
-    }
-
-    @PreAuthorize("@securityUtils.isSpaceOwnerOfReservation(#id, authentication.name)")
-    public Reservation rejectReservation(Integer id) {
-        Reservation aux= reservationRepository.findById(id).orElseThrow(
-                ()->new IdNotFoundException("Reservation", id));
-
-        aux.setStatus(ReservationStatus.CANCELLED);
-        return reservationRepository.save(aux);
     }
 }
