@@ -5,9 +5,9 @@ import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.repository.ConsumerRepository;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 @AllArgsConstructor
 @Service
 public class ConsumerService {

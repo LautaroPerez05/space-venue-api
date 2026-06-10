@@ -16,7 +16,7 @@ import java.util.*;
 public class Consumer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_consumer;
+    private Integer idConsumer;
 
     private String firstname;
     private String lastname;
@@ -34,7 +34,7 @@ public class Consumer {
     @JsonIgnore
     private List<Notification> notificationsList;
 
-    @OneToMany(mappedBy = "consumer_owner")
+    @OneToMany(mappedBy = "consumerOwner")
     @JsonIgnore
     private List<Space> spacesList;
 

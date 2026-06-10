@@ -4,6 +4,8 @@ import com.utn.space.venueaapi.repository.CredentialRepository;
 import com.utn.space.venueaapi.security.JwtFilter;
 import com.utn.space.venueaapi.security.JwtUtil;
 import org.springframework.context.annotation.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,7 +32,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // Desactiva la protección CSRF ya que al usar JWT la API es inherentemente inmune
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Configura la API sin estado, no guarda sesiones en el servidor
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/s&v/usuarios").permitAll() // Permite el paso libre sin token al login y registro de usuarios
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .anyRequest().authenticated() // Exige token JWT obligatorio para ingresar a cualquier otra ruta del sistema
                 );
 
@@ -41,14 +43,19 @@ public class SecurityConfig {
     }
 
 
-    @Bean
+    /*@Bean <-------------- Se eliminaa por duplicado de lógica de usuarios, esto ya existe en CustomUserDetailsService
     public UserDetailsService userDetailsService(CredentialRepository credentialRepository) {
         return username -> credentialRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
-    }
+    }*/
 
     @Bean
     PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

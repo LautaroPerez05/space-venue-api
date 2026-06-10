@@ -38,13 +38,18 @@ public class Space {
 
     @Column(name = "name_space")
     private String nameSpace;
+
     private String description;
+
     @Column(name = "base_price")
     private BigDecimal basePrice;
+
     @Column(name = "publication_date")
     private LocalDate publicationDate;
+
     @Column(name = "buffer_time")
     private Integer bufferTime;
+
     private Boolean isActive;
 
     @OneToMany(mappedBy = "space")

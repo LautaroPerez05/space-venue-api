@@ -15,7 +15,7 @@ public interface SpaceRepository extends JpaRepository<Space, Integer> {
             "( :nameSpace IS NULL OR LOWER(s.nameSpace) LIKE LOWER(CONCAT('%', :nameSpace, '%')) ) AND " +
             "( :minPrice IS NULL OR s.basePrice >= :minPrice ) AND " +
             "( :maxPrice IS NULL OR s.basePrice <= :maxPrice ) AND " +
-            "( :idConsumerOwner IS NULL OR s.consumer_owner.idConsumer = :idConsumerOwner ) AND " +
+            "( :idConsumerOwner IS NULL OR s.consumerOwner.idConsumer = :idConsumerOwner ) AND " +
             "( :idLocation IS NULL OR s.location.idLocation = :idLocation )"
     )
     List<Space> findAllByFields(
