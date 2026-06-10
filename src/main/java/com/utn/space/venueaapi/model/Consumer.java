@@ -1,7 +1,6 @@
 package com.utn.space.venueaapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.utn.space.venueaapi.model.*;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;

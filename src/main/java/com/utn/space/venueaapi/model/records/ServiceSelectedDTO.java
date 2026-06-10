@@ -3,13 +3,13 @@ package com.utn.space.venueaapi.model.records;
 import java.math.BigDecimal;
 
 public record ServiceSelectedDTO(
-        Integer idServiceSelected,
+        Integer id,
         BigDecimal priceAtReservation,
         Integer idReservation,
         String descriptionFrozen
 ) {
-    public ServiceSelectedDTO(Integer idServiceSelected, BigDecimal priceAtReservation, Integer idReservation, String descriptionFrozen) {
-        this.idServiceSelected = idServiceSelected;
+    public ServiceSelectedDTO(Integer id, BigDecimal priceAtReservation, Integer idReservation, String descriptionFrozen) {
+        this.id = id;
         this.priceAtReservation = priceAtReservation;
         this.idReservation = idReservation;
         this.descriptionFrozen = descriptionFrozen;

@@ -19,7 +19,6 @@ public interface ReservationMapper {
 
     @Mapping(target = "consumer", ignore = true)
     @Mapping(target = "space", ignore = true)
-    @Mapping(target = "services", ignore = true)
     @Mapping(target = "googleEventCode", ignore = true)
     Reservation toEntity(ReservationDTO dto);
 
