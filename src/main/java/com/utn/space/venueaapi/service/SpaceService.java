@@ -1,5 +1,4 @@
 package com.utn.space.venueaapi.service;
-
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
@@ -12,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class SpaceService {
@@ -29,8 +29,12 @@ public class SpaceService {
         return spaceRepository.findAll();
     }
 
+    public List<Space> findAllActives(){
+        return spaceRepository.findAllWithOutInactives();
+    }
+
     public Boolean existsById(Integer id){
-        return spaceRepository.existsById(id);
+        return spaceRepository.existsByIdAndIsActiveTrue(id); //Modifique esta logica para no buscar espacios inactivos
     }
 
     public Space findById(Integer id){
@@ -109,7 +113,7 @@ public class SpaceService {
         spaceRepository.save(spaceToInsert);
     }
 
-
+    //Este metodo maneja solo espacios activos
     public List<Space> findAllByFields(SpaceFilterDTO spaceFilterDTO){
         if((spaceFilterDTO.idConsumerOwner() != null) && !consumerService.existsById(spaceFilterDTO.idConsumerOwner())){
             throw new IdNotFoundException("Consumer",spaceFilterDTO.idConsumerOwner());
@@ -125,8 +129,7 @@ public class SpaceService {
                 spaceFilterDTO.minPrice(),
                 spaceFilterDTO.maxPrice(),
                 spaceFilterDTO.nameSpace(),
-                spaceFilterDTO.idLocation() //Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
-        );
+                spaceFilterDTO.idLocation());//Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
 
         //Hago un filtro por proximidad al usuario, solo si este mando latitud y longitud
         if(spaceFilterDTO.lat() != null && spaceFilterDTO.lng() != null){
@@ -141,4 +144,122 @@ public class SpaceService {
 
         return spaces;
     }
+
+
+    //Este metodo considera espacios inactivos
+    public List<Space> findAllByFieldsWithInactives(SpaceFilterDTO spaceFilterDTO){
+        if((spaceFilterDTO.idConsumerOwner() != null) && !consumerService.existsById(spaceFilterDTO.idConsumerOwner())){
+            throw new IdNotFoundException("Consumer",spaceFilterDTO.idConsumerOwner());
+        }
+
+        if((spaceFilterDTO.idLocation() != null) && !locationService.existsById(spaceFilterDTO.idLocation())){
+            throw new IdNotFoundException("Location",spaceFilterDTO.idLocation());
+        }
+
+        //Filtro inicial de mi base de datos
+        List<Space> spaces = spaceRepository.findAllByFieldsWithInactives(
+                spaceFilterDTO.idConsumerOwner(),
+                spaceFilterDTO.minPrice(),
+                spaceFilterDTO.maxPrice(),
+                spaceFilterDTO.nameSpace(),
+                spaceFilterDTO.idLocation());//Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
+
+        //Hago un filtro por proximidad al usuario, solo si este mando latitud y longitud
+        if(spaceFilterDTO.lat() != null && spaceFilterDTO.lng() != null){
+            //Si no encuentro un radio de filtrado en el DTO pongo 5Km de base
+            BigDecimal maxRadious = spaceFilterDTO.radious() != null ? spaceFilterDTO.radious() : new BigDecimal("5.0");
+            //Uso isSpaceNearBy para filtrar la lista de espacios, primero filtro los espacios que tengan datos de ubicacion incompletos para evitar errores
+            spaces = spaces.stream()
+                    .filter(space ->space.getLocation()!= null && space.getLocation().getLatitude() != null && space.getLocation().getLongitude() != null)
+                    .filter(space -> locationService.isSpaceNearby(spaceFilterDTO.lat(),spaceFilterDTO.lng(),maxRadious,space))
+                    .toList();
+        }
+
+        return spaces;
+    }
+
+    public List<Space> findAllForOwner(){
+        Integer loggedOwnerId = consumerService.getLoggedConsumerId();
+        SpaceFilterDTO auxDTO = new SpaceFilterDTO(
+                loggedOwnerId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );//Creo un nuevo record porque no se pueden modificar directamente
+
+        return findAllByFieldsWithInactives(auxDTO);
+    }
+
+    public List<Space> findAllByFieldsForOwner(SpaceFilterDTO spaceFilterDTO){
+        Integer loggedOwnerId = consumerService.getLoggedConsumerId();
+        SpaceFilterDTO auxDTO = new SpaceFilterDTO(
+                loggedOwnerId,
+                spaceFilterDTO.idLocation(),
+                spaceFilterDTO.nameSpace(),
+                spaceFilterDTO.minPrice(),
+                spaceFilterDTO.maxPrice(),
+                spaceFilterDTO.lat(),
+                spaceFilterDTO.lng(),
+                spaceFilterDTO.radious()
+        );//Creo un nuevo record porque no se pueden modificar directamente
+
+        return findAllByFieldsWithInactives(auxDTO);
+    }
+
+    public void deleteOwnedSpace(Integer id){
+        Integer loggedOwnerId = consumerService.getLoggedConsumerId();
+        Space spaceToDelete = findById(id);
+
+        if(!Objects.equals(spaceToDelete.getConsumerOwner().getIdConsumer(), loggedOwnerId)){
+            throw new InvalidDataException("Debe ser duenio de el espacio que desdea eliminar");
+        }
+        deleteById(id);
+    }
+
+    public void insertOwnedSpace(SpaceDTO spaceDTO){
+        Integer loggedOwnerId = consumerService.getLoggedConsumerId();
+        SpaceDTO spaceDTOAux = new SpaceDTO(
+                null,
+                loggedOwnerId,
+                spaceDTO.idLocation(),
+                spaceDTO.idCancellationPolicies(),
+                spaceDTO.googleCalendarId(),
+                spaceDTO.nameSpace(),
+                spaceDTO.description(),
+                spaceDTO.basePrice(),
+                spaceDTO.publicationDate(),
+                spaceDTO.bufferTime(),
+                true
+        );
+
+        insertSpace(spaceDTOAux);
+    }
+
+    public void modifyOwnedSpace(Integer id, SpaceDTO spaceDTO){
+        Integer loggedOwnerId = consumerService.getLoggedConsumerId();
+        Space spaceToModify = findById(id);
+
+        if(!Objects.equals(spaceToModify.getConsumerOwner().getIdConsumer(), loggedOwnerId)){
+            throw new InvalidDataException("Debe ser duenio de el espacio que desea modificar");
+        }
+
+        SpaceDTO spaceDTOAux = new SpaceDTO(
+                id,
+                spaceDTO.idConsumerOwner(),
+                spaceDTO.idLocation(),
+                spaceDTO.idCancellationPolicies(),
+                spaceDTO.googleCalendarId(),
+                spaceDTO.nameSpace(),
+                spaceDTO.description(),
+                spaceDTO.basePrice(),
+                spaceDTO.publicationDate(),
+                spaceDTO.bufferTime(),
+                spaceDTO.isActive()
+        );
+    }
+
 }

@@ -10,5 +10,5 @@ public record SpaceFilterDTO(
         Double maxPrice,
         BigDecimal lat, //Latitud del usuario
         BigDecimal lng, //Longitud del usuario
-        BigDecimal radious) // Radio de busqueda
+        BigDecimal radious)// Radio de busqueda
 {}

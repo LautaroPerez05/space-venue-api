@@ -36,7 +36,6 @@ public class ReservationController {
         this.googleCalendarService = googleCalendarService;
     }
 
-    /// ------------------------------METODOS----------------------------------------------------
 
     @PostMapping("/{id}/checkout")
     @PreAuthorize("hasRole('CLIENT') and @securityUtils.isReservationOwner(#id, authentication.name)")

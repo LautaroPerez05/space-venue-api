@@ -18,6 +18,8 @@ public class CommentService {
     ConsumerService consumerService;
     @Autowired
     SpaceService spaceService;
+    @Autowired
+    ReservationService reservationService;
 
     public List<Comment> findAll(){
         return commentRepository.findAll();

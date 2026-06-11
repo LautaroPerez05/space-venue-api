@@ -17,7 +17,7 @@ public interface CommentRepository extends JpaRepository<Comment,Integer> {
     @Query("SELECT c FROM Comment c WHERE c.space.idSpace = :idSpace")
     List<Comment> findAllBySpaceIdSpace(@Param("idSpace") Integer idSpace);
 
-    @Query("SELECT c FROM Comment c WHERE c.consumer.idConsumer = :idConsumer")
+    @Query("SELECT c FROM Comment c WHERE c.consumer.idConsumer = :idConsumer AND c.space.isActive") //Solo comentarios de espacios activos
     List<Comment> findAllByConsumerIdConsumer(@Param("idConsumer") Integer idConsumer);
 
     List<Comment> findAllByOrderByScoreAsc();

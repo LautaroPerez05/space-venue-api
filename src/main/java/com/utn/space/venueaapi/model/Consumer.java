@@ -16,19 +16,18 @@ public class Consumer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idConsumer;
-
     private String firstname;
     private String lastname;
 
     @Email
     private String email;
-
     private String phone;
 
     @OneToOne
     @JoinColumn(name = "username")
     private Credential credentials;
 
+    /*
     @OneToMany(mappedBy = "consumer")
     @JsonIgnore
     private List<Notification> notificationsList;
@@ -44,4 +43,5 @@ public class Consumer {
     @OneToMany(mappedBy = "consumer")
     @JsonIgnore
     private List<Reservation> reservationsList;
+    */
 }
