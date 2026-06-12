@@ -174,6 +174,12 @@ public class ReservationService {
         return reservationRepository.save(aux);
     }
 
+    public Reservation rejectReservation(Integer id){
+        Reservation aux= reservationRepository.findById(id).orElseThrow(()->new IdNotFoundException ("Reservation", id));
+        aux.setStatus(ReservationStatus.REJECTED);
+        return reservationRepository.save(aux);
+    }
+
     public Reservation cancelReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new IdNotFoundException ("Reservation", id));
         aux.setStatus(ReservationStatus.CANCELLED);
