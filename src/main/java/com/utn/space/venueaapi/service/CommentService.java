@@ -32,7 +32,6 @@ public class CommentService {
     }
 
     public void deleteById(Integer id){
-        Comment commentToDelete = commentRepository.findById(id).orElseThrow();
         if(!commentRepository.existsById(id)){
             throw new IdNotFoundException("No se encontro el comentario a eliminar: ", id);
         }

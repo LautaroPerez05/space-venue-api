@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -26,7 +27,7 @@ public class NotificationController {
     @GetMapping("/consumer/{id}")
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     public ResponseEntity<List<Notification>>findAllByIdConsumer(@PathVariable Integer id, Authentication authentication){
-        if (authentication.getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN"))){
+        if (authentication.getAuthorities().stream().anyMatch(r -> Objects.equals(r.getAuthority(), "ROLE_ADMIN"))){
             //Logica si es un Admin
             return ResponseEntity.ok(notificationService.listAllByIdConsumer(id));
         }

@@ -36,8 +36,6 @@ public class ReservationService {
     @Autowired
     private final SpaceService spaceService;
     @Autowired
-    private final SpaceServiceItemService spaceServiceItemService;
-    @Autowired
     private final GoogleCalendarService googleCalendarService;
     @Autowired
     private final PaymentRepository paymentRepository;
@@ -151,7 +149,7 @@ public class ReservationService {
 
     private void checkModificationPermission(Reservation reservation) {
         boolean isAdmin = Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication())
-                .getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .getAuthorities().stream().anyMatch(a -> Objects.equals(a.getAuthority(), "ROLE_ADMIN"));
 
         if (!isAdmin && !reservation.getStatus().equals(ReservationStatus.TENTATIVE)) {
             throw new AccessDeniedException("No se puede modificar una reserva procesada.");
