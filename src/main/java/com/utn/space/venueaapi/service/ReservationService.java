@@ -45,8 +45,6 @@ public class ReservationService {
     private final RefundService refundService;
 
 
-    ///--------------------------------------------Metodos------------------------------------------------------------------------------
-
     public List<Reservation> findAll (){
         return reservationRepository.findAll();
     }
@@ -217,5 +215,9 @@ public class ReservationService {
         aux.setIsActive(false);
         return reservationRepository.save(aux);
 
+    }
+
+    public List<Reservation> findAllByConsumerId(Integer id){
+        return reservationRepository.findAllByConsumer_IdConsumer(id);
     }
 }

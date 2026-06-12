@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation,Integer> {
@@ -18,4 +19,6 @@ public interface ReservationRepository extends JpaRepository<Reservation,Integer
     boolean existsOverlappingReservation(@Param("idSpace") Integer idSpace,
                                          @Param("fromDate") LocalDateTime fromDate,
                                          @Param("untilDate") LocalDateTime untilDate);
+
+    List<Reservation> findAllByConsumer_IdConsumer(Integer idConsumer);
 }

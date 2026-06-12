@@ -73,4 +73,6 @@ public class ConsumerController {
         consumerService.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado con exito");
     }
+
+
 }

@@ -12,8 +12,8 @@ import java.util.List;
 public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
-
-    /// ---------------------------------Metodos------------------------------------------
+    @Autowired
+    private ConsumerService consumerService;
 
     public List<Notification> listAll(){
         return notificationRepository.findAll();
@@ -31,5 +31,30 @@ public class NotificationService {
 
     public List<Notification> listAllByIdConsumer (Integer id){
         return notificationRepository.findAllByIdConsumer(id);
+    }
+
+    public List<Notification> listAllByIdConsumerForConsumer(){
+        List<Notification> notificationList = notificationRepository.findAllByIdConsumer(consumerService.getLoggedConsumerId());
+
+        for (Notification notification : notificationList){
+            if(!notification.getIsSeen()){
+                markAsSeen(notification.getIdNotification()); //Marco cada una de las notificaciones mostradas como vistas
+            }
+        }
+
+        return notificationList;
+    }
+
+    public List<Notification> listAllUnseenForConsumer(){
+        List<Notification> notificationList = notificationRepository.findAllByIdConsumer(consumerService.getLoggedConsumerId());
+
+        //filtro las notificacion ya vistas.
+        notificationList = notificationList.stream().filter(notification -> notification.getIsSeen()).toList();
+
+        for (Notification notification : notificationList){
+            markAsSeen(notification.getIdNotification()); //Marco cada una de las notificaciones mostradas como vistas
+        }
+
+        return notificationList;
     }
 }

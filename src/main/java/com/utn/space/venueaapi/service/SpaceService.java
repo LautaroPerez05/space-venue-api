@@ -108,7 +108,7 @@ public class SpaceService {
                 spaceDTO.basePrice(),
                 spaceDTO.publicationDate(),
                 spaceDTO.bufferTime(),
-                true);
+                spaceDTO.isActive());// <--Con esta parte el Admin puede verificar espacios
 
         spaceRepository.save(spaceToInsert);
     }
@@ -233,7 +233,7 @@ public class SpaceService {
                 spaceDTO.basePrice(),
                 spaceDTO.publicationDate(),
                 spaceDTO.bufferTime(),
-                true
+                false //Cada espacio debe ser verificado por el Admin
         );
 
         insertSpace(spaceDTOAux);
@@ -258,8 +258,10 @@ public class SpaceService {
                 spaceDTO.basePrice(),
                 spaceDTO.publicationDate(),
                 spaceDTO.bufferTime(),
-                spaceDTO.isActive()
+                false //De base cualquier modificacion hace que el espacio requiera una nueva verificacion
         );
+
+        modifySpace(id, spaceDTOAux);
     }
 
 }
