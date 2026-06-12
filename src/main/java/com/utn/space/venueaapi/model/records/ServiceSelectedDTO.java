@@ -21,7 +21,7 @@ public record ServiceSelectedDTO(
         @NotBlank(groups = {Create.class, Update.class})
         String descriptionFrozen,
 
-        @NotBlank(groups = {Create.class, Update.class})
+        @NotEmpty(groups = {Create.class, Update.class})
         Integer idReservation
 ){}
 //fede no se si se necesita

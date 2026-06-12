@@ -2,21 +2,18 @@ package com.utn.space.venueaapi.model.records;
 
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 
 public record CommentDTO (
-        @NotBlank(groups =Update.class)
+        @NotEmpty(groups = {Create.class, Update.class})
         Integer idComment,
 
-        @NotBlank(groups = {Create.class, Update.class})
+        @NotEmpty(groups = {Create.class, Update.class})
         Integer idConsumer,
 
-        @NotBlank(groups = {Create.class, Update.class})
+        @NotEmpty(groups = {Create.class, Update.class})
         Integer idSpace,
 
         @NotBlank(groups = {Create.class, Update.class})
