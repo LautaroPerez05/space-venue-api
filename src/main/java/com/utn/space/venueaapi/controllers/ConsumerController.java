@@ -31,7 +31,7 @@ public class ConsumerController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/usuarios")
-    public ResponseEntity<String> createUser(@RequestBody Credential credential){
+    public ResponseEntity<String> createUser(@RequestBody Credential credential) {
         // 1. Encriptas la contraseña recibida y la asignas de nuevo al objeto
         String passwordEncriptada = passwordEncoder.encode(credential.getPasswordHash());
         credential.setPasswordHash(passwordEncriptada);
@@ -54,9 +54,11 @@ public class ConsumerController {
     public ResponseEntity<List<Credential>> listAllUsers() {
         return ResponseEntity.ok(credentialService.findAll());
     }
-    @GetMapping("/usuarios/{id}") //publico porque asi podes entrar al perfil de cualquier usuario como si fuese una red social, pero autorizado asi no cualquiera puede entrar a perfiles
+
+    @GetMapping("/usuarios/{id}")
+    //publico porque asi podes entrar al perfil de cualquier usuario como si fuese una red social, pero autorizado asi no cualquiera puede entrar a perfiles
     @PreAuthorize("hasrole('CLIENT')")
-    public Consumer listById(@PathVariable Integer id){
+    public Consumer listById(@PathVariable Integer id) {
         return consumerService.findById(id);
     }
 
@@ -71,19 +73,19 @@ public class ConsumerController {
     //Es para para que el admin filtre consumers
     @GetMapping("/usuarios/byfields")
     @PreAuthorize("hasroles('ADMIN')")
-    public ResponseEntity<List<Consumer>> findAllByFields(@RequestBody ConsumerFilterDTO consumerFilterDTO){
+    public ResponseEntity<List<Consumer>> findAllByFields(@RequestBody ConsumerFilterDTO consumerFilterDTO) {
         return ResponseEntity.ok(consumerService.findAllByfields(consumerFilterDTO));
     }
 
     @DeleteMapping("/usuarios/{id}")
     @PreAuthorize("hasroles('ADMIN')")
-    public ResponseEntity<String> deleteById(@PathVariable Integer id){
+    public ResponseEntity<String> deleteById(@PathVariable Integer id) {
         consumerService.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado con exito");
     }
 
     @PutMapping("/usuario")
-    public ResponseEntity<String> updateUser(@RequestBody ConsumerFilterDTO updateData, Principal principal){
+    public ResponseEntity<String> updateUser(@RequestBody ConsumerFilterDTO updateData, Principal principal) {
         String username = principal.getName();
         Consumer consumerExistente = consumerService.findByUsername(username);
         if (updateData.firstname() != null) consumerExistente.setFirstname(updateData.firstname());
@@ -104,4 +106,14 @@ public class ConsumerController {
         consumerService.updateUser(consumerExistente);
         return ResponseEntity.ok("Se ha actualizado correctamente tu perfil");
     }
+
+    @DeleteMapping("/usuario")
+    public ResponseEntity<String> deleteUser(Principal principal) {
+        String username = principal.getName();
+        // Ejecuta la baja lógica en el servicio
+        consumerService.deleteUserLogically(username);
+        return ResponseEntity.ok("Tu cuenta ha sido desactivada correctamente.");
+    }
+
+
 }

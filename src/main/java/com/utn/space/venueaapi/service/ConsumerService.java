@@ -3,6 +3,7 @@ package com.utn.space.venueaapi.service;
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.NameNotFoundException;
 import com.utn.space.venueaapi.model.Consumer;
+import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.model.records.ConsumerFilterDTO;
 import com.utn.space.venueaapi.repository.ConsumerRepository;
 import jdk.dynalink.linker.LinkerServices;
@@ -76,5 +77,19 @@ public class ConsumerService {
         String username = auth.getName(); // normalmente debería ser el username (credential.username)
         Consumer consumer = findByCredentialsUsername(username);
         return consumer.getIdConsumer();
+    }
+    public void deleteUserLogically(String username) {
+        // 1. Buscas al consumidor por su username
+        Consumer consumer = consumerRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        // 2. Obtienes la entidad Credential asociada
+        Credential credential = consumer.getCredentials();
+        if (credential == null) {
+            throw new RuntimeException("No se encontraron credenciales para este usuario");
+        }
+        // 3. Cambias el atributo de baja lógica
+        credential.setIsActive(false);
+        // 4. Guardas el cambio (al guardar el consumer, JPA actualiza la relación gracias al ciclo de vida)
+        consumerRepository.save(consumer);
     }
 }
