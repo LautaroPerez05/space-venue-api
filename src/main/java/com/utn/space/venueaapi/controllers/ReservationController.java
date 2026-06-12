@@ -93,14 +93,14 @@ public class ReservationController {
     public ResponseEntity<Reservation> createReservation(@Validated(Create.class) @RequestBody ReservationDTO dto) throws IOException {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(reservationService.createReservation(dto));
+                .body(reservationService.create(dto));
     }
 
     @PutMapping
     public ResponseEntity<Reservation> modifyReservation(@Validated(Update.class)@RequestBody ReservationDTO dto){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(reservationService.modifyReservation(dto));
+                .body(reservationService.modify(dto));
     }
 
     @PutMapping("/confirm/{id}")

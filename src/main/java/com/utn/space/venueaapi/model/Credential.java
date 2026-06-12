@@ -18,7 +18,6 @@ public class Credential implements UserDetails {
     @Id
     private String username;
 
-
     @Column(name = "isActive", nullable = false)
     private Boolean isActive = true;
 

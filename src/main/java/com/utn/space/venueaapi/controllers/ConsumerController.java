@@ -5,7 +5,6 @@ import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.model.ERoles;
 import com.utn.space.venueaapi.model.records.ConsumerFilterDTO;
 
-import com.utn.space.venueaapi.repository.ConsumerRepository;
 import com.utn.space.venueaapi.service.ConsumerService;
 import com.utn.space.venueaapi.service.CredentialService;
 import lombok.AllArgsConstructor;
@@ -15,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 import java.util.List;
 
 @AllArgsConstructor
@@ -73,13 +70,13 @@ public class ConsumerController {
     //Es para para que el admin filtre consumers
     @GetMapping("/usuarios/byfields")
     @PreAuthorize("hasroles('ADMIN')")
-    public ResponseEntity<List<Consumer>> findAllByFields(@RequestBody ConsumerFilterDTO consumerFilterDTO) {
+    public ResponseEntity<List<Consumer>> findAllByFields(@RequestBody ConsumerFilterDTO consumerFilterDTO){
         return ResponseEntity.ok(consumerService.findAllByfields(consumerFilterDTO));
     }
 
     @DeleteMapping("/usuarios/{id}")
     @PreAuthorize("hasroles('ADMIN')")
-    public ResponseEntity<String> deleteById(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteById(@PathVariable Integer id){
         consumerService.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado con exito");
     }
@@ -114,6 +111,8 @@ public class ConsumerController {
         consumerService.deleteUserLogically(username);
         return ResponseEntity.ok("Tu cuenta ha sido desactivada correctamente.");
     }
+
+
 
 
 }
