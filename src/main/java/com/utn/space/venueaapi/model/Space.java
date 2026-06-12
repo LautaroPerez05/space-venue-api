@@ -20,34 +20,46 @@ import java.util.List;
 public class Space {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_space;
+    @Column(name = "id_space")
+    private Integer idSpace;
 
     @ManyToOne
-    @JoinColumn(name = "id_consumer_owner")
-    private Consumer consumer_owner;
+    @JoinColumn(name = "idConsumerOwner")
+    private Consumer consumerOwner;
 
     @ManyToOne
-    @JoinColumn(name = "id_location")
+    @JoinColumn(name = "idLocation")
     private Location location;
 
     @OneToOne
-    @JoinColumn(name = "id_cancellation_policies")
-    private CancellationPolicy cancellation_Policy;
+    @JoinColumn(name = "idCancellationPolicies")
+    private CancellationPolicy cancellationPolicy;
 
-    @Column(name = "google_calendar_id")
+    @Column(name = "googleCalendarId")
     private String googleCalendarId;
 
-    private String name_space;
+    @Column(name = "name_space")
+    private String nameSpace;
+
     private String description;
-    private BigDecimal base_price;
-    private LocalDate publication_date;
-    private Integer buffer_time;
+
+    @Column(name = "base_price")
+    private BigDecimal basePrice;
+
+    @Column(name = "publication_date")
+    private LocalDate publicationDate;
+
+    @Column(name = "buffer_time")
+    private Integer bufferTime;
+
     private Boolean isActive;
 
+    /*
     @OneToMany(mappedBy = "space")
     @JsonIgnore
     private List<SpaceServiceItem> services;
 
     public Space(Integer id, Consumer consumer, Location location, CancellationPolicy cancellationPolicies, String s, String s1, String description, BigDecimal bigDecimal, LocalDate localDate, Integer integer) {
     }
+    */
 }

@@ -1,40 +1,53 @@
 package com.utn.space.venueaapi.repository;
 
+import com.utn.space.venueaapi.model.Notification;
 import com.utn.space.venueaapi.model.Space;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import java.time.LocalDate;
-import java.util.List;
-
 @Repository
-public interface SpaceRepository extends JpaRepository<Space,Integer> {
-    /*
-    List<Space> findAllByConsumerOwner_IdConsumer(Long idConsumer);
-    List<Space> findAllByLocation_IdLocation(Long idLocation);
-    List<Space> findAllByNameSpace(String nameSpace);
-    List<Space> findAllByBasePriceBetween(Double minPrice, Double maxPrice);
-    */
-    //Dejo comentada la forma anterior de filtrar
-
-    //Con este metodo puedo filtrar por varios parametros a la vez (id_consumer_owner, id_location, name_space, base_price) , los que no uso simplemente seran null
-    //Estoy mapeando un objeto de clase Space que denomino con el alias "s" ya con el tipo de objto JPA ya sabe que tabla mirar
+public interface SpaceRepository extends JpaRepository<Space, Integer> {
     @Query("SELECT s FROM Space s WHERE " +
-            "( :name_space IS NULL OR LOWER(s.name_space) LIKE LOWER(CONCAT('%', :name_space, '%')) ) AND " +
-            "( :minPrice IS NULL OR s.base_price >= :minPrice ) AND " +
-            "( :maxPrice IS NULL OR s.base_price <= :maxPrice ) AND " +
-            " :id_consumer_owner IS NULL OR s.consumer_owner.id_consumer = :id_consumer_owner AND " +
-            ":id_location IS NULL OR s.location.id_location = :id_location"
+            "( :nameSpace IS NULL OR LOWER(s.nameSpace) LIKE LOWER(CONCAT('%', :nameSpace, '%')) ) AND " +
+            "( :minPrice IS NULL OR s.basePrice >= :minPrice ) AND " +
+            "( :maxPrice IS NULL OR s.basePrice <= :maxPrice ) AND " +
+            "( :idConsumerOwner IS NULL OR s.consumerOwner.idConsumer = :idConsumerOwner ) AND " +
+            "( :idLocation IS NULL OR s.location.idLocation = :idLocation ) AND " +
+            "( s.isActive)" //Este metodo solo busca espacios activos
+
     )
     List<Space> findAllByFields(
-            @Param("id_consumer_owner") Integer id_consumer_owner,
+            @Param("idConsumerOwner") Integer id_consumer_owner,
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice,
-            @Param("name_space") Long name_space,
-            @Param("id_location") Integer id_location
+            @Param("nameSpace") String name_space, // <- Corregido a String
+            @Param("idLocation") Integer id_location
     );
+
+    @Query("SELECT s FROM Space s WHERE " +
+            "( :nameSpace IS NULL OR LOWER(s.nameSpace) LIKE LOWER(CONCAT('%', :nameSpace, '%')) ) AND " +
+            "( :minPrice IS NULL OR s.basePrice >= :minPrice ) AND " +
+            "( :maxPrice IS NULL OR s.basePrice <= :maxPrice ) AND " +
+            "( :idConsumerOwner IS NULL OR s.consumerOwner.idConsumer = :idConsumerOwner ) AND " +
+            "( :idLocation IS NULL OR s.location.idLocation = :idLocation )" //Este metodo no filtra los inactivos
+    )
+    List<Space> findAllByFieldsWithInactives(
+            @Param("idConsumerOwner") Integer id_consumer_owner,
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice,
+            @Param("nameSpace") String name_space, // <- Corregido a String
+            @Param("idLocation") Integer id_location
+    );
+
+
+    @Query("SELECT s FROM Space s WHERE s.isActive")
+    List<Space>findAllWithOutInactives();
+
+    boolean existsByIdAndIsActiveTrue(Integer id);
 }

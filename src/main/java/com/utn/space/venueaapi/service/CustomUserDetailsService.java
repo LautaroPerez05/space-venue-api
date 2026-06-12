@@ -1,9 +1,8 @@
-package com.utn.space.venueaapi.config;
+package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.repository.CredentialRepository;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-@Data
+//@Data <----- se elimina por conflicto entre lombok y Spring Security
 public class CustomUserDetailsService implements UserDetailsService {
     private final CredentialRepository credentialsRepository;
 
@@ -27,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 // La contraseña ya debe estar encriptada en la base de datos con BCrypt
                 .password(currentUser.getPasswordHash())
                 // Le pasamos el rol que trajimos de la BD
-                .roles(currentUser.getRol().toString())
+                .authorities(currentUser.getAuthorities())
                 .build();
     }
 

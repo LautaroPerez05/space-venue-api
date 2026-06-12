@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 
 public record CommentDTO (
         @NotBlank(groups =Update.class)
-        Integer id_comment,
+        Integer idComment,
 
         @NotBlank(groups = {Create.class, Update.class})
-        Integer id_consumer,
+        Integer idConsumer,
 
         @NotBlank(groups = {Create.class, Update.class})
-        Integer id_space,
+        Integer idSpace,
 
         @NotBlank(groups = {Create.class, Update.class})
         String description,

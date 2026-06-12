@@ -18,14 +18,23 @@ public record ServiceSelectedDTO(
         @Positive(groups = {Create.class, Update.class})
         BigDecimal priceAtReservation,
 
+
+
+        @NotBlank(groups = {Create.class, Update.class})
+
+        String descriptionFrozen,
+
         @NotBlank(groups = {Create.class, Update.class})
         Integer idService,
 
         @NotBlank(groups = {Create.class, Update.class})
         Integer idReservation
 ) {
-    public ServiceSelectedDTO(BigDecimal priceAtReservation, Integer idService, Integer idReservation) {
-        this(0, priceAtReservation, idService, idReservation);
+    public ServiceSelectedDTO(Integer id, BigDecimal priceAtReservation, Integer idReservation, String descriptionFrozen) {
+        this.id = id;
+        this.priceAtReservation = priceAtReservation;
+        this.idReservation = idReservation;
+        this.descriptionFrozen = descriptionFrozen;
     }
 }
 //fede no se si se necesita

@@ -14,14 +14,15 @@ import java.time.LocalDateTime;
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_comment;
+    @Column(name = "id_comment")
+    private Integer idComment;
 
     @ManyToOne
-    @JoinColumn(name = "id_consumer")
+    @JoinColumn(name = "idConsumer")
     private Consumer consumer;
 
     @ManyToOne
-    @JoinColumn(name = "id_space")
+    @JoinColumn(name = "idSpace")
     private Space space;
 
     private String description;
@@ -29,5 +30,6 @@ public class Comment {
     @Column(name = "score", nullable = false)
     private Byte score;
 
-    private LocalDateTime created_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 }

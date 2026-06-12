@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_notification")
     private Integer idNotification;
 
     @Column(name = "created_at")
@@ -25,7 +26,7 @@ public class Notification {
     private Boolean isSeen=false;
 
     @ManyToOne
-    @JoinColumn(name = "id_consumer")
+    @JoinColumn(name = "idConsumer")
     @JsonIgnore
     private Consumer consumer;
 

@@ -14,29 +14,43 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ExceptionIdNotFound.class)
-    public ResponseEntity<String> idNotFound (ExceptionIdNotFound e){
+    @ExceptionHandler(IdNotFoundException.class)
+    public ResponseEntity<String> idNotFound (IdNotFoundException e){
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage());
     }
 
-    @ExceptionHandler(ExceptionInvalidDate.class)
-    public ResponseEntity<String> invalidDate(ExceptionInvalidDate e){
+    @ExceptionHandler(InvalidDateException.class)
+    public ResponseEntity<String> invalidDate(InvalidDateException e){
         return ResponseEntity
                 .badRequest()
                 .body(e.getMessage());
     }
 
-    @ExceptionHandler(ExceptionServiceOutOfPlace.class)
-    public ResponseEntity<String> idNotFound (ExceptionServiceOutOfPlace e){
+    @ExceptionHandler(InvalidReservationException.class)
+    public ResponseEntity<String> invalidReservation(InvalidReservationException e){
+        return ResponseEntity
+                .badRequest()
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(SpaceUnavailableException.class)
+    public ResponseEntity<String> spaceUnavailable(SpaceUnavailableException e){
+        return ResponseEntity
+                .badRequest()
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(ServiceOutOfPlaceException.class)
+    public ResponseEntity<String> idNotFound (ServiceOutOfPlaceException e){
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage());
     }
 
-    @ExceptionHandler(ExceptionNameNotFound.class)
-    public ResponseEntity<String> nameNotFound(ExceptionNameNotFound e) {
+    @ExceptionHandler(NameNotFoundException.class)
+    public ResponseEntity<String> nameNotFound(NameNotFoundException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage());

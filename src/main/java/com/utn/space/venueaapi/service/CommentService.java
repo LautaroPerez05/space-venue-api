@@ -1,12 +1,12 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
+import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.Comment;
+import com.utn.space.venueaapi.model.Reservation;
+import com.utn.space.venueaapi.model.ReservationStatus;
 import com.utn.space.venueaapi.model.records.CommentDTO;
 import com.utn.space.venueaapi.repository.CommentRepository;
-import com.utn.space.venueaapi.repository.ConsumerRepository;
-import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,21 +17,32 @@ public class CommentService {
     @Autowired
     CommentRepository commentRepository;
     @Autowired
-    ConsumerRepository consumerRepository;
+    ConsumerService consumerService;
     @Autowired
-    SpaceRepository spaceRepository;
+    SpaceService spaceService;
+    @Autowired
+    ReservationService reservationService;
 
     public List<Comment> findAll(){
         return commentRepository.findAll();
     }
 
     public Comment findById(Integer id){
-        return commentRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Comment", id));
+        return commentRepository.findById(id).orElseThrow(()-> new IdNotFoundException("No se encontro el comentario buscado: ", id));
     }
 
     public void deleteById(Integer id){
         if(!commentRepository.existsById(id)){
-            throw new ExceptionIdNotFound("Comment", id);
+            throw new IdNotFoundException("No se encontro el comentario a eliminar: ", id);
+        }
+        commentRepository.deleteById(id);
+    }
+
+    public void deleteByIdCustomer(Integer id){
+        Comment commentToDelete = commentRepository.findById(id).orElseThrow(()-> new IdNotFoundException("No se encontro el comentario a eliminar: ", id));
+        //Logica para que un usuario solo elimine comentarios propios
+        if(!commentToDelete.getConsumer().getIdConsumer().equals(consumerService.getLoggedConsumerId())){
+            throw new InvalidDataException("No se puede elimnar un comentario que no es propio");
         }
         commentRepository.deleteById(id);
     }
@@ -45,10 +56,12 @@ public class CommentService {
             throw new InvalidDataException("El score ingresado es invalido");
         }
 
+        Integer currentUserId = consumerService.getLoggedConsumerId(); //Comentamos siempre con el id de quien esta loggeado
+
         Comment commentToInsert = new Comment(
                 null,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new ExceptionIdNotFound("Consummer", commentDTO.id_consumer())),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new ExceptionIdNotFound("Space", commentDTO.id_space())),
+                consumerService.findById(currentUserId),
+                spaceService.findById(commentDTO.idSpace()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -59,7 +72,7 @@ public class CommentService {
 
     public void modifyComment(Integer id, CommentDTO commentDTO){
         if(!commentRepository.existsById(id)){
-            throw new ExceptionIdNotFound("Comment", id);
+            throw new IdNotFoundException("No se encontro el comentario a eliminar: ", id);
         }
 
         if(commentDTO.description().isBlank()){
@@ -70,10 +83,12 @@ public class CommentService {
             throw new InvalidDataException("El score ingresado es invalido");
         }
 
+        Integer currentUserId = consumerService.getLoggedConsumerId(); //Comentamos siempre con el id de quien esta loggeado
+
         Comment commentToInsert = new Comment(
                 id,
-                consumerRepository.findById(commentDTO.id_consumer()).orElseThrow(()-> new ExceptionIdNotFound("Consummer", commentDTO.id_consumer())),
-                spaceRepository.findById(commentDTO.id_space()).orElseThrow(()-> new ExceptionIdNotFound("Space", commentDTO.id_space())),
+                consumerService.findById(currentUserId),
+                spaceService.findById(commentDTO.idSpace()),
                 commentDTO.description(),
                 commentDTO.score(),
                 commentDTO.created_at());
@@ -82,15 +97,15 @@ public class CommentService {
     }
 
     public List<Comment> findAllBySpaceId(Integer spaceId){
-        if(!spaceRepository.existsById(spaceId)){
-            throw new ExceptionIdNotFound("Space", spaceId);
+        if(!spaceService.existsById(spaceId)){
+            throw new IdNotFoundException("No se encontro el espacio del cual se quieren buscar comentarios: ", spaceId);
         }
         return commentRepository.findAllBySpaceIdSpace(spaceId);
     }
 
     public List<Comment> findAllByConsumerId(Integer consumerId){
-        if(!consumerRepository.existsById(consumerId)){
-            throw new ExceptionIdNotFound("Consumer", consumerId);
+        if(!consumerService.existsById(consumerId)){
+            throw new IdNotFoundException("No se encontro el consumidor del cual se quieren buscar comentarios: ", consumerId);
         }
         return commentRepository.findAllByConsumerIdConsumer(consumerId);
     }
@@ -100,5 +115,29 @@ public class CommentService {
 
     public List<Comment> filterByScoreDESC(){
         return commentRepository.findAllByOrderByScoreDesc();
+    }
+
+    public void consumerInsertCommentOnSpace(CommentDTO commentDTO){
+        //Averiguamos las reservas del consumer loggeado
+        List<Reservation> reservationsForConsumer = reservationService.findAllByConsumerId(consumerService.getLoggedConsumerId());
+        //Filtramos para que queden solo reservas activas y completas
+        reservationsForConsumer = reservationsForConsumer.stream()
+                .filter(reservation -> reservation.getIsActive() && reservation.getStatus().equals(ReservationStatus.COMPLETED)).toList();
+
+        //Verificamos que alguna de las reservas fue sobre el espacio que queremos comentar
+        if(!reservationsForConsumer.stream().anyMatch(reservation -> reservation.getSpace().getIdSpace().equals(commentDTO.idSpace()))){
+            throw new InvalidDataException("No puede comentar sobre un espacio que nunca reservo o cuya reserva no completo");
+        }
+
+        //Finalmente insertamos el comentario
+        insertComment(commentDTO);
+    }
+
+    public void consumerModifyCommentOnSpace(Integer id,CommentDTO commentDTO){
+        if(!commentDTO.idConsumer().equals(consumerService.getLoggedConsumerId())){
+            throw new InvalidDataException("No se puede modificar un comentario que no es propio");
+        }
+
+        modifyComment(id,commentDTO);
     }
 }

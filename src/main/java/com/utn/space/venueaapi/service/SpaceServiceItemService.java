@@ -1,66 +1,117 @@
 package com.utn.space.venueaapi.service;
 
+import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.SpaceServiceItem;
 import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
-import com.utn.space.venueaapi.repository.SpaceRepository;
 import com.utn.space.venueaapi.repository.SpaceServiceItemRepository;
 import com.utn.space.venueaapi.service.mappers.SpaceServiceItemMapper;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+@AllArgsConstructor
 @Service
 public class SpaceServiceItemService {
-    private final SpaceServiceItemRepository repository;
-    private final SpaceRepository spaceRepository;
+    @Autowired
+    private final SpaceServiceItemRepository spaceServiceItemRepository;
+    @Autowired
+    private final SpaceService spaceService;
+    @Autowired
+    private final ConsumerService consumerService;
 
-    public SpaceServiceItemService(SpaceServiceItemRepository repository, SpaceRepository spaceRepository) {
-        this.repository = repository;
-        this.spaceRepository = spaceRepository;
+    public SpaceServiceItem findById(Integer id){
+        return spaceServiceItemRepository.findById(id).orElseThrow(() -> new IdNotFoundException("Servicio Catálogo", id));
     }
 
     public List<SpaceServiceItemDTO> listOfServicesFromSpace(Integer id){
-        return repository.findAllSpaceServicesBySpaceId(id);
+        return spaceServiceItemRepository.findAllSpaceServicesBySpaceId(id);
+    }
+
+    public List<SpaceServiceItemDTO> ConsumerlistOfServicesFromSpace(Integer id){
+        Integer currentConsumerId = consumerService.getLoggedConsumerId();
+
+        if(!spaceService.findById(id).getConsumerOwner().getIdConsumer().equals(currentConsumerId)){
+            //Si no soy el dueño del espacio
+            //se filtraran espacios inactivos
+            List<SpaceServiceItemDTO> spaceServiceItemDTOs = spaceServiceItemRepository.findAllSpaceServicesBySpaceId(id).stream()
+                    .filter(spaceServiceItemDTO -> spaceService.findById(spaceServiceItemDTO.idSpace()).getIsActive()).toList();
+
+            //Luego se filtran Servicios inactivos
+            spaceServiceItemDTOs = spaceServiceItemDTOs.stream().filter(spaceServiceItemDTO -> spaceServiceItemDTO.isActive()).toList();
+
+            return spaceServiceItemDTOs;
+        }
+        //Si soy el dueño no filtro nada
+        return spaceServiceItemRepository.findAllSpaceServicesBySpaceId(id);
     }
 
     @Transactional
     public void insertServiceItem(SpaceServiceItemDTO serviceItemDTO){
         if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en el precio de un servicio");
 
-        Space space = spaceRepository.findById(serviceItemDTO.idSpace()).orElseThrow(() -> new ExceptionNameNotFound("No se ha encontrado el espacio al que se le quiere asociar un servicio"));
+        Space space = spaceService.findById(serviceItemDTO.idSpace());
 
         SpaceServiceItem serviceItem = SpaceServiceItemMapper.toEntity(serviceItemDTO, space);
 
-        repository.save(serviceItem);
+        spaceServiceItemRepository.save(serviceItem);
+    }
+
+    @Transactional
+    public void insertServiceItemOwner(SpaceServiceItemDTO serviceItemDTO){
+        Integer currentConsumerId = consumerService.getLoggedConsumerId();
+
+        if(!spaceService.findById(serviceItemDTO.idSpace()).getConsumerOwner().getIdConsumer().equals(currentConsumerId)){
+            throw new InvalidDataException("No puede insertar servicios en un espacio del que no es duenio");
+        }
+
+        insertServiceItem(serviceItemDTO);
     }
 
     @Transactional
     public void updateServiceItem(Integer id, SpaceServiceItemDTO serviceItemDTO){
-        if(!repository.existsServiceItemInSpace(id, serviceItemDTO.idSpace())){
-            throw new ExceptionNameNotFound("No se ha encontrado el servicio a modificar en el espacio");
+        if(!spaceServiceItemRepository.existsServiceItemInSpace(id, serviceItemDTO.idSpace())){
+            throw new IdNotFoundException("No se ha encontrado el servicio a modificar en el espacio: ", id);
         }
 
         if(serviceItemDTO.price().compareTo(BigDecimal.ZERO) <= 0) throw new InvalidDataException("No se permiten numeros negativos en modificacion del precio de un servicio");
 
-
-
         SpaceServiceItem serviceItem = SpaceServiceItemMapper.toEntity(
                 serviceItemDTO,
                 id,
-                spaceRepository.findById(serviceItemDTO.idSpace())
-                        .orElseThrow(() -> new ExceptionNameNotFound("No se ha encontrado el espaacio del servicio a modificar")));
+                spaceService.findById(serviceItemDTO.idSpace()));
 
-        repository.save(serviceItem);
+        spaceServiceItemRepository.save(serviceItem);
+    }
+
+    @Transactional
+    public void updateServiceItemOwner(Integer id, SpaceServiceItemDTO serviceItemDTO){
+        Integer currentConsumerId = consumerService.getLoggedConsumerId();
+
+        if(!spaceService.findById(serviceItemDTO.idSpace()).getConsumerOwner().getIdConsumer().equals(currentConsumerId)){
+            throw new InvalidDataException("No puede modificar servicios en un espacio del que no es duenio");
+        }
+
+        updateServiceItem(id,serviceItemDTO);
     }
 
     @Transactional
     public void deleteServiceItem(Integer id, Integer idSpace){
-        if(!repository.existsServiceItemInSpace(id, idSpace)) throw new ExceptionNameNotFound("No se ha encontrado el servicio a eiminar");
-        repository.deleteById(id);
+        if(!spaceServiceItemRepository.existsServiceItemInSpace(id, idSpace)) throw new IdNotFoundException("No se ha encontrado el servicio a eliminar: ", id);
+        spaceServiceItemRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteServiceItemOwner(Integer id, Integer idSpace){
+        Integer currentConsumerId = consumerService.getLoggedConsumerId();
+
+        if(!spaceService.findById(idSpace).getConsumerOwner().getIdConsumer().equals(currentConsumerId)){
+            throw new InvalidDataException("No puede eliminar servicios en un espacio del que no es duenio");
+        }
+        deleteServiceItem(id,idSpace);
     }
 }

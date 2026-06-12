@@ -1,26 +1,63 @@
 package com.utn.space.venueaapi.service;
 
-import com.utn.space.venueaapi.exceptions.ExceptionIdNotFound;
-import com.utn.space.venueaapi.exceptions.ExceptionNameNotFound;
+import com.utn.space.venueaapi.exceptions.IdNotFoundException;
+import com.utn.space.venueaapi.exceptions.NameNotFoundException;
 import com.utn.space.venueaapi.model.Consumer;
+import com.utn.space.venueaapi.model.records.ConsumerFilterDTO;
 import com.utn.space.venueaapi.repository.ConsumerRepository;
+import jdk.dynalink.linker.LinkerServices;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
+@AllArgsConstructor
 @Service
 public class ConsumerService {
+    @Autowired
     private final ConsumerRepository consumerRepository;
 
-    public ConsumerService(ConsumerRepository consumerRepository) {
-        this.consumerRepository = consumerRepository;
+    public Boolean existsById(Integer id){
+        return consumerRepository.existsById(id);
     }
 
-/// ---------------------------Metodos------------------------------------------------------
-
-    public Consumer findById (Integer id){
-        return consumerRepository.findById(id).orElseThrow(()-> new ExceptionIdNotFound("Consumer", id));
+    public Consumer findById(Integer id){
+        return consumerRepository.findById(id).orElseThrow(()-> new IdNotFoundException("Consumer",id));
     }
 
     public Consumer findByCredentialsUsername(String username){
-        return consumerRepository.findByUsername(username).orElseThrow(() -> new ExceptionNameNotFound("No se ha encontrado al usuario buscado por username"));
+        return consumerRepository.findByUsername(username).orElseThrow(() -> new NameNotFoundException("No se ha encontrado al usuario buscado por username"));
+    }
+
+    public List<Consumer> findAllByfields(ConsumerFilterDTO consumerFilterDTO){
+        return consumerRepository.findAllByFilters(
+                consumerFilterDTO.firstname(),
+                consumerFilterDTO.lastname(),
+                consumerFilterDTO.email(),
+                consumerFilterDTO.phone());
+    }
+
+    public void deleteById(Integer id){
+        if(!existsById(id)){
+            throw new IdNotFoundException("Consumer",id);
+        }
+        consumerRepository.deleteById(id);
+    }
+
+    //Quizas esto quieran ponerlo en security utils
+    public Integer getLoggedConsumerId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            throw new IllegalStateException("No hay un usuario autenticado");
+        }
+
+        String username = auth.getName(); // normalmente debería ser el username (credential.username)
+        Consumer consumer = findByCredentialsUsername(username);
+        return consumer.getIdConsumer();
     }
 }

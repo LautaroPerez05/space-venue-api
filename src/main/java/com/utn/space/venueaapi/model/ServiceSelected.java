@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-
+// Este objeto guarda los servicios asociados a una cuenta en el momento de su reserva con el precio que tenian
 @Entity
 @Table(name = "servicesselected")
 @Getter @Setter
@@ -14,13 +14,14 @@ import java.math.BigDecimal;
 public class ServiceSelected {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_service_selected")
-    private Integer id_service_selected;
+    @Column(name = "idServiceSelected")
+    private Integer id;
 
     @Column(name = "price_at_reservation")
-    private BigDecimal price_at_reservation;
+    private BigDecimal priceAtReservation;
 
-    private String description;
+    @Column(name = "descriptionFrozen")
+    String descriptionFrozen;
 
     @ManyToOne
     @JoinColumn(name = "id_reservation")
@@ -29,8 +30,8 @@ public class ServiceSelected {
     private Reservation reservation;
 
     public ServiceSelected(SpaceServiceItem item, Reservation res) {
-        this.price_at_reservation = item.getPrice();
-        this.description=item.getDescription();
+        this.priceAtReservation = item.getPrice();
+        this.descriptionFrozen=item.getDescription();
         this.reservation=res;
     }
 }

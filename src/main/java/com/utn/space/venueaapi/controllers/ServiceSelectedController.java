@@ -1,15 +1,12 @@
 package com.utn.space.venueaapi.controllers;
 
 import com.utn.space.venueaapi.model.records.ServiceSelectedDTO;
-import com.utn.space.venueaapi.model.records.ServiceSelectedWithoutReservationDTO;
 import com.utn.space.venueaapi.service.ServiceSelectedService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/servicesselected")
@@ -23,13 +20,18 @@ public class ServiceSelectedController {
         return ResponseEntity.ok(service.getServicesSelectedOfReservation(idReservation));
     }
 
+    //Este un metodo que inserta servicios sin una reserva?
+    /*
     @PostMapping("/insert")
     public void selectOneServiceForAReservation(@RequestBody ServiceSelectedDTO serviceSelectedDTO){
-        service.insertServiceSelectedForAReservation(serviceSelectedDTO);
+        service.insertServiceForAReservation(serviceSelectedDTO);
     }
+    */
 
+
+    //Este es un metodo que usaría un Consumer para seleccionar los servicios de un espacio que quiere para una reserva
     @PostMapping("/insert/list/{idReservation}")
-    public void selectListOfServicesSelectedOnReservation(@PathVariable Integer idReservation, @RequestBody List<ServiceSelectedWithoutReservationDTO> servicesSelectedDTO){
+    public void selectListOfServicesOnReservation(@PathVariable Integer idReservation, @RequestBody List<ServiceSelectedDTO> servicesSelectedDTO){
         service.insertListOfServicesSelectedInAReservation(idReservation, servicesSelectedDTO);
     }
 

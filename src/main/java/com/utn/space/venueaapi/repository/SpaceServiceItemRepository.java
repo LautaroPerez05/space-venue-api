@@ -11,16 +11,16 @@ import java.util.List;
 
 @Repository
 public interface SpaceServiceItemRepository extends JpaRepository<SpaceServiceItem,Integer> {
-    @Query("SELECT new com.utn.space.venueaapi.model.records.SpaceServiceItemDTO(ss.id, ss.description, ss.price, ss.isActive, sp.id_space) " +
+    @Query("SELECT new com.utn.space.venueaapi.model.records.SpaceServiceItemDTO(ss.id, ss.description, ss.price, ss.isActive, sp.idSpace) " +
             "FROM SpaceServiceItem ss " +
             "JOIN ss.space sp " +
-            "WHERE sp.id_space = :idSpace")
+            "WHERE sp.idSpace = :idSpace")
     List<SpaceServiceItemDTO> findAllSpaceServicesBySpaceId(@Param("idSpace") Integer idSpace);
 
     @Query("SELECT CASE WHEN EXISTS (" +
                 "SELECT s " +
                 "FROM SpaceServiceItem s JOIN s.space sp " +
-                "WHERE s.id = :idItem AND sp.id_space = :idSpace) " +
+                "WHERE s.id = :idItem AND sp.idSpace = :idSpace) " +
             "THEN true ELSE false END")
     boolean existsServiceItemInSpace(Integer idItem, Integer idSpace);
 }

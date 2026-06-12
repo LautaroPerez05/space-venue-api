@@ -11,14 +11,14 @@ import org.mapstruct.Mapping;
 public interface ReservationMapper {
 
     // Corrección de Mappings por errores de compilación (señalaban atributos inexistentes)
-    @Mapping(target = "id_consumer", source = "consumer.id_consumer")
-    @Mapping(target = "id_space", source = "space.id_space")
-    @Mapping(target = "id_servicesSelec", ignore = true)
+    // mapear a los nombres camelCase del DTO usando los nombres reales de las entidades
+    @Mapping(target = "idConsumer", source = "consumer.idConsumer")
+    @Mapping(target = "idSpace", source = "space.idSpace")
+    @Mapping(target = "idServicesSelec", ignore = true)
     ReservationDTO toDTO(Reservation reservation);
 
     @Mapping(target = "consumer", ignore = true)
     @Mapping(target = "space", ignore = true)
-    @Mapping(target = "services", ignore = true)
     @Mapping(target = "googleEventCode", ignore = true)
     Reservation toEntity(ReservationDTO dto);
 
@@ -26,7 +26,7 @@ public interface ReservationMapper {
         if(id == null) return null;
 
         Consumer c = new Consumer();
-        c.setId_consumer(id);
+        c.setIdConsumer(id);
         return c;
     }
 
@@ -34,7 +34,7 @@ public interface ReservationMapper {
         if(id == null) return null;
 
         Space s = new Space();
-        s.setId_space(id);
+        s.setIdSpace(id);
         return s;
     }
 }
