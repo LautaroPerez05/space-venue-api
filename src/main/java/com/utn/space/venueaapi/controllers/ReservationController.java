@@ -9,6 +9,7 @@ import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.GoogleCalendarService;
 import com.utn.space.venueaapi.service.IPaymentService;
 import com.utn.space.venueaapi.service.ReservationService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+
+
+@Tag(name = "Reservaciones", description = "Operaciones sobre Reservación.")
 
 @RestController
 @RequestMapping("/api/reservations")
