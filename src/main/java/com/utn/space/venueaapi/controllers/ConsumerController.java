@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 import java.util.List;
 
 @AllArgsConstructor
@@ -28,7 +30,7 @@ public class ConsumerController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/usuarios")
-    public ResponseEntity<String> createUser(@RequestBody Credential credential){
+    public ResponseEntity<String> createUser(@RequestBody Credential credential) {
         // 1. Encriptas la contraseña recibida y la asignas de nuevo al objeto
         String passwordEncriptada = passwordEncoder.encode(credential.getPasswordHash());
         credential.setPasswordHash(passwordEncriptada);
@@ -52,6 +54,13 @@ public class ConsumerController {
         return ResponseEntity.ok(credentialService.findAll());
     }
 
+    @GetMapping("/usuarios/{id}")
+    //publico porque asi podes entrar al perfil de cualquier usuario como si fuese una red social, pero autorizado asi no cualquiera puede entrar a perfiles
+    @PreAuthorize("hasrole('CLIENT')")
+    public Consumer listById(@PathVariable Integer id) {
+        return consumerService.findById(id);
+    }
+
     // Lógica sin desarrollar
     @PutMapping("/admin/usuarios/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
@@ -73,6 +82,39 @@ public class ConsumerController {
         consumerService.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado con exito");
     }
+
+    @PutMapping("/usuario")
+    public ResponseEntity<String> updateUser(@RequestBody ConsumerFilterDTO updateData, Principal principal) {
+        String username = principal.getName();
+        Consumer consumerExistente = consumerService.findByUsername(username);
+        if (updateData.firstname() != null) consumerExistente.setFirstname(updateData.firstname());
+        if (updateData.lastname() != null) consumerExistente.setLastname(updateData.lastname());
+
+        if (updateData.email() != null && !updateData.email().equals(consumerExistente.getEmail())) {
+            if (consumerService.existByEmail(updateData.email())) {
+                throw new RuntimeException("El correo electrónico ya se encuentra registrado por otro usuario.");
+            }
+            consumerExistente.setEmail(updateData.email()); // <- Se asigna solo si pasa la validación
+        }
+        if (updateData.phone() != null && !updateData.phone().equals(consumerExistente.getPhone())) {
+            if (consumerService.existsByPhone(updateData.phone())) {
+                throw new RuntimeException("El telefono ya se encuentra registrado por otro usuario.");
+            }
+            consumerExistente.setPhone(updateData.phone()); // <- Se asigna solo si pasa la validación
+        }
+        consumerService.updateUser(consumerExistente);
+        return ResponseEntity.ok("Se ha actualizado correctamente tu perfil");
+    }
+
+    @DeleteMapping("/usuario")
+    public ResponseEntity<String> deleteUser(Principal principal) {
+        String username = principal.getName();
+        // Ejecuta la baja lógica en el servicio
+        consumerService.deleteUserLogically(username);
+        return ResponseEntity.ok("Tu cuenta ha sido desactivada correctamente.");
+    }
+
+
 
 
 }
