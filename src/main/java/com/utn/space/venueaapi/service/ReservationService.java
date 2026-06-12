@@ -59,27 +59,27 @@ public class ReservationService {
     }
 
     public Reservation create (ReservationDTO dto) throws IOException {
-        if (dto.getUntilDate().isBefore(dto.getFromDate())) {
+        if (dto.untilDate().isBefore(dto.fromDate())) {
             throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
-        if (dto.getFromDate().isBefore(LocalDateTime.now())) {
+        if (dto.fromDate().isBefore(LocalDateTime.now())) {
             throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
 
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
 
-        Consumer client = consumerService.findById(dto.getIdConsumer());
+        Consumer client = consumerService.findById(dto.idConsumer());
         aux.setConsumer(client);
 
-        Space space = spaceService.findById(dto.getIdSpace());
+        Space space = spaceService.findById(dto.idSpace());
         aux.setSpace(space);
 
         // Corrección: Validación contra el catálogo general y armado de seleccionados
         List<ServiceSelected> serviciosSeleccionados = new ArrayList<>();
         BigDecimal totalServicios = BigDecimal.ZERO;
 
-        for (Integer idService : dto.getIdServicesSelec()) {
+        for (Integer idService : dto.idServicesSelec()) {
             SpaceServiceItem servicioCatalogo = spaceServiceItemRepository.findById(idService)
                     .orElseThrow(() -> new IdNotFoundException("Servicio Catálogo", idService));
 
@@ -129,29 +129,29 @@ public class ReservationService {
     }
 
     public Reservation modify (ReservationDTO dto){
-        if (dto.getUntilDate().isBefore(dto.getFromDate())) {
+        if (dto.untilDate().isBefore(dto.fromDate())) {
             throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
-        if (dto.getFromDate().isBefore(LocalDateTime.now())) {
+        if (dto.fromDate().isBefore(LocalDateTime.now())) {
             throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
-        if(!reservationRepository.existsById(dto.getId())){
-            throw new IdNotFoundException ("Reservation", dto.getId());
+        if(!reservationRepository.existsById(dto.id())){
+            throw new IdNotFoundException ("Reservation", dto.id());
         }
         Reservation nuevaReserva = reservationMapper.toEntity(dto);
 
-        nuevaReserva.setConsumer(consumerService.findById(dto.getIdConsumer()));
+        nuevaReserva.setConsumer(consumerService.findById(dto.idConsumer()));
 
-        nuevaReserva.setSpace(spaceService.findById(dto.getIdSpace()));
+        nuevaReserva.setSpace(spaceService.findById(dto.idSpace()));
 
 
         //limpiar servicios seleccionados anteriores
-        serviceSelectedService.deleteSelectedServiceByReserveId(dto.getId());
+        serviceSelectedService.deleteSelectedServiceByReserveId(dto.id());
 
         //Los cargo de nuevo y actualizado
         List<ServiceSelected> list= new ArrayList<>();
         list= nuevaReserva.getSpace().getServices().stream()
-                .filter(item->dto.getIdServicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
+                .filter(item->dto.idServicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
                 .map(item-> new ServiceSelected(item, nuevaReserva))  //transformo los item en serviceSelected
                 .toList();
 
