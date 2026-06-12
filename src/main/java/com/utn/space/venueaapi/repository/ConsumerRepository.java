@@ -26,4 +26,7 @@ public interface ConsumerRepository extends JpaRepository<Consumer,Integer> {
                                    @Param("lastname") String lastname,
                                    @Param("email") String email,
                                    @Param("phone") String phone);
+
+    boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
 }

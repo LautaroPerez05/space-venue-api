@@ -28,6 +28,9 @@ public class ConsumerService {
     public Consumer findById(Integer id){
         return consumerRepository.findById(id).orElseThrow(()-> new IdNotFoundException("Consumer",id));
     }
+    public Consumer findByUsername(String username){
+        return consumerRepository.findByUsername(username).orElseThrow(() -> new NameNotFoundException("No hay usuarios con ese username"));
+    }
 
     public Consumer findByCredentialsUsername(String username){
         return consumerRepository.findByUsername(username).orElseThrow(() -> new NameNotFoundException("No se ha encontrado al usuario buscado por username"));
@@ -40,12 +43,26 @@ public class ConsumerService {
                 consumerFilterDTO.email(),
                 consumerFilterDTO.phone());
     }
+    public Boolean existByEmail(String email){
+        return consumerRepository.existsByEmail(email);
+    }
+    public Boolean existsByPhone(String phone){
+        return consumerRepository.existsByPhone(phone);
+    }
 
     public void deleteById(Integer id){
         if(!existsById(id)){
             throw new IdNotFoundException("Consumer",id);
         }
         consumerRepository.deleteById(id);
+    }
+    public void updateUser(Consumer consumer) throws IdNotFoundException{
+        if(consumerRepository.existsById(consumer.getIdConsumer())){
+            consumerRepository.save(consumer);
+        }
+        else {
+            throw new IdNotFoundException("Consumer", consumer.getIdConsumer());
+        }
     }
 
     //Quizas esto quieran ponerlo en security utils
