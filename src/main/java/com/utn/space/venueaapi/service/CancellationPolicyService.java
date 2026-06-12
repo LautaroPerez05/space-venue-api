@@ -13,6 +13,6 @@ public class CancellationPolicyService {
     CancellationPolicyRepository cancellationPolicyRepository;
 
     public CancellationPolicy findById(Integer id){
-        return cancellationPolicyRepository.findById(id).orElseThrow(()->new IdNotFoundException("No se encontraron las politicas de cancelacion: ", id));
+        return cancellationPolicyRepository.findById(id).orElseThrow(()->new IdNotFoundException("Politicas de Cancelacion ", id));
     }
 }
