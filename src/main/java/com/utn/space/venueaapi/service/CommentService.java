@@ -119,7 +119,7 @@ public class CommentService {
 
     public void consumerInsertCommentOnSpace(CommentDTO commentDTO){
         //Averiguamos las reservas del consumer loggeado
-        List<Reservation> reservationsForConsumer = reservationService.findAllByConsumerId(consumerService.getLoggedConsumerId());
+        List<Reservation> reservationsForConsumer = reservationService.findByIdConsumer(consumerService.getLoggedConsumerId());
         //Filtramos para que queden solo reservas activas y completas
         reservationsForConsumer = reservationsForConsumer.stream()
                 .filter(reservation -> reservation.getIsActive() && reservation.getStatus().equals(ReservationStatus.COMPLETED)).toList();

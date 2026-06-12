@@ -10,8 +10,8 @@ public class ServiceSelectedMapper {
         return new ServiceSelectedDTO(
                 serviceSelected.getId(),
                 serviceSelected.getPriceAtReservation(),
-                serviceSelected.getReservation().getId(),
-                serviceSelected.getDescriptionFrozen()
+                serviceSelected.getDescriptionFrozen(),
+                serviceSelected.getReservation().getId()
         );
     }
 

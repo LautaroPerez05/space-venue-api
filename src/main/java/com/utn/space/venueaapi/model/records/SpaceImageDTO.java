@@ -8,17 +8,17 @@ import java.time.LocalDateTime;
 
 public record SpaceImageDTO (
         @NotBlank(groups = Update.class)
-        Integer id_image,
+        Integer idImage,
 
         @NotBlank(groups = {Create.class, Update.class})
-        Integer id_space,
+        Integer idSpace,
 
         @NotBlank(groups = {Create.class, Update.class})
-        String file_name,
+        String fileName,
 
         @NotBlank(groups = {Create.class, Update.class})
-        String url_image,
+        String urlImage,
 
         @NotBlank(groups = Update.class)
-        LocalDateTime date_send){
+        LocalDateTime dateSend){
 }

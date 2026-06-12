@@ -56,9 +56,9 @@ public class Reservation {
     @JoinColumn(name = "idSpace")
     private Space space;
 
-    /*
+
     // Cambiado de SpaceServiceItem a ServiceSelected. Mapea contra el atributo 'reservation' de la clase intermedia
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ServiceSelected> services;
-    */
+
 }

@@ -10,7 +10,6 @@ import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,17 +28,19 @@ public class ReservationService {
     @Autowired
     private ConsumerService consumerService;
 
-    private final ReservationRepository reservationRepository;
-    private final ConsumerRepository consumerRepository;
-    private final SpaceRepository spaceRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private SpaceService spaceService;
+
+
     private final SpaceServiceItemRepository spaceServiceItemRepository;
     private final GoogleCalendarService googleCalendarService;
 
-    public ReservationService(ReservationRepository reservationRepository, ConsumerRepository consumerRepository, SpaceRepository spaceRepository, SpaceServiceItemRepository spaceServiceItemRepository, GoogleCalendarService googleCalendarService) {
-        this.reservationRepository = reservationRepository;
-        this.consumerRepository = consumerRepository;
+    public ReservationService( SpaceServiceItemRepository spaceServiceItemRepository, GoogleCalendarService googleCalendarService) {
+
         this.spaceServiceItemRepository = spaceServiceItemRepository;
-        this.spaceRepository = spaceRepository;
         this.googleCalendarService = googleCalendarService;
     }
 
@@ -68,12 +69,10 @@ public class ReservationService {
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
 
-        Consumer client = consumerRepository.findById(dto.getIdConsumer())
-                .orElseThrow(() -> new IdNotFoundException("Consumer", dto.getIdConsumer()));
+        Consumer client = consumerService.findById(dto.getIdConsumer());
         aux.setConsumer(client);
 
-        Space space = spaceRepository.findById(dto.getIdSpace())
-                .orElseThrow(() -> new IdNotFoundException("Space", dto.getIdSpace()));
+        Space space = spaceService.findById(dto.getIdSpace());
         aux.setSpace(space);
 
         // Corrección: Validación contra el catálogo general y armado de seleccionados
@@ -139,13 +138,11 @@ public class ReservationService {
         if(!reservationRepository.existsById(dto.getId())){
             throw new IdNotFoundException ("Reservation", dto.getId());
         }
-        Reservation aux= reservationMapper.toEntity(dto);
+        Reservation nuevaReserva = reservationMapper.toEntity(dto);
 
-        aux.setConsumer(consumerRepository.findById(dto.getIdConsumer())
-                .orElseThrow(()->new IdNotFoundException("Consumer", dto.getIdConsumer())));
+        nuevaReserva.setConsumer(consumerService.findById(dto.getIdConsumer()));
 
-        aux.setSpace(spaceRepository.findById(dto.getIdSpace())
-                .orElseThrow(()->new IdNotFoundException("Space",dto.getIdSpace())));
+        nuevaReserva.setSpace(spaceService.findById(dto.getIdSpace()));
 
 
         //limpiar servicios seleccionados anteriores
@@ -153,21 +150,22 @@ public class ReservationService {
 
         //Los cargo de nuevo y actualizado
         List<ServiceSelected> list= new ArrayList<>();
-        list= aux.getSpace().getServices().stream()
+        list= nuevaReserva.getSpace().getServices().stream()
                 .filter(item->dto.getIdServicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
-                .map(item-> new ServiceSelected(item,aux))  //transformo los item en serviceSelected
+                .map(item-> new ServiceSelected(item, nuevaReserva))  //transformo los item en serviceSelected
                 .toList();
-        aux.setServices(list);
 
-        aux.setFinalPrice(
-                aux.getSpace().getBasePrice().add( //el + no funciona con bigDecimal
-                        aux.getServices()
+        nuevaReserva.setServices(list);
+
+        nuevaReserva.setFinalPrice(
+                nuevaReserva.getSpace().getBasePrice().add( //el + no funciona con bigDecimal
+                        nuevaReserva.getServices()
                                 .stream()
                                 .map(ServiceSelected::getPriceAtReservation)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 )
         );
-        return reservationRepository.save(aux);
+        return reservationRepository.save(nuevaReserva);
     }
 
     public Reservation confirmReservation(Integer id){

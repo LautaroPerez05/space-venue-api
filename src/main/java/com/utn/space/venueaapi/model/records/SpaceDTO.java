@@ -10,38 +10,40 @@ import java.time.LocalDate;
 
 public record SpaceDTO (
         @NotBlank(groups =  Update.class)
-        Integer id_space,
+        Integer idSpace,
 
         @NotBlank(groups = {Create.class, Update.class})
         @Positive(groups = {Create.class, Update.class})
-        Integer id_consumer_owner,
+        Integer idConsumerOwner,
 
         @NotBlank(groups = {Create.class, Update.class})
         @Positive(groups = {Create.class, Update.class})
-        Integer id_location,
+        Integer idLocation,
 
         @NotBlank(groups = {Create.class, Update.class})
         @Positive(groups = {Create.class, Update.class})
-        Integer id_cancellation_policies,
+        Integer idCancellationPolicies,
 
         @NotBlank(groups = {Create.class, Update.class})
-        String google_calendar_id,
+        String googleCalendarId,
 
         @NotBlank(groups = {Create.class, Update.class})
-        String name_space,
+        String nameSpace,
 
         @NotBlank(groups = {Create.class, Update.class})
         String description,
 
         @NotBlank(groups = {Create.class, Update.class})
         @Positive(groups = {Create.class, Update.class})
-        BigDecimal base_price,
+        BigDecimal basePrice,
 
         @NotBlank(groups = {Create.class, Update.class})
-        LocalDate publication_date,
+        LocalDate publicationDate,
 
         @NotBlank(groups = {Create.class, Update.class})
-        Integer buffer_time
+        Integer bufferTime,
+
+        Boolean active
 ) {
 
 }

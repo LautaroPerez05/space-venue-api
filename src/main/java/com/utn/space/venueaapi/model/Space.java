@@ -1,7 +1,11 @@
 package com.utn.space.venueaapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.utn.space.venueaapi.model.flags.Create;
+import com.utn.space.venueaapi.model.flags.Update;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,4 +66,6 @@ public class Space {
     public Space(Integer id, Consumer consumer, Location location, CancellationPolicy cancellationPolicies, String s, String s1, String description, BigDecimal bigDecimal, LocalDate localDate, Integer integer) {
     }
 
+    public Space(Object o, Consumer byId, Location byId1, CancellationPolicy byId2, @NotBlank(groups = {Create.class, Update.class}) String s, @NotBlank(groups = {Create.class, Update.class}) String s1, @NotBlank(groups = {Create.class, Update.class}) String description, @NotBlank(groups = {Create.class, Update.class}) @Positive(groups = {Create.class, Update.class}) BigDecimal bigDecimal, @NotBlank(groups = {Create.class, Update.class}) LocalDate localDate, @NotBlank(groups = {Create.class, Update.class}) Integer integer, boolean b) {
+    }
 }

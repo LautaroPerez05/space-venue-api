@@ -107,8 +107,8 @@ public class SpaceService {
                 spaceDTO.description(),
                 spaceDTO.basePrice(),
                 spaceDTO.publicationDate(),
-                spaceDTO.bufferTime(),
-                spaceDTO.isActive());// <--Con esta parte el Admin puede verificar espacios
+                spaceDTO.bufferTime());
+               // spaceDTO.isActive());// <--Con esta parte el Admin puede verificar espacios, Fede: para que en una DTO?
 
         spaceRepository.save(spaceToInsert);
     }
