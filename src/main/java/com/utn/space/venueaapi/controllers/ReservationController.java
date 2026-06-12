@@ -9,6 +9,12 @@ import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.GoogleCalendarService;
 import com.utn.space.venueaapi.service.IPaymentService;
 import com.utn.space.venueaapi.service.ReservationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +27,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+
+
+
 @RestController
 @RequestMapping("/api/reservations")
+@Tag(name = "Reservaciones", description = "Operaciones sobre Reservación.")
+
 public class ReservationController {
     @Autowired
     private ReservationService reservationService;
@@ -36,10 +47,10 @@ public class ReservationController {
         this.googleCalendarService = googleCalendarService;
     }
 
-
+///---------------------------Metodos------------------------------------------------------------------------------------
     @PostMapping("/{id}/checkout")
     @PreAuthorize("hasRole('CLIENT') and @securityUtils.isReservationOwner(#id, authentication.name)")
-    public ResponseEntity<Map<String, String>> createPaymentPreference(@PathVariable Integer id) {
+    public ResponseEntity<Map<String, String>> createPaymentPreference(@Parameter(description = "ID de la Reservación") @PathVariable Integer id) {
         try {
             Reservation reservation = reservationService.findById(id);
 
@@ -66,6 +77,10 @@ public class ReservationController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Busca TODAS las Reservas.",
+            description = "Devuelve una lista Completa de Reservas."
+    )
     public ResponseEntity<List<Reservation>> findAll (){
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -81,7 +96,11 @@ public class ReservationController {
     */
 
     @GetMapping("/{id}")
-    public ResponseEntity<Reservation> findById (@PathVariable Integer id){
+    @Operation(
+            summary = "Busca una Reserva.",
+            description = "Busca la ID de una reserva y la devuelve."
+    )
+    public ResponseEntity<Reservation> findById ( @Parameter(description = "ID de la Reservación") @PathVariable Integer id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.findById(id));
@@ -90,7 +109,30 @@ public class ReservationController {
 
     @PostMapping
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<Reservation> createReservation(@Validated(Create.class) @RequestBody ReservationDTO dto) throws IOException {
+    @Operation(
+            summary = "Crea una Reserva.",
+            description = "El cliente entra un ReservaDTO por el body."
+    )
+    public ResponseEntity<Reservation> createReservation(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Entra los datos obligatorios de la creacion de una nueva Reserva",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ReservationDTO.class),
+                            examples = @ExampleObject (
+                                    name = "Ejemplo",
+                                    value = """
+                                    {
+                                      "title":"Cumpleaños",
+                                      "id_consumer":1,
+                                      "id_space":2
+                                    }
+                                    """)
+                    )
+            )
+            @Validated(Create.class)
+            @RequestBody ReservationDTO dto) throws IOException {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(reservationService.create(dto));
@@ -105,7 +147,11 @@ public class ReservationController {
 
     @PutMapping("/confirm/{id}")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<Reservation> confirmReservation(@PathVariable Integer id){
+    @Operation(
+            summary = "El duelo Confirma una Reserva.",
+            description = "Busca la ID de una reserva y le cambia su Estado a CONFIRM."
+    )
+    public ResponseEntity<Reservation> confirmReservation(@Parameter(description = "ID de la Reservación") @PathVariable Integer id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.confirmReservation(id));
@@ -113,19 +159,31 @@ public class ReservationController {
 
     // Caso de uso: El Dueño rechaza la solicitud de reserva
     @PutMapping("/reject/{id}")
-    public ResponseEntity<Reservation> rejectReservation(@PathVariable Integer id){
-        return ResponseEntity.ok(reservationService.cancelReservation(id));
+    @Operation(
+            summary = "El duelo rechaza una Reserva.",
+            description = "Busca la ID de una reserva y le cambia su Estado a REJECTED."
+    )
+    public ResponseEntity<Reservation> rejectReservation(@Parameter(description = "ID de la Reservación") @PathVariable Integer id){
+        return ResponseEntity.ok(reservationService.rejectReservation(id));
     }
 
     @PutMapping("/complete/{id}")
-    public ResponseEntity<Reservation> completeReservation(@PathVariable Integer id){
+    @Operation(
+            summary = "Completa una Reserva.",
+            description = "Busca la ID de una reserva y le cambia su Estado a COMPLETED."
+    )
+    public ResponseEntity<Reservation> completeReservation(@Parameter(description = "ID de la Reservación") @PathVariable Integer id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.completeReservation(id));
     }
 
     @PutMapping("/cancel/{id}")
-    public ResponseEntity<Reservation> cancelReservation(@PathVariable Integer id){
+    @Operation(
+            summary = "Cancela una Reserva.",
+            description = "Busca la ID de una reserva y le cambia su Estado a CANCELLED."
+    )
+    public ResponseEntity<Reservation> cancelReservation(@Parameter(description = "ID de la Reservación") @PathVariable Integer id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.cancelReservation(id));
@@ -133,7 +191,11 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity <Reservation> softDelete (@PathVariable Integer id){
+    @Operation(
+            summary = "Hace un borrado suave de una Reserva.",
+            description = "Busca una Reserva por su ID y la marca como borrada(SoftDelete)."
+    )
+    public ResponseEntity <Reservation> softDelete (@Parameter(description = "ID de la Reservación") @PathVariable Integer id){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.softDelete(id));
