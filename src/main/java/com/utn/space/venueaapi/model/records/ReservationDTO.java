@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
 @Schema( description = "DTO de Reservas")
 public record ReservationDTO (
     @NotEmpty(groups = Update.class)
