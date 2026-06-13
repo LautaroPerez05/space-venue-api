@@ -1,5 +1,7 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,8 +23,10 @@ public class Credential implements UserDetails {
     @Column(name = "isActive", nullable = false)
     private Boolean isActive = true;
 
-    @Column(name = "passwordHash")
-    private String passwordHash;
+    // CORRECCIÓN ATÓMICA: Forzamos a Jackson a que mapee este campo bajo este nombre exacto, vaya a donde vaya
+    @JsonProperty("password")
+    @Column(name = "password")
+    private String password;
 
     @Enumerated(EnumType.STRING)
     private ERoles rol = ERoles.ROLE_CLIENT;
@@ -35,7 +39,7 @@ public class Credential implements UserDetails {
     // 3. Devuelve tu campo de contraseña
     @Override
     public String getPassword() {
-        return this.passwordHash;
+        return this.password;
     }
 
     // 4. Devuelve tu campo de usuario

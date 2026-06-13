@@ -24,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         // 2. Traducimos NUESTRO usuario al "User" que entiende Spring Security
         return User.withUsername(currentUser.getUsername())
                 // La contraseña ya debe estar encriptada en la base de datos con BCrypt
-                .password(currentUser.getPasswordHash())
+                .password(currentUser.getPassword())
                 // Le pasamos el rol que trajimos de la BD
                 .authorities(currentUser.getAuthorities())
                 .build();

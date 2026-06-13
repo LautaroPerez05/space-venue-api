@@ -29,18 +29,15 @@ public class CredentialService {
      * Registra o actualiza una credencial aplicando algoritmos de hashing delegados
      */
     public void saveCredential(Credential credential) {
-        if (credential.getPasswordHash() == null || credential.getPasswordHash().isEmpty()) {
+        if (credential.getPassword() == null || credential.getPassword().isEmpty()) {
             throw new IllegalArgumentException("La contraseña de la credencial no puede ser nula o vacía.");
         }
 
-        // 1. Interceptamos la clave en texto plano y la encriptamos de forma segura
-        String securedPassword = passwordEncoder.encode(credential.getPasswordHash());
-        credential.setPasswordHash(securedPassword);
+        String securedPassword = passwordEncoder.encode(credential.getPassword());
+        credential.setPassword(securedPassword);
 
-        // 2. Aseguramos que la credencial nazca activa para que no falle el login
         credential.setIsActive(true);
 
-        // 3. Guardamos en la base de datos
         credentialRepository.save(credential);
     }
 

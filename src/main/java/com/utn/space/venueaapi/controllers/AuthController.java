@@ -45,15 +45,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Credential credential) {
+    public ResponseEntity<String> login(@RequestBody java.util.Map<String, String> loginRequest) {
         try {
+            String username = loginRequest.get("username");
+            String password = loginRequest.get("password");
+
             Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            credential.getUsername(),
-                            credential.getPasswordHash()
-                    )
+                    new UsernamePasswordAuthenticationToken(username, password)
             );
-            String token = jwtUtil.generarToken(credential.getUsername());
+
+            String token = jwtUtil.generarToken(username);
             return ResponseEntity.ok("Bearer " + token);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body("Credenciales inválidas");
@@ -71,11 +72,8 @@ public class AuthController {
         Credential newCredential = new Credential();
         newCredential.setUsername(credential.getUsername());
 
-        // Encriptamos usando BCrypt antes de guardar en la BD
-        String encodedPassword = passwordEncoder.encode(credential.getPasswordHash());
-        newCredential.setPasswordHash(encodedPassword);
+        newCredential.setPassword(credential.getPassword());
 
-        // 3. Guardar en la base de datos
         credentialService.saveCredential(newCredential);
 
         return ResponseEntity.status(201).body("Usuario registrado con éxito");

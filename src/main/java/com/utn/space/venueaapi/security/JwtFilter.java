@@ -47,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.validarToken(jwt, username) && !blacklistService.isTokenBlacklisted(jwt)) {
                 // Crea un objeto de autenticación interna con el usuario y una lista vacía de permisos/roles
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
+                        new UsernamePasswordAuthenticationToken(username, null, java.util.Collections.emptyList());
 
                 // Extrae y asocia detalles del origen de la petición de red (como la IP o sesión remota)
                 authToken.setDetails(new org.springframework.security.web.authentication.WebAuthenticationDetailsSource().buildDetails(request));
