@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.security;
 
+import com.utn.space.venueaapi.service.TokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,10 +15,12 @@ import java.util.ArrayList;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService blacklistService;
 
     // Constructor que permite inyectar el utilitario de manejo de tokens
-    public JwtFilter(JwtUtil jwtUtil) {
+    public JwtFilter(JwtUtil jwtUtil, TokenBlacklistService blacklistService) {
         this.jwtUtil = jwtUtil;
+        this.blacklistService = blacklistService;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Si se halló un usuario válido pero este aún no cuenta con una sesión activa en el hilo de ejecución actual
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtUtil.validarToken(jwt, username)) {
+            if (jwtUtil.validarToken(jwt, username) && !blacklistService.isTokenBlacklisted(jwt)) {
                 // Crea un objeto de autenticación interna con el usuario y una lista vacía de permisos/roles
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
@@ -51,6 +54,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 // Setea formalmente la autenticación en el contexto global de Spring Security para esta petición
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else if (blacklistService.isTokenBlacklisted(jwt)) {
+                // Dejar un log para auditoría interna de intentos de uso de tokens dados de baja
+                logger.warn("Intento de acceso denegado: El usuario '" + username + "' intentó usar un token JWT que ya fue invalidado por Logout.");
             }
         }
 

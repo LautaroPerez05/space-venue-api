@@ -3,7 +3,10 @@ package com.utn.space.venueaapi.controllers;
 import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.security.JwtUtil;
 import com.utn.space.venueaapi.service.CredentialService;
+import com.utn.space.venueaapi.service.TokenBlacklistService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,6 +23,26 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final PasswordEncoder passwordEncoder;
     private final CredentialService credentialService;
+
+    @Autowired
+    private TokenBlacklistService blacklistService;
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            String jwt = bearerToken.substring(7);
+
+            // Extraer el tiempo de expiración restante del JWT para optimizar la memoria
+            long remainingTime = blacklistService.getRemainingExpirationTime(jwt);
+
+            // Guardar en la lista negra
+            blacklistService.blacklistToken(jwt, remainingTime);
+
+            return ResponseEntity.ok("Sesión cerrada exitosamente y token invalidado.");
+        }
+        return ResponseEntity.badRequest().body("Token no provisto o inválido.");
+    }
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody Credential credential) {

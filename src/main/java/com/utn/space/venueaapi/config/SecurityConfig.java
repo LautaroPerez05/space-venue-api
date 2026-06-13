@@ -2,6 +2,7 @@ package com.utn.space.venueaapi.config;
 
 import com.utn.space.venueaapi.security.JwtFilter;
 import com.utn.space.venueaapi.security.JwtUtil;
+import com.utn.space.venueaapi.service.TokenBlacklistService;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,8 +22,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService blacklistService;
 
-    public SecurityConfig(JwtUtil jwtUtil) {this.jwtUtil = jwtUtil;}
+    public SecurityConfig(JwtUtil jwtUtil, TokenBlacklistService blacklistService) {
+        this.jwtUtil = jwtUtil;
+        this.blacklistService = blacklistService;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -45,7 +50,7 @@ public class SecurityConfig {
                 );
 
         // Agrega el filtro interceptor de JWT justo antes del filtro nativo de autenticación de Spring por usuario/contraseña
-        http.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtFilter(jwtUtil, blacklistService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build(); // Retorna la cadena de configuración construida
     }
