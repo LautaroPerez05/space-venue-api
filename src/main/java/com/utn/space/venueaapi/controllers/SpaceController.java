@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.controllers;
 
+import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
@@ -7,6 +8,7 @@ import com.utn.space.venueaapi.service.SpaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -54,9 +56,10 @@ public class SpaceController {
         spaceService.insertSpace(spaceDTO);
     }
 
+    //Lo que hace @Validated es no permitir que se mande un DTO incompleto
     @PostMapping("/ownedspace")
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
-    public void insertOwnedSpace(@RequestBody SpaceDTO spaceDTO){
+    public void insertOwnedSpace(@Validated(Create.class)@RequestBody SpaceDTO spaceDTO){
         spaceService.insertOwnedSpace(spaceDTO);
     }
 

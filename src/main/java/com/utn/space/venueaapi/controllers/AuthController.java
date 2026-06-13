@@ -54,7 +54,13 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(username, password)
             );
 
-            String token = jwtUtil.generarToken(username);
+            // 2. Extraemos el rol REAL que Spring Security cargó desde tu base de datos
+            String rol = auth.getAuthorities().stream()
+                    .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse("ROLE_CLIENT"); // Rol por defecto si el usuario no tuviera ninguno
+
+            String token = jwtUtil.generarToken(username,rol);
             return ResponseEntity.ok("Bearer " + token);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body("Credenciales inválidas");

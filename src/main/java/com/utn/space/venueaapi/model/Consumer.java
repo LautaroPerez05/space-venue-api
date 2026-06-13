@@ -23,25 +23,10 @@ public class Consumer {
     private String email;
     private String phone;
 
-    @OneToOne
+    // Al usar CascadeType.ALL, Hibernate persiste la Credencial
+    // en la base de datos automáticamente al guardar el Consumer.
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "username")
     private Credential credentials;
 
-    /*
-    @OneToMany(mappedBy = "consumer")
-    @JsonIgnore
-    private List<Notification> notificationsList;
-
-    @OneToMany(mappedBy = "consumerOwner")
-    @JsonIgnore
-    private List<Space> spacesList;
-
-    @OneToMany(mappedBy = "consumer")
-    @JsonIgnore
-    private List<Comment> commentsList;
-
-    @OneToMany(mappedBy = "consumer")
-    @JsonIgnore
-    private List<Reservation> reservationsList;
-    */
 }

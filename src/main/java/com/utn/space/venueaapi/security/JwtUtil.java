@@ -18,13 +18,14 @@ public class JwtUtil {
     private final long TIEMPO_EXPIRACION = 36_000_000;
 
     // Construye el token JWT empaquetando el nombre de usuario del cliente
-    public String generarToken(String username) {
+    public String generarToken(String username, String rol) {
         return Jwts.builder()
-                .setSubject(username) // Almacena el identificador principal del usuario (username)
-                .setIssuedAt(new Date(System.currentTimeMillis())) // Registra el momento exacto de emisión
-                .setExpiration(new Date(System.currentTimeMillis() + TIEMPO_EXPIRACION)) // Define el momento de caducidad
-                .signWith(CLAVE_SECRETA) // Firma el contenido para evitar alteraciones maliciosas
-                .compact(); // Compacta la estructura jerárquica en un String plano separado por puntos
+                .setSubject(username)
+                .claim("rol", rol) // Para poder pasar roles en el payload
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + TIEMPO_EXPIRACION))
+                .signWith(CLAVE_SECRETA)
+                .compact();
     }
 
     // Abre el token y extrae su payload de datos (Claims) usando la firma secreta de control
@@ -39,6 +40,11 @@ public class JwtUtil {
     // Recupera directamente el nombre de usuario desde el cuerpo del token
     public String extraerUsername(String token) {
         return extraerClaims(token).getSubject(); // El Subject almacena el username
+    }
+
+    // Metodo para recuperar el rol
+    public String extraerRol(String token) {
+        return extraerClaims(token).get("rol", String.class);
     }
 
     // Verifica que el token pertenezca al usuario en cuestión y que la fecha actual no supere la de expiración

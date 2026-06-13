@@ -1,6 +1,7 @@
 package com.utn.space.venueaapi.service;
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
+import com.utn.space.venueaapi.model.Location;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
@@ -23,6 +24,8 @@ public class SpaceService {
     LocationService locationService;
     @Autowired
     CancellationPolicyService cancellationPolicyService;
+    @Autowired
+    GoogleCalendarService googleCalendarService;
 
 
     public List<Space> findAll(){
@@ -220,23 +223,30 @@ public class SpaceService {
         deleteById(id);
     }
 
-    public void insertOwnedSpace(SpaceDTO spaceDTO){
-        Integer loggedOwnerId = consumerService.getLoggedConsumerId();
-        SpaceDTO spaceDTOAux = new SpaceDTO(
-                null,
-                loggedOwnerId,
-                spaceDTO.idLocation(),
-                spaceDTO.idCancellationPolicies(),
-                spaceDTO.googleCalendarId(),
-                spaceDTO.nameSpace(),
-                spaceDTO.description(),
-                spaceDTO.basePrice(),
-                spaceDTO.publicationDate(),
-                spaceDTO.bufferTime(),
-                false //Cada espacio debe ser verificado por el Admin
-        );
+    public void insertOwnedSpace(SpaceDTO spaceDTO) {
+        Space space = new Space();
 
-        insertSpace(spaceDTOAux);
+        // Mapeas los campos normales del DTO...
+        space.setNameSpace(spaceDTO.nameSpace());
+        space.setDescription(spaceDTO.description());
+        space.setBasePrice(spaceDTO.basePrice());
+        space.setBufferTime(spaceDTO.bufferTime());
+        space.setIsActive(true); //Lo dejo en true por default para no comerme le coco
+
+        // 1. FECHA AUTOMÁTICA: Asignamos la fecha del día de hoy del servidor
+        space.setPublicationDate(java.time.LocalDate.now());
+
+        // 2. GOOGLE CALENDAR ID:
+        //ESTA PARTE HAY QUE CONFIGURARLA
+        String idAutomatico = "cal_" + java.util.UUID.randomUUID().toString();
+        space.setGoogleCalendarId(idAutomatico);
+
+        // 3. LEAFLET
+        //ESTA PARTE HAY QUE CONFIGURARLA
+        space.setLocation(new Location(1,"Calle1","12334","Muncipalidad","7600","MDQ",BigDecimal.TEN,BigDecimal.TEN));
+
+        space.setConsumerOwner(consumerService.findById(consumerService.getLoggedConsumerId()));
+        spaceRepository.save(space);
     }
 
     public void modifyOwnedSpace(Integer id, SpaceDTO spaceDTO){
