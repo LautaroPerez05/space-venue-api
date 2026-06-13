@@ -44,11 +44,18 @@ public class ConsumerService {
                 consumerFilterDTO.email(),
                 consumerFilterDTO.phone());
     }
+
     public Boolean existByEmail(String email){
         return consumerRepository.existsByEmail(email);
     }
+
     public Boolean existsByPhone(String phone){
         return consumerRepository.existsByPhone(phone);
+    }
+
+    public Consumer saveConsumer(Consumer consumer) {
+        // Al usar .save() directo, JPA sabe que si el ID es null debe hacer un INSERT
+        return consumerRepository.saveAndFlush(consumer);
     }
 
     public void deleteById(Integer id){

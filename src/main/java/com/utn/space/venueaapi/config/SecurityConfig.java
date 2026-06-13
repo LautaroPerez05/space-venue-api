@@ -6,19 +6,26 @@ import com.utn.space.venueaapi.service.TokenBlacklistService;
 import org.springframework.context.annotation.*;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // CRUCIAL: Esto habilita @PreAuthorize("hasRole('...')") en tus controladores
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
@@ -32,6 +39,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable()) // Desactiva la protección CSRF ya que al usar JWT la API es inherentemente inmune
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Configura la API sin estado, no guarda sesiones en el servidor
                 .authorizeHttpRequests(auth -> auth
@@ -39,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/spaces/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/spaceimages/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/spaces/search").permitAll()
 
                         // RUTAS EXCLUSIVAS DE ADMINISTRADOR
@@ -56,6 +65,16 @@ public class SecurityConfig {
     }
 
     @Bean
+    public DaoAuthenticationProvider authenticationProvider(
+            UserDetailsService userDetailsService, // Spring inyectará automáticamente tu servicio que implementa la carga de usuarios
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder); // Le obligamos a usar el DelegatingPasswordEncoder
+        return authProvider;
+    }
+
+    @Bean
     PasswordEncoder passwordEncoder(){
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
@@ -63,5 +82,35 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // IMPORTANTÍSIMO: Define qué URLs públicas pueden consumir tu API
+        // Se puede agregar "http://localhost" para pruebas locales y la URL de Render para producción
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost",           // Docker Front estándar (Puerto 80)
+                "http://localhost:3000",      // Servidores locales comunes (Node/React/Python)
+                "http://localhost:5500",      // Live Server de VS Code común
+                "http://127.0.0.1:5500",      // Live Server por IP
+                "http://127.0.0.1",           // Loopback local estándar
+                "https://tu-frontend-desplegado.onrender.com" // <- Reemplaza con tu link real del front
+        ));
+
+        // Métodos HTTP permitidos
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // Cabeceras permitidas. Al usar JWT, es vital permitir "Authorization"
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
+
+        // Permitir que el navegador envíe credenciales (cookies, headers de auth) si fuera necesario
+        configuration.setAllowCredentials(true);
+
+        // Aplicar esta configuración a todas las rutas de la aplicación
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

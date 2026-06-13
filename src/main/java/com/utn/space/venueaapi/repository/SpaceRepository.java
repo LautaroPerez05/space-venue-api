@@ -49,5 +49,5 @@ public interface SpaceRepository extends JpaRepository<Space, Integer> {
     @Query("SELECT s FROM Space s WHERE s.isActive")
     List<Space>findAllWithOutInactives();
 
-    boolean existsByIdAndIsActiveTrue(Integer id);
+    boolean existsByIdSpaceAndIsActiveTrue(Integer idSpace);
 }

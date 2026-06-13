@@ -34,7 +34,7 @@ public class SpaceService {
     }
 
     public Boolean existsById(Integer id){
-        return spaceRepository.existsByIdAndIsActiveTrue(id); //Modifique esta logica para no buscar espacios inactivos
+        return spaceRepository.existsByIdSpaceAndIsActiveTrue(id); //Modifique esta logica para no buscar espacios inactivos
     }
 
     public Space findById(Integer id){
