@@ -1,6 +1,9 @@
 package com.utn.space.venueaapi.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,12 +19,17 @@ import java.util.*;
 @Entity
 public class Credential implements UserDetails {
     @Id
+    @NotBlank
+    @Schema(description = "UserName único del Usuario", example = "Carlos25")
     private String username;
 
     @Column(name = "isActive", nullable = false)
+    @NotBlank
     private Boolean isActive = true;
 
     @Column(name = "passwordHash")
+    @NotBlank
+    @Schema(description = "Contraceña del Usuario", example = "Carlos2000")
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
