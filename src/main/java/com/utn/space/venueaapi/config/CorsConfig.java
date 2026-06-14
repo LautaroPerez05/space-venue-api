@@ -13,7 +13,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Permite todas las rutas de la API (ej: /api/venues, /api/auth)
-                        .allowedOrigins("http://localhost", "http://127.0.0.1", "https://space-venue-front.onrender.com/") // Autoriza a tu frontend de Docker
+                        .allowedOrigins("http://localhost", "http://127.0.0.1") // Autoriza a tu frontend de Docker
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
