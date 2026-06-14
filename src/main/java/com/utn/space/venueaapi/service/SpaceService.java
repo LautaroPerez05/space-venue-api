@@ -1,6 +1,8 @@
 package com.utn.space.venueaapi.service;
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
+import com.utn.space.venueaapi.model.CancellationPolicies;
+import com.utn.space.venueaapi.model.EPolicyType;
 import com.utn.space.venueaapi.model.Location;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
@@ -23,7 +25,7 @@ public class SpaceService {
     @Autowired
     LocationService locationService;
     @Autowired
-    CancellationPolicyService cancellationPolicyService;
+    CancellationPoliciesService cancellationPoliciesService;
     @Autowired
     GoogleCalendarService googleCalendarService;
 
@@ -68,8 +70,8 @@ public class SpaceService {
         Space spaceToInsert = new Space(
                 null,
                 consumerService.findById(spaceDTO.idConsumerOwner()),
-                locationService.findById(spaceDTO.idLocation()),
-                cancellationPolicyService.findById(spaceDTO.idCancellationPolicies()),
+                locationService.findByLongitudeAndLatitude(spaceDTO.location().longitude(), spaceDTO.location().latitude()),
+                cancellationPoliciesService.findByType(EPolicyType.valueOf(spaceDTO.cancellationPolicies())),
                 spaceDTO.googleCalendarId(),
                 spaceDTO.nameSpace(),
                 spaceDTO.description(),
@@ -103,8 +105,8 @@ public class SpaceService {
         Space spaceToInsert = new Space(
                 id,
                 consumerService.findById(spaceDTO.idConsumerOwner()),
-                locationService.findById(spaceDTO.idLocation()),
-                cancellationPolicyService.findById(spaceDTO.idCancellationPolicies()),
+                locationService.findByLongitudeAndLatitude(spaceDTO.location().longitude(), spaceDTO.location().latitude()),
+                cancellationPoliciesService.findByType(EPolicyType.valueOf(spaceDTO.cancellationPolicies())),
                 spaceDTO.googleCalendarId(),
                 spaceDTO.nameSpace(),
                 spaceDTO.description(),
@@ -242,13 +244,36 @@ public class SpaceService {
         space.setGoogleCalendarId(idAutomatico);
 
         // 3. LEAFLET
-        //ESTA PARTE HAY QUE CONFIGURARLA
-        space.setLocation(new Location(1,"Calle1","12334","Muncipalidad","7600","MDQ",BigDecimal.TEN,BigDecimal.TEN));
+        if (spaceDTO.location() != null) {
+            Location nuevaLocacion = new Location();
+            // Seteamos la latitud y longitud que capturó el mapa en el front
+            nuevaLocacion.setLatitude(spaceDTO.location().latitude());
+            nuevaLocacion.setLongitude(spaceDTO.location().longitude());
+
+            // Asignamos esta entidad Location al Espacio
+            space.setLocation(nuevaLocacion);
+        } else {
+            // Validación de seguridad opcional por si falla el payload
+            throw new IllegalArgumentException("La ubicación geográfica es obligatoria mediante el mapa.");
+        }
+
+        if (spaceDTO.cancellationPolicies() != null) {
+            // 1. Convertimos el String del Front al Enum
+            EPolicyType tipoEnum = EPolicyType.valueOf(spaceDTO.cancellationPolicies().toUpperCase());
+
+            // 2. Buscamos en la tabla 'cancellationpolicies' el registro que tenga ese tipo
+            CancellationPolicies politicaBD = cancellationPoliciesService.findByType(tipoEnum);
+
+            // 3. Enlazamos la política encontrada al Espacio
+            space.setCancellationPolicies(politicaBD);
+        }
 
         space.setConsumerOwner(consumerService.findById(consumerService.getLoggedConsumerId()));
+
         spaceRepository.save(space);
     }
 
+    @Transactional
     public void modifyOwnedSpace(Integer id, SpaceDTO spaceDTO){
         Integer loggedOwnerId = consumerService.getLoggedConsumerId();
         Space spaceToModify = findById(id);
@@ -260,8 +285,8 @@ public class SpaceService {
         SpaceDTO spaceDTOAux = new SpaceDTO(
                 id,
                 spaceDTO.idConsumerOwner(),
-                spaceDTO.idLocation(),
-                spaceDTO.idCancellationPolicies(),
+                spaceDTO.location(),
+                spaceDTO.cancellationPolicies(),
                 spaceDTO.googleCalendarId(),
                 spaceDTO.nameSpace(),
                 spaceDTO.description(),

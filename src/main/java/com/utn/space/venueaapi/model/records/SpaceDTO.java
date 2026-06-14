@@ -2,8 +2,8 @@ package com.utn.space.venueaapi.model.records;
 
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -19,12 +19,12 @@ public record SpaceDTO (
         Integer idConsumerOwner,
 
         @NotNull(groups = {Create.class, Update.class})
-        @Positive(groups = {Create.class, Update.class})
-        Integer idLocation,
+        @Valid
+        LocationDTO location,
 
         @NotNull(groups = {Create.class, Update.class})
-        @Positive(groups = {Create.class, Update.class})
-        Integer idCancellationPolicies,
+        @Valid
+        String cancellationPolicies,
 
         // 🟢 QUITAMOS Create.class: Solo se valida al actualizar, en la creación puede ser null
         @NotBlank(groups = Update.class)

@@ -9,8 +9,6 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,13 +29,13 @@ public class Space {
     @JoinColumn(name = "idConsumerOwner")
     private Consumer consumerOwner;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "idLocation")
     private Location location;
 
     @OneToOne
     @JoinColumn(name = "idCancellationPolicies")
-    private CancellationPolicy cancellationPolicy;
+    private CancellationPolicies cancellationPolicies;
 
     @Column(name = "googleCalendarId")
     private String googleCalendarId;
@@ -63,9 +61,9 @@ public class Space {
     @JsonIgnore
     private List<SpaceServiceItem> services;
 
-    public Space(Integer id, Consumer consumer, Location location, CancellationPolicy cancellationPolicies, String s, String s1, String description, BigDecimal bigDecimal, LocalDate localDate, Integer integer) {
+    public Space(Integer id, Consumer consumer, Location location, CancellationPolicies cancellationPolicies, String s, String s1, String description, BigDecimal bigDecimal, LocalDate localDate, Integer integer) {
     }
 
-    public Space(Object o, Consumer byId, Location byId1, CancellationPolicy byId2, @NotBlank(groups = {Create.class, Update.class}) String s, @NotBlank(groups = {Create.class, Update.class}) String s1, @NotBlank(groups = {Create.class, Update.class}) String description, @NotBlank(groups = {Create.class, Update.class}) @Positive(groups = {Create.class, Update.class}) BigDecimal bigDecimal, @NotBlank(groups = {Create.class, Update.class}) LocalDate localDate, @NotBlank(groups = {Create.class, Update.class}) Integer integer, boolean b) {
+    public Space(Object o, Consumer byId, Location byId1, CancellationPolicies byId2, @NotBlank(groups = {Create.class, Update.class}) String s, @NotBlank(groups = {Create.class, Update.class}) String s1, @NotBlank(groups = {Create.class, Update.class}) String description, @NotBlank(groups = {Create.class, Update.class}) @Positive(groups = {Create.class, Update.class}) BigDecimal bigDecimal, @NotBlank(groups = {Create.class, Update.class}) LocalDate localDate, @NotBlank(groups = {Create.class, Update.class}) Integer integer, boolean b) {
     }
 }
