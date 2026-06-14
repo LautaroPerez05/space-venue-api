@@ -54,7 +54,6 @@ public class ConsumerService {
     }
 
     public Consumer saveConsumer(Consumer consumer) {
-        // Al usar .save() directo, JPA sabe que si el ID es null debe hacer un INSERT
         return consumerRepository.saveAndFlush(consumer);
     }
 
