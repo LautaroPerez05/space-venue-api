@@ -127,7 +127,7 @@ public class ReservationController {
                                       "title":"Cumpleaños",
                                       "description":"Cumpleaños de Cecilia",
                                       "googleEventCode":"loquedegoogle",
-                                      "fromDate":"2026-09-15T21:00:00"
+                                      "fromDate":"2026-09-15T21:00:00",
                                       "untilDate":"2026-09-16T05:00:00",
                                       "id_consumer":1,
                                       "id_space":2,
@@ -158,7 +158,7 @@ public class ReservationController {
                                       "title":"Cumpleaños",
                                       "description":"Cumpleaños de Cecilia",
                                       "googleEventCode":"loquedegoogle",
-                                      "fromDate":"2026-09-15T21:00:00"
+                                      "fromDate":"2026-09-15T21:00:00",
                                       "untilDate":"2026-09-16T05:00:00",
                                       "status":"CONFIRMED",
                                       "createdAt":"2026-05-20T011:25:31"
