@@ -41,16 +41,17 @@ public record ReservationDTO (
     @Schema(description = "Precio final de la reserva")
     Double finalPrice,
 
-    @NotEmpty(groups = {Create.class, Update.class})
+    @NotEmpty(groups = Update.class)
     @Schema(description = "Estado de la Reserva", example = "CONFIRMED")
     ReservationStatus status,
 
-    @NotEmpty(groups = {Create.class, Update.class})
+    @NotEmpty(groups = Update.class)
     @Schema(description = "Fecha en la que se hizo la reserva", example = "2026-05-20T011:25:31")
     LocalDateTime createdAt,
 
-    @Schema(description = "Flag para saber si se hizo un softdelete en la reserva", example = "2026-05-20T011:25:31")
+    @Schema(description = "Flag para saber si se hizo un softdelete en la reserva")
     Boolean isActive,
+
     Boolean saveToMyCalendar,
 
     @NotEmpty(groups = {Create.class, Update.class})
@@ -58,7 +59,7 @@ public record ReservationDTO (
     Integer idConsumer,
 
     @NotEmpty(groups = {Create.class, Update.class})
-    @Schema(description = "ID del espacio a reservar", example = "2026-05-20T011:25:31")
+    @Schema(description = "ID del espacio a reservar")
     Integer idSpace,
 
 

@@ -4,8 +4,15 @@ import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.model.ERoles;
 import com.utn.space.venueaapi.model.records.ConsumerFilterDTO;
+
+import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.ConsumerService;
 import com.utn.space.venueaapi.service.CredentialService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +26,8 @@ import java.util.List;
 
 @AllArgsConstructor
 @RestController
+@Tag(name = "Usuarios", description = "Operaciones sobre Consumer.")
+
 @RequestMapping("/api") // CORREGIDO: Se remueve la barra final para evitar URLs del tipo /api//usuarios
 public class ConsumerController {
 
@@ -27,10 +36,35 @@ public class ConsumerController {
 
     @Autowired
     private final CredentialService credentialService;
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/usuarios")
-    @Transactional // Sigue siendo crítico para que todo ocurra en un solo bloque seguro
-    public ResponseEntity<String> createUser(@RequestBody Credential credential) {
+    @Operation(
+            summary = "Crea un Consummer.",
+            description = "Crea un nuevo usuario."
+    )
+    public ResponseEntity<String> createUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Entra los datos obligatorios de la creacion de una nueva Reserva",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = Credential.class),
+                            examples = @ExampleObject(
+                                    name = "Ejemplo",
+                                    value = """
+                                    {
+                                      "username":"Pepe",
+                                      "isActive": true,
+                                      "passwordHash":"fatiga"}
+                                    """)
+                    )
+            )
+            @RequestBody Credential credential) {
+        // 1. Encriptas la contraseña recibida y la asignas de nuevo al objeto
+        String passwordEncriptada = passwordEncoder.encode(credential.getPasswordHash());
+        credential.setPasswordHash(passwordEncriptada);
 
         // 1. Validar duplicados
         if (credentialService.existsByUsername(credential.getUsername())) {
@@ -66,32 +100,70 @@ public class ConsumerController {
     }
 
     @GetMapping("/usuarios")
-    @PreAuthorize("hasRole('ADMIN')") // CORREGIDO: URL limpia. Suficiente y seguro.
+    @PreAuthorize("hasRole('ADMIN')")// CORREGIDO: URL limpia. Suficiente y seguro.
+    @Operation(
+            summary = "Busca todos los usuarios.",
+            description = "Devuelve una lista de todos los usuario."
+    )
     public ResponseEntity<List<Credential>> listAllUsers() {
         return ResponseEntity.ok(credentialService.findAll());
     }
 
     @GetMapping("/usuarios/{id}")
     @PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')") // CORREGIDO: Sintaxis 'hasRole' estricta
+    @Operation(
+            summary = "Busca un Usuario",
+            description = "Busca un usuarios usando su ID."
+    )
     public ResponseEntity<Consumer> listById(@PathVariable Integer id) {
         return ResponseEntity.ok(consumerService.findById(id));
     }
 
     @PutMapping("/usuarios/{id}/status") // CORREGIDO: Estandarizado a /api/usuarios/...
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> toggleUserStatus(@PathVariable Integer id, @RequestParam Boolean active) {
+    @Operation(
+            summary = "Cambia el estado de un Usuario.",
+            description = "Cambia el estado Activo de un usuario por ID."
+    )
+    public ResponseEntity<String> toggleUserStatus(
+            @PathVariable Integer id, @RequestParam Boolean active) {
         // Tu lógica pendiente de service
-        return ResponseEntity.ok("Estado del usuario actualizado correctamente");
+        return ResponseEntity.ok("Estado del usuario actualizado");
     }
 
+    //Es para para que el admin filtre consumers
     @GetMapping("/usuarios/byfields")
-    @PreAuthorize("hasRole('ADMIN')") // CORREGIDO: de 'hasroles' a 'hasRole'
-    public ResponseEntity<List<Consumer>> findAllByFields(@RequestBody ConsumerFilterDTO consumerFilterDTO){
+    @PreAuthorize("hasroles('ADMIN')")// CORREGIDO: de 'hasroles' a 'hasRole'
+    @Operation(
+            summary = "Busca los Usuarios por atributos.",
+            description = "Crea una lista de usuario que cumplen con los atributos dados."
+    )
+    public ResponseEntity<List<Consumer>> findAllByFields(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Entra los datos obligatorios de la creacion de una nueva Reserva",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = Credential.class),
+                            examples = @ExampleObject(
+                                    name = "Ejemplo",
+                                    value = """
+                                    {
+                                      "username":"Pepe",
+                                      "isActive": true,
+                                      "passwordHash":"fatiga"}
+                                    """)
+                    )
+            )
+            @RequestBody ConsumerFilterDTO consumerFilterDTO){
         return ResponseEntity.ok(consumerService.findAllByfields(consumerFilterDTO));
     }
 
     @DeleteMapping("/usuarios/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // CORREGIDO: de 'hasroles' a 'hasRole'
+    @PreAuthorize("hasroles('ADMIN')")// CORREGIDO: de 'hasroles' a 'hasRole'
+    @Operation(
+            summary = "Elimina un usuario por ID."
+    )
     public ResponseEntity<String> deleteById(@PathVariable Integer id){
         consumerService.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado con exito");
@@ -99,7 +171,28 @@ public class ConsumerController {
 
     @PutMapping("/usuario")
     @PreAuthorize("isAuthenticated()") // Asegura que solo usuarios con sesión activa editen su perfil
-    public ResponseEntity<String> updateUser(@RequestBody ConsumerFilterDTO updateData, Principal principal) {
+    @Operation(
+            summary = "Actualiza un Usuario."
+    )
+    public ResponseEntity<String> updateUser(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Entra los datos obligatorios de la creacion de una nueva Reserva",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = Credential.class),
+                            examples = @ExampleObject(
+                                    name = "Ejemplo",
+                                    value = """
+                                    {
+                                      "username":"Pepe",
+                                      "isActive": true,
+                                      "passwordHash":"fatiga"}
+                                    """)
+                    )
+            )
+            @RequestBody ConsumerFilterDTO updateData,
+            Principal principal) {
         String username = principal.getName();
         Consumer consumerExistente = consumerService.findByUsername(username);
 
@@ -126,6 +219,10 @@ public class ConsumerController {
 
     @DeleteMapping("/usuario")
     @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Elimina un Usuario.",
+            description = "Hace un SoftDelete de un usuario."
+    )
     public ResponseEntity<String> deleteUser(Principal principal) {
         String username = principal.getName();
         consumerService.deleteUserLogically(username);

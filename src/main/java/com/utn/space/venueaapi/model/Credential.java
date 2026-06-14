@@ -2,7 +2,10 @@ package com.utn.space.venueaapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,14 +21,19 @@ import java.util.*;
 @Entity
 public class Credential implements UserDetails {
     @Id
+    @NotBlank
+    @Schema(description = "UserName único del Usuario", example = "Carlos25")
     private String username;
 
     @Column(name = "isActive", nullable = false)
+    @NotBlank
     private Boolean isActive = true;
 
     // CORRECCIÓN ATÓMICA: Forzamos a Jackson a que mapee este campo bajo este nombre exacto, vaya a donde vaya
     @JsonProperty("password")
     @Column(name = "password")
+    @NotBlank
+    @Schema(description = "Contraceña del Usuario", example = "Carlos2000")
     private String password;
 
     @Enumerated(EnumType.STRING)
