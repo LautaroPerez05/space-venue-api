@@ -17,14 +17,7 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_location")
     private Integer idLocation;
-    @Column(name = "street_name")
-    private String streetName;
-    @Column(name = "street_number")
-    private String streetNumber;
-    private String municipality;
-    @Column(name = "zip_code")
-    private String zipCode;
-    private String city;
+
     private BigDecimal longitude;
     private BigDecimal latitude;
 }

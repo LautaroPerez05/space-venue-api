@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Table(name = "cancellationpolicies")
 @Entity
 @NoArgsConstructor
-public class CancellationPolicy {
+public class CancellationPolicies {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_cancellation_policies")

@@ -1,6 +1,7 @@
 package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
+import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.Location;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.repository.LocationRepository;
@@ -20,6 +21,11 @@ public class LocationService {
 
     public Location findById(Integer id){
         return locationRepository.findById(id).orElseThrow(()-> new IdNotFoundException("No se encontro la ubicacion: ", id));
+    }
+
+    public Location findByLongitudeAndLatitude(BigDecimal longitude, BigDecimal latitude){
+        return locationRepository.findLocationByLongitudeAndLatitude(longitude, latitude).orElseThrow(
+                () -> new InvalidDataException("No se ha encontrado la ubicación en la base de datos bajo las coordenadas: lt=" + latitude + " lg=" + longitude));
     }
 
     public boolean existsById(Integer id){
