@@ -125,9 +125,13 @@ public class ReservationController {
                                     value = """
                                     {
                                       "title":"Cumpleaños",
+                                      "description":"Cumpleaños de Cecilia",
+                                      "googleEventCode":"loquedegoogle",
+                                      "fromDate":"2026-09-15T21:00:00"
+                                      "untilDate":"2026-09-16T05:00:00",
                                       "id_consumer":1,
-                                      "id_space":2
-                                    }
+                                      "id_space":2,
+                                      "idServicesSelec":[1, 2, 5, 9]}
                                     """)
                     )
             )
@@ -139,7 +143,32 @@ public class ReservationController {
     }
 
     @PutMapping
-    public ResponseEntity<Reservation> modifyReservation(@Validated(Update.class)@RequestBody ReservationDTO dto){
+    public ResponseEntity<Reservation> modifyReservation(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Entra los datos obligatorios de la creacion de una nueva Reserva",
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ReservationDTO.class),
+                            examples = @ExampleObject (
+                                    name = "Ejemplo",
+                                    value = """
+                                    {
+                                      "id": 4,
+                                      "title":"Cumpleaños",
+                                      "description":"Cumpleaños de Cecilia",
+                                      "googleEventCode":"loquedegoogle",
+                                      "fromDate":"2026-09-15T21:00:00"
+                                      "untilDate":"2026-09-16T05:00:00",
+                                      "status":"CONFIRMED",
+                                      "createdAt":"2026-05-20T011:25:31"
+                                      "id_consumer":1,
+                                      "id_space":2,
+                                      "idServicesSelec":[1, 2, 5, 9]}
+                                    """)
+                    )
+            )
+            @Validated(Update.class)@RequestBody ReservationDTO dto){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationService.modify(dto));
