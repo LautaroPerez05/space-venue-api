@@ -24,8 +24,8 @@ Este repositorio contiene la arquitectura completa del proyecto (**Backend** y *
 ## 📋 Requisitos Previos
 
 Antes de comenzar con la instalación, asegúrate de tener instaladas las siguientes herramientas en tu máquina de desarrollo:
-* [Java JDK 25](https://www.oracle.com/java/technologies/downloads/)
-* [MySQL Server](https://dev.mysql.com/downloads/installer/)
+* [Java JDK 17](https://www.oracle.com/java/technologies/downloads/)
+* [MySQL Server/Workbench](https://dev.mysql.com/downloads/installer/)
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 * **IDE Recomendado para el Backend:** [IntelliJ IDEA](https://www.jetbrains.com/idea/) (Necesario para una fácil inyección de variables de entorno).
 
@@ -50,13 +50,15 @@ CREATE DATABASE space_venue_db;
 ### 3. Variables de Entorno
 El archivo `application.properties` está parametrizado para no exponer credenciales. Las siguientes variables deben ser inyectadas en la configuración de ejecución de tu IDE:
 
-| Variable | Descripción / Ejemplo |
-| :--- | :--- |
-| `PORT` | Puerto de escucha del servidor backend (Por defecto: `8080`) |
-| `SPRING_DATASOURCE_URL` | URL de conexión JDBC (Ej: `jdbc:mysql://localhost:3306/space_venue_db`) |
-| `SPRING_DATASOURCE_USERNAME` | Usuario de tu instancia local de MySQL (Ej: `root`) |
-| `SPRING_DATASOURCE_PASSWORD` | Contraseña de tu instancia local de MySQL |
-| `MP_ACCESS_TOKEN` | Token de acceso para la API de Mercado Pago |
+| Variable                     | Descripción / Ejemplo                                                                                                                                                                                                                                          |
+|:-----------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PORT`                       | Puerto de escucha del servidor backend (Por defecto: `8080`)                                                                                                                                                                                                   |
+| `SPRING_DATASOURCE_URL`      | URL de conexión JDBC (Ej: `jdbc:mysql://localhost:3306/space_venue_db`)                                                                                                                                                                                        |
+| `SPRING_DATASOURCE_USERNAME` | Usuario de tu instancia local de MySQL (Ej: `root`)                                                                                                                                                                                                            |
+| `SPRING_DATASOURCE_PASSWORD` | Contraseña de tu instancia local de MySQL                                                                                                                                                                                                                      |
+| `MP_ACCESS_TOKEN`            | Token de acceso para la API de Mercado Pago                                                                                                                                                                                                                    |
+| `ID_FOR_GOOGLE_CALENDAR`     | ID del calendario corporativo donde se centralizan y guardan todas las reservas. Actualmente se utiliza un ID fijo (hardcodeado) para unificar los eventos de los clientes en una cuenta de empresa específica. (Ej:`identificador@group.calendar.google.com`) |
+| `GOOGLE_CREDENTIALS_BASE64`  | Credenciales de servicio de Google para la API. Corresponde al contenido íntegro del archivo de credenciales .json, pero convertido a un único string en formato Base64 (necesario para el despliegue del proyecto). (Ej: `woglCJ0eXBlIjogInNlcnZpY...`)       |
 
 ---
 
