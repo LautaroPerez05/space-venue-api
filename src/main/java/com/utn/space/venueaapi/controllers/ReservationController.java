@@ -116,11 +116,14 @@ public class ReservationController {
                                     name = "Ejemplo",
                                     value = """
                                     {
+                                      "id": 4,
                                       "title":"Cumpleaños",
                                       "description":"Cumpleaños de Cecilia",
                                       "googleEventCode":"loquedegoogle",
                                       "fromDate":"2026-09-15T21:00:00",
                                       "untilDate":"2026-09-16T05:00:00",
+                                      "status":"CONFIRMED",
+                                      "createdAt":"2026-05-20T011:25:31"
                                       "id_consumer":1,
                                       "id_space":2,
                                       "idServicesSelec":[1, 2, 5, 9]}
