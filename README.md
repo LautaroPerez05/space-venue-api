@@ -1,6 +1,6 @@
 # Space & Venue 🚀
 
-**Space & Venue** es una plataforma estilo marketplace y sistema de reservas (booking) para el alquiler temporal de espacios. El sistema está diseñado de manera flexible y sin limitaciones de categorías, permitiendo a los usuarios publicar y rentar desde oficinas vacías y salas de reuniones, hasta cabañas en el bosque, salones de eventos o habitaciones libres.
+**Space & Venue** es una plataforma estilo marketplace y sistema de reservas (booking) para el alquiler temporal de espacios. El sistema está diseñado de manera flexible y sin limitaciones de categorías, permitiendo a los usuarios publicar y rentar desde oficinas vacías y salas de reuniones, hasta salones de eventos o habitaciones libres.
 
 Este repositorio contiene la arquitectura completa del proyecto (**Backend** y **Frontend**). Esta guía está estructurada exclusivamente para desarrolladores que deseen clonar, configurar y ejecutar el entorno de desarrollo local de manera rápida y eficiente.
 
