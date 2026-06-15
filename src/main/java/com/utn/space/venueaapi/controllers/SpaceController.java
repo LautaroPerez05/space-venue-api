@@ -212,7 +212,7 @@ public class SpaceController {
         spaceService.modifySpace(id,spaceDTO);
     }
 
-    //Este metodo va a mostrar solo espacios disponibles
+    //Se modifico de GET a POST porque en los navegadores los GET no permiten mandar un Body
     @GetMapping("/byfields")
     @Operation(
             summary = "Busca TODOS los Espacios Filtrados.",

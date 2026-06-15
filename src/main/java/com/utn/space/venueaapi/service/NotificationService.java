@@ -52,7 +52,7 @@ public class NotificationService {
         List<Notification> notificationList = notificationRepository.findByConsumer_IdConsumer(consumerService.getLoggedConsumerId());
 
         //filtro las notificacion ya vistas.
-        notificationList = notificationList.stream().filter(notification -> notification.getIsSeen()).toList();
+        notificationList = notificationList.stream().filter(Notification::getIsSeen).toList();
 
         for (Notification notification : notificationList){
             markAsSeen(notification.getIdNotification()); //Marco cada una de las notificaciones mostradas como vistas

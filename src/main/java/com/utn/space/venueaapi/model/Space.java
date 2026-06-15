@@ -38,7 +38,7 @@ public class Space {
     @JoinColumn(name = "idCancellationPolicies")
     private CancellationPolicies cancellationPolicies;
 
-    @Column(name = "googleCalendarId", nullable = false)
+    @Column(name = "googleCalendarId", nullable = true)//Para que Google calendar sea opcional
     private String googleCalendarId;
 
     @Column(name = "name_space")

@@ -50,34 +50,46 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
 
-        //Nueva version para manejar los roles de los ususarios
+        // Nueva versión corregida para manejar los roles y atrapar fallas de validación
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtUtil.validarToken(jwt, username) && !blacklistService.isTokenBlacklisted(jwt)) {
+            boolean esValido = jwtUtil.validarToken(jwt, username);
+            boolean estaEnBlacklist = blacklistService.isTokenBlacklisted(jwt);
 
+            if (esValido && !estaEnBlacklist) {
                 // 1. Extraemos el rol real que guardamos en el token
-                String rol = jwtUtil.extraerRol(jwt); // Te va a devolver "ROLE_ADMIN", "ROLE_CLIENT", etc.
+                String rol = jwtUtil.extraerRol(jwt);
 
                 // 2. Convertimos ese String en una autoridad que Spring Security entienda
                 var authority = new org.springframework.security.core.authority.SimpleGrantedAuthority(rol);
                 java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities = java.util.List.of(authority);
 
-                // 3. Reemplazamos 'emptyList()' por nuestra lista de autoridades real
+                // 3. Creamos el token de autenticación formal
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(username, null, authorities);
 
-                // Extrae y asocia detalles del origen de la petición de red (como la IP o sesión remota)
                 authToken.setDetails(new org.springframework.security.web.authentication.WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Setea formalmente la autenticación en el contexto global de Spring Security con sus ROLES reales
+                // Setea formalmente la autenticación en el contexto global
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                logger.info("🟢 JWT Válido. Usuario autenticado localmente: '" + username + "' con rol: " + rol);
 
-            } else if (blacklistService.isTokenBlacklisted(jwt)) {
-                // Dejar un log para auditoría interna de intentos de uso de tokens dados de baja
-                logger.warn("Intento de acceso denegado: El usuario '" + username + "' intentó usar un token JWT que ya fue invalidado por Logout.");
+            } else {
+                // Si el token llegó pero no pasó las validaciones, imprimimos el porqué exacto en tu consola de IntelliJ/VS Code
+                if (estaEnBlacklist) {
+                    logger.warn("Intento de acceso denegado: El token de '" + username + "' está en la Blacklist (Salió por Logout).");
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token invalidado por Logout.");
+                    return; // Corta la petición acá, no va al controlador
+                }
+                if (!esValido) {
+                    logger.error("¡FALLÓ LA VALIDACIÓN DEL JWT! El jwtUtil determinó que el token para '" + username + "' NO es válido en este entorno local.");
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token JWT inválido o expirado en entorno local.");
+                    return; // Corta la petición acá, no va al controlador
+                }
             }
         }
 
-        // Cede el control de la petición para que continúe hacia el siguiente filtro o controlador
+        // Cede el control de la petición para que continúe si todo salio bien
         filterChain.doFilter(request, response);
     }
 }
+

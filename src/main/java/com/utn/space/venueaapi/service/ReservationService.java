@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.service;
 
+import com.google.api.client.util.DateTime;
 import com.utn.space.venueaapi.exceptions.*;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
@@ -59,6 +60,22 @@ public class ReservationService {
         return reservationRepository.findAllByConsumer_IdConsumer(id);
     }
 
+    public List<Reservation> findAllForLoggedConsumer() {
+        Integer loggedCustomerId = consumerService.getLoggedConsumerId();
+        return reservationRepository.findAllByConsumer_IdConsumer(loggedCustomerId);
+    }
+
+    private boolean isSpaceAvailableBetweenDates(LocalDateTime from, LocalDateTime until, Integer spaceId){
+        List<Reservation> reservationsForSpace = reservationRepository.findAllBySpace_IdSpace(spaceId);
+        reservationsForSpace = reservationsForSpace.stream().
+                filter(reservation -> reservation.getStatus().equals(ReservationStatus.CANCELLED)
+                        || reservation.getStatus().equals(ReservationStatus.REJECTED)
+                        || !reservation.getIsActive()).toList(); //filtro reservas canceladas rechazadas o inactivas
+
+        //Busco si alguna de las reservas que quedan se solapa con la reserva actual
+        return !reservationsForSpace.stream().anyMatch(reservation -> !reservation.getFromDate().isAfter(until) && !reservation.getUntilDate().isBefore(from));
+    }
+
     @Transactional
     public Reservation create(ReservationDTO dto) throws IOException {
         if (dto.untilDate().isBefore(dto.fromDate())) {
@@ -68,12 +85,24 @@ public class ReservationService {
             throw new InvalidDateException("La Fecha de Inicio no puede ser en el pasado.");
         }
 
+        Integer idLogueado = consumerService.getLoggedConsumerId();
+
+        if (!isSpaceAvailableBetweenDates(dto.fromDate(),dto.untilDate(),dto.idSpace())){
+            throw new InvalidReservationException("La reserva no esta disponible en la fechas seleccionadas");
+        }
+
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
         aux.setStatus(ReservationStatus.TENTATIVE); // Aseguramos el estado inicial por defecto
         aux.setIsActive(true);
 
         Consumer client = consumerService.findById(dto.idConsumer());
+        if(!idLogueado.equals(dto.idConsumer())) {
+            client = consumerService.findById(idLogueado);
+            /*throw new InvalidDataException("El id del usuario logeado no coresponde con el ingresado por el front: " +
+                    "usLog=" + idLogueado + ", usDto=" + dto.idConsumer());*/
+        }
+
         aux.setConsumer(client);
 
         Space space = spaceService.findById(dto.idSpace());
@@ -101,33 +130,45 @@ public class ReservationService {
         aux.setServices(serviciosSeleccionados);
         aux.setFinalPrice(space.getBasePrice().add(totalServicios));
 
-        // INTEGRACIÓN GOOGLE CALENDAR COHESIVA
+        // =================================================================
+        // INTEGRACIÓN GOOGLE CALENDAR (IGNORA EL NULL DE FORMA SEGURA) Por si no quiero usar Google Calendar
+        // =================================================================
         String googleCalendarId = space.getGoogleCalendarId();
-        String emailCliente = client.getEmail();
-        String emailOferente = space.getConsumerOwner().getEmail();
 
-        String tituloEvento = "Reserva: " + space.getNameSpace() + " - " + dto.title();
-        String descriptionEvento = dto.description() + "\nOrganizador: " + client.getFirstname() + " " + client.getLastname();
+        // 1. Filtro inteligente: Solo entra a Google si el ID NO es nulo ni está vacío
+        if (googleCalendarId != null && !googleCalendarId.trim().isEmpty()) {
+            String emailCliente = client.getEmail();
+            String emailOferente = space.getConsumerOwner().getEmail();
+            String tituloEvento = "Reserva: " + space.getNameSpace() + " - " + dto.title();
+            String descriptionEvento = dto.description() + "\nOrganizador: " + client.getFirstname() + " " + client.getLastname();
 
-        try {
-            String idEventoGoogle = googleCalendarService.sincronizarReservaMultiplesCalendarios(
-                    googleCalendarId,
-                    tituloEvento,
-                    descriptionEvento,
-                    aux.getFromDate(),
-                    aux.getUntilDate(),
-                    emailCliente,
-                    emailOferente,
-                    dto.getSaveToMyCalendar() // Aplica la bandera dinámica
-            );
-            aux.setGoogleEventCode(idEventoGoogle);
-        } catch (IOException e) {
-            System.err.println("ERROR CRÍTICO AL COMUNICAR CON GOOGLE API: " + e.getMessage());
-            throw e;
+            try {
+                String idEventoGoogle = googleCalendarService.sincronizarReservaMultiplesCalendarios(
+                        googleCalendarId,
+                        tituloEvento,
+                        descriptionEvento,
+                        aux.getFromDate(),
+                        aux.getUntilDate(),
+                        emailCliente,
+                        emailOferente,
+                        dto.getSaveToMyCalendar()
+                );
+                aux.setGoogleEventCode(idEventoGoogle);
+                System.out.println("✅ Sincronización con Google Calendar exitosa.");
+            } catch (IOException e) {
+                // Logueamos el error de red/credenciales, pero NO tiramos "throw e;"
+                // Así, si Google falla, la reserva en tu BD local SE GUARDA IGUAL.
+                System.err.println("⚠️ ALERTA: Falló la API de Google, pero la reserva se creó localmente.");
+            }
+        } else {
+            // 2. Si el espacio se creó recién y está en NULL, el flujo pasa por acá limpiamente
+            System.out.println("ℹ️ El espacio #" + space.getIdSpace() + " no tiene Google Calendar configurado. Saltando paso.");
         }
 
+        // Se guarda en la BD local pase lo que pase con Google
         return reservationRepository.save(aux);
     }
+
 
     @Transactional
     public Reservation modify (ReservationDTO dto){
