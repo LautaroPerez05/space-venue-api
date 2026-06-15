@@ -182,7 +182,7 @@ public class ReservationController {
     @PutMapping("/confirm/{id}")
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     @Operation(
-            summary = "El duelo Confirma una Reserva.",
+            summary = "El duenio Confirma una Reserva.",
             description = "Busca la ID de una reserva y le cambia su Estado a CONFIRM."
     )
     public ResponseEntity<Reservation> confirmReservation(@Parameter(description = "ID de la Reservación") @PathVariable Integer id){
@@ -194,7 +194,7 @@ public class ReservationController {
     // Caso de uso: El Dueño rechaza la solicitud de reserva
     @PutMapping("/reject/{id}")
     @Operation(
-            summary = "El duelo rechaza una Reserva.",
+            summary = "El duenio rechaza una Reserva.",
             description = "Busca la ID de una reserva y le cambia su Estado a REJECTED."
     )
     public ResponseEntity<Reservation> rejectReservation(@Parameter(description = "ID de la Reservación") @PathVariable Integer id){

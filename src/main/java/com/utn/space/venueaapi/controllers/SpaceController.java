@@ -75,8 +75,8 @@ public class SpaceController {
         spaceService.modifySpace(id,spaceDTO);
     }
 
-    //Este metodo va a mostrar solo espacios disponibles
-    @GetMapping("/byfields")
+    //Se modifico de GET a POST porque en los navegadores los GET no permiten mandar un Body
+    @PostMapping("/byfields")
     public ResponseEntity<List<Space>> findAllByFields(@RequestBody SpaceFilterDTO spaceFilterDTO){
         return ResponseEntity.ok(spaceService.findAllByFields(spaceFilterDTO));
     }

@@ -21,4 +21,5 @@ public interface ReservationRepository extends JpaRepository<Reservation,Integer
                                          @Param("untilDate") LocalDateTime untilDate);
 
     List<Reservation> findAllByConsumer_IdConsumer(Integer idConsumer);
+    List<Reservation> findAllBySpace_IdSpace(Integer idSpace);
 }
