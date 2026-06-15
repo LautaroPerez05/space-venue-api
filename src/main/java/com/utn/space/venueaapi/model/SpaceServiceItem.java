@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,5 +23,6 @@ public class SpaceServiceItem {
 
     @ManyToOne
     @JoinColumn(name = "idSpace")
+    @JsonBackReference
     private Space space;
 }

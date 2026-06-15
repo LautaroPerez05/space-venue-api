@@ -1,11 +1,8 @@
 package com.utn.space.venueaapi.service;
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
-import com.utn.space.venueaapi.model.CancellationPolicies;
-import com.utn.space.venueaapi.model.EPolicyType;
-import com.utn.space.venueaapi.model.Location;
+import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
-import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
 import com.utn.space.venueaapi.repository.SpaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,6 +212,7 @@ public class SpaceService {
         return findAllByFieldsWithInactives(auxDTO);
     }
 
+    @Transactional
     public void deleteOwnedSpace(Integer id){
         Integer loggedOwnerId = consumerService.getLoggedConsumerId();
         Space spaceToDelete = findById(id);
@@ -225,47 +223,53 @@ public class SpaceService {
         deleteById(id);
     }
 
+    @Transactional
     public void insertOwnedSpace(SpaceDTO spaceDTO) {
         Space space = new Space();
 
-        // Mapeas los campos normales del DTO...
         space.setNameSpace(spaceDTO.nameSpace());
         space.setDescription(spaceDTO.description());
         space.setBasePrice(spaceDTO.basePrice());
         space.setBufferTime(spaceDTO.bufferTime());
-        space.setIsActive(true); //Lo dejo en true por default para no comerme le coco
+        space.setIsActive(true);
 
         // 1. FECHA AUTOMÁTICA: Asignamos la fecha del día de hoy del servidor
         space.setPublicationDate(java.time.LocalDate.now());
 
         // 2. GOOGLE CALENDAR ID:
-        //ESTA PARTE HAY QUE CONFIGURARLA
-        String idAutomatico = "cal_" + java.util.UUID.randomUUID().toString();
-        space.setGoogleCalendarId(idAutomatico);
+        // Hardcodeado para guardar el evento en el calendario principal de la cuenta que está
+        // conectada (implementando variable de entorno que puede tener el valo de "primary" o
+        // el id del calendario compartido entre el mail de servicio proveido en
+        // googles-credentials.json y la cuenta que reserve x espacio)
+        space.setGoogleCalendarId(System.getenv("ID_FOR_GOOGLE_CALENDAR"));
 
         // 3. LEAFLET
         if (spaceDTO.location() != null) {
             Location nuevaLocacion = new Location();
-            // Seteamos la latitud y longitud que capturó el mapa en el front
             nuevaLocacion.setLatitude(spaceDTO.location().latitude());
             nuevaLocacion.setLongitude(spaceDTO.location().longitude());
 
-            // Asignamos esta entidad Location al Espacio
             space.setLocation(nuevaLocacion);
         } else {
-            // Validación de seguridad opcional por si falla el payload
             throw new IllegalArgumentException("La ubicación geográfica es obligatoria mediante el mapa.");
         }
 
         if (spaceDTO.cancellationPolicies() != null) {
-            // 1. Convertimos el String del Front al Enum
             EPolicyType tipoEnum = EPolicyType.valueOf(spaceDTO.cancellationPolicies().toUpperCase());
-
-            // 2. Buscamos en la tabla 'cancellationpolicies' el registro que tenga ese tipo
             CancellationPolicies politicaBD = cancellationPoliciesService.findByType(tipoEnum);
-
-            // 3. Enlazamos la política encontrada al Espacio
             space.setCancellationPolicies(politicaBD);
+        }
+
+        if (spaceDTO.services() != null && !spaceDTO.services().isEmpty()) {
+            List<SpaceServiceItem> items = spaceDTO.services().stream().map(sDto -> {
+                SpaceServiceItem item = new SpaceServiceItem();
+                item.setDescription(sDto.description());
+                item.setPrice(sDto.price());
+                item.setIsActive(true);
+                item.setSpace(space); // Relación bidireccional
+                return item;
+            }).toList();
+            space.setServices(items);
         }
 
         space.setConsumerOwner(consumerService.findById(consumerService.getLoggedConsumerId()));
@@ -293,7 +297,8 @@ public class SpaceService {
                 spaceDTO.basePrice(),
                 spaceDTO.publicationDate(),
                 spaceDTO.bufferTime(),
-                false //De base cualquier modificacion hace que el espacio requiera una nueva verificacion
+                false, //De base cualquier modificacion hace que el espacio requiera una nueva verificacion
+                spaceDTO.services()
         );
 
         modifySpace(id, spaceDTOAux);

@@ -10,6 +10,7 @@ import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -58,16 +59,19 @@ public class ReservationService {
         return reservationRepository.findAllByConsumer_IdConsumer(id);
     }
 
-    public Reservation create (ReservationDTO dto) throws IOException {
+    @Transactional
+    public Reservation create(ReservationDTO dto) throws IOException {
         if (dto.untilDate().isBefore(dto.fromDate())) {
             throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
         if (dto.fromDate().isBefore(LocalDateTime.now())) {
-            throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");
+            throw new InvalidDateException("La Fecha de Inicio no puede ser en el pasado.");
         }
 
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
+        aux.setStatus(ReservationStatus.TENTATIVE); // Aseguramos el estado inicial por defecto
+        aux.setIsActive(true);
 
         Consumer client = consumerService.findById(dto.idConsumer());
         aux.setConsumer(client);
@@ -75,59 +79,57 @@ public class ReservationService {
         Space space = spaceService.findById(dto.idSpace());
         aux.setSpace(space);
 
-        // Corrección: Validación contra el catálogo general y armado de seleccionados
         List<ServiceSelected> serviciosSeleccionados = new ArrayList<>();
         BigDecimal totalServicios = BigDecimal.ZERO;
 
-        for (Integer idService : dto.idServicesSelec()) {
-            SpaceServiceItem servicioCatalogo = spaceServiceItemRepository.findById(idService)
-                    .orElseThrow(() -> new IdNotFoundException("Servicio Catálogo", idService));
+        // Defensa contra nulos si el usuario no seleccionó ningún opcional
+        if (dto.idServicesSelec() != null) {
+            for (Integer idService : dto.idServicesSelec()) {
+                SpaceServiceItem servicioCatalogo = spaceServiceItemRepository.findById(idService)
+                        .orElseThrow(() -> new IdNotFoundException("Servicio Catálogo", idService));
 
-            if (!servicioCatalogo.getSpace().getIdSpace().equals(space.getIdSpace())) {
-                throw new ServiceOutOfPlaceException("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
+                if (!servicioCatalogo.getSpace().getIdSpace().equals(space.getIdSpace())) {
+                    throw new ServiceOutOfPlaceException("El servicio con ID " + idService + " no corresponde al espacio seleccionado.");
+                }
+
+                ServiceSelected selected = new ServiceSelected(servicioCatalogo, aux);
+                totalServicios = totalServicios.add(servicioCatalogo.getPrice());
+                serviciosSeleccionados.add(selected);
             }
-
-            ServiceSelected selected = new ServiceSelected();
-            selected.setReservation(aux);
-            selected.setDescriptionFrozen(servicioCatalogo.getDescription());
-            selected.setPriceAtReservation(servicioCatalogo.getPrice());
-
-            totalServicios = totalServicios.add(servicioCatalogo.getPrice());
-
-            serviciosSeleccionados.add(selected);
         }
 
         aux.setServices(serviciosSeleccionados);
-
         aux.setFinalPrice(space.getBasePrice().add(totalServicios));
 
-        // Extrae los datos dinámicos necesarios para configurar las invitaciones del evento
-        String googleCalendarId = space.getGoogleCalendarId(); // ID del calendario guardado en el modelo Space
-        String emailCliente = client.getEmail();                 // Email del consumidor para mandarle la invitación
-        String emailOferente = space.getConsumerOwner().getEmail(); // Email del dueño/oferente del salón
+        // INTEGRACIÓN GOOGLE CALENDAR COHESIVA
+        String googleCalendarId = space.getGoogleCalendarId();
+        String emailCliente = client.getEmail();
+        String emailOferente = space.getConsumerOwner().getEmail();
 
-        String tituloEvento = "Reserva: " + space.getNameSpace();
-        String descripcionEvento = "Reserva confirmada de espacio. Cliente: " + client.getFirstname() + " " + client.getLastname();
+        String tituloEvento = "Reserva: " + space.getNameSpace() + " - " + dto.title();
+        String descriptionEvento = dto.description() + "\nOrganizador: " + client.getFirstname() + " " + client.getLastname();
 
-        // Invoca el metodo remoto de sincronización múltiple pasando los parámetros correspondientes
-        String idEventoGoogle = googleCalendarService.sincronizarReservaMultiplesCalendarios(
-                googleCalendarId,
-                tituloEvento,
-                descripcionEvento,
-                aux.getFromDate(),
-                aux.getUntilDate(),
-                emailCliente,
-                emailOferente,
-                dto.getSaveToMyCalendar() // Campo booleano provisto por el DTO para respetar la decisión del usuario
-        );
-
-        // 3. Setea el código hash único devuelto por Google en tu atributo de base de datos local
-        aux.setGoogleEventCode(idEventoGoogle);
+        try {
+            String idEventoGoogle = googleCalendarService.sincronizarReservaMultiplesCalendarios(
+                    googleCalendarId,
+                    tituloEvento,
+                    descriptionEvento,
+                    aux.getFromDate(),
+                    aux.getUntilDate(),
+                    emailCliente,
+                    emailOferente,
+                    dto.getSaveToMyCalendar() // Aplica la bandera dinámica
+            );
+            aux.setGoogleEventCode(idEventoGoogle);
+        } catch (IOException e) {
+            System.err.println("ERROR CRÍTICO AL COMUNICAR CON GOOGLE API: " + e.getMessage());
+            throw e;
+        }
 
         return reservationRepository.save(aux);
-
     }
 
+    @Transactional
     public Reservation modify (ReservationDTO dto){
         if (dto.untilDate().isBefore(dto.fromDate())) {
             throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");

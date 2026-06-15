@@ -39,9 +39,9 @@ public class GoogleCalendarService {
         // 1. Instancia el modelo del evento base de Google
         Event evento = new Event()
                 .setSummary(title)
-                .setDescription(description);
+                .setDescription(description + "\n\nCliente: " + emailClient + "\nDueño: " + emailOwner); // 🌟 Colocamos los correos en la descripción para que no se pierdan
 
-        // 2. Formatea y setea la fecha/hora de inicio convirtiendo de LocalDateTime a DateTime de Google
+        // 2. Formatea y setea la fecha/hora de inicio
         Date dateFrom = Date.from(introduction.atZone(ZoneId.systemDefault()).toInstant());
         EventDateTime start = new EventDateTime().setDateTime(new DateTime(dateFrom));
         evento.setStart(start);
@@ -51,25 +51,18 @@ public class GoogleCalendarService {
         EventDateTime end = new EventDateTime().setDateTime(new DateTime(dateUntil));
         evento.setEnd(end);
 
-        // 4. Gestión dinámica de Invitados (Attendees) para impactar múltiples calendarios
+        /* SE ELIMINA EL BLOQUE DE ATTENDEES (GUESTS) QUE PROVOCA UN ERROR 403
+        * Las Cuentas de Servicio gratuitas no pueden tener invitados externos.
+        * Gestión dinámica de Invitados (Attendees) para impactar múltiples calendarios
+        *
         List<EventAttendee> guests = new ArrayList<>();
 
-        // Agrega al Oferente (Dueño del espacio) de forma obligatoria
-        EventAttendee asistenteOferente = new EventAttendee().setEmail(emailOwner).setResponseStatus("accepted");
-        guests.add(asistenteOferente);
+        * */
 
-        // Agrega al Cliente (Consumer) únicamente si este otorgó su consentimiento explícito
-        if (saveInClientCalendar && emailClient != null) {
-            EventAttendee asistenteCliente = new EventAttendee().setEmail(emailClient).setResponseStatus("tentative");
-            guests.add(asistenteCliente);
-        }
-
-        // Vincula la lista de invitados construida al cuerpo del evento
-        evento.setAttendees(guests);
-
-        // 5. Envía el evento a Google indicando que se deben despachar notificaciones de invitación por correo
+        // 4. Enviamos el evento al calendario "primary" de la Service Account
+        // Cambiamos "all" por "none" ya que al no haber invitados, no hay actualizaciones que despachar.
         Event eventoEjecutado = googleCalendar.events().insert(calendarIdSpace, evento)
-                .setSendUpdates("all") // "all" fuerza el envío de correos y la inserción automática en los calendarios de los invitados
+                .setSendUpdates("none")
                 .execute();
 
         // Devuelve el ID único del evento generado por los servidores de Google

@@ -1,6 +1,7 @@
 package com.utn.space.venueaapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
 import jakarta.persistence.*;
@@ -33,11 +34,11 @@ public class Space {
     @JoinColumn(name = "idLocation")
     private Location location;
 
-    @OneToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "idCancellationPolicies")
     private CancellationPolicies cancellationPolicies;
 
-    @Column(name = "googleCalendarId")
+    @Column(name = "googleCalendarId", nullable = false)
     private String googleCalendarId;
 
     @Column(name = "name_space")
@@ -57,8 +58,8 @@ public class Space {
     private Boolean isActive;
 
 
-    @OneToMany(mappedBy = "space")
-    @JsonIgnore
+    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JsonManagedReference
     private List<SpaceServiceItem> services;
 
     public Space(Integer id, Consumer consumer, Location location, CancellationPolicies cancellationPolicies, String s, String s1, String description, BigDecimal bigDecimal, LocalDate localDate, Integer integer) {

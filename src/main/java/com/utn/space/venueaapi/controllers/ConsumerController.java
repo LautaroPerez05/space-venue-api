@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,8 +64,8 @@ public class ConsumerController {
             )
             @RequestBody Credential credential) {
         // 1. Encriptas la contraseña recibida y la asignas de nuevo al objeto
-        String passwordEncriptada = passwordEncoder.encode(credential.getPasswordHash());
-        credential.setPasswordHash(passwordEncriptada);
+        String passwordEncriptada = passwordEncoder.encode(credential.getPassword());
+        credential.setPassword(passwordEncriptada);
 
         // 1. Validar duplicados
         if (credentialService.existsByUsername(credential.getUsername())) {
@@ -133,7 +134,7 @@ public class ConsumerController {
 
     //Es para para que el admin filtre consumers
     @GetMapping("/usuarios/byfields")
-    @PreAuthorize("hasroles('ADMIN')")// CORREGIDO: de 'hasroles' a 'hasRole'
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Busca los Usuarios por atributos.",
             description = "Crea una lista de usuario que cumplen con los atributos dados."
@@ -160,7 +161,7 @@ public class ConsumerController {
     }
 
     @DeleteMapping("/usuarios/{id}")
-    @PreAuthorize("hasroles('ADMIN')")// CORREGIDO: de 'hasroles' a 'hasRole'
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Elimina un usuario por ID."
     )

@@ -3,28 +3,41 @@ package com.utn.space.venueaapi.service.mappers;
 import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.Space;
+import com.utn.space.venueaapi.model.ServiceSelected;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface ReservationMapper {
 
-    // Corrección de Mappings por errores de compilación (señalaban atributos inexistentes)
-    // mapear a los nombres camelCase del DTO usando los nombres reales de las entidades
+    // Cambiamos ignore = true por una expresión/metodo que extraiga solo los IDs de los servicios congelados
     @Mapping(target = "idConsumer", source = "consumer.idConsumer")
     @Mapping(target = "idSpace", source = "space.idSpace")
-    @Mapping(target = "idServicesSelec", ignore = true)
+    @Mapping(target = "idServicesSelec", source = "services", qualifiedByName = "mapServicesToIds")
     ReservationDTO toDTO(Reservation reservation);
 
     @Mapping(target = "consumer", ignore = true)
     @Mapping(target = "space", ignore = true)
     @Mapping(target = "googleEventCode", ignore = true)
+    @Mapping(target = "services", ignore = true) // Ignoramos en la conversión a entidad limpia, los creamos a mano en el Service
     Reservation toEntity(ReservationDTO dto);
+
+    // METODO DE SOPORTE: Convierte la lista de entidades complejas a un array plano de IDs para el Front
+    @Named("mapServicesToIds")
+    default List<Integer> mapServicesToIds(List<ServiceSelected> services) {
+        if (services == null) return null;
+        return services.stream()
+                .map(ServiceSelected::getId) // Extrae el id de cada fila de servicesselected
+                .collect(Collectors.toList());
+    }
 
     default Consumer mapConsumer(Integer id){
         if(id == null) return null;
-
         Consumer c = new Consumer();
         c.setIdConsumer(id);
         return c;
@@ -32,7 +45,6 @@ public interface ReservationMapper {
 
     default Space mapSpace(Integer id){
         if(id == null) return null;
-
         Space s = new Space();
         s.setIdSpace(id);
         return s;

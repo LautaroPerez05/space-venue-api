@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public record SpaceDTO (
         @NotNull(groups = Update.class)
@@ -46,5 +47,7 @@ public record SpaceDTO (
         @NotNull(groups = {Create.class, Update.class})
         Integer bufferTime,
 
-        Boolean active
+        Boolean active,
+
+        List<ServiceItemDTO> services
 ) {}
