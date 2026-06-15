@@ -33,6 +33,17 @@ public class NotificationController {
         return notificationService.listAll();
     }
 
+    @GetMapping("/unread-count")
+    @Operation(
+            summary = "Cuenta las notificaciones no vistas del usuario logueado.",
+            description = "Devuelve un objeto JSON con el conteo de notificaciones donde isSeen = false."
+    )
+    @PreAuthorize("hasRole('CLIENT')")
+    public ResponseEntity<java.util.Map<String, Long>> getUnreadCount() {
+        long count = notificationService.countUnseenForConsumer();
+        return ResponseEntity.ok(java.util.Map.of("count", count));
+    }
+
     @GetMapping("/consumer/{id}")
     @Operation(
             summary = "Busca todas las notificaciones de un Usuario.",

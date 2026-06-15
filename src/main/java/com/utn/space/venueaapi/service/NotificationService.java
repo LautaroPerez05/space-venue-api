@@ -33,11 +33,11 @@ public class NotificationService {
     }
 
     public List<Notification> listAllByIdConsumer (Integer id){
-        return notificationRepository.findAllByIdConsumer(id);
+        return notificationRepository.findByConsumer_IdConsumer(id);
     }
 
     public List<Notification> listAllByIdConsumerForConsumer(){
-        List<Notification> notificationList = notificationRepository.findAllByIdConsumer(consumerService.getLoggedConsumerId());
+        List<Notification> notificationList = notificationRepository.findByConsumer_IdConsumer(consumerService.getLoggedConsumerId());
 
         for (Notification notification : notificationList){
             if(!notification.getIsSeen()){
@@ -49,7 +49,7 @@ public class NotificationService {
     }
 
     public List<Notification> listAllUnseenForConsumer(){
-        List<Notification> notificationList = notificationRepository.findAllByIdConsumer(consumerService.getLoggedConsumerId());
+        List<Notification> notificationList = notificationRepository.findByConsumer_IdConsumer(consumerService.getLoggedConsumerId());
 
         //filtro las notificacion ya vistas.
         notificationList = notificationList.stream().filter(notification -> notification.getIsSeen()).toList();
@@ -59,5 +59,13 @@ public class NotificationService {
         }
 
         return notificationList;
+    }
+
+    public long countUnseenForConsumer() {
+        List<Notification> notificationList = notificationRepository.findByConsumer_IdConsumer(consumerService.getLoggedConsumerId());
+
+        return notificationList.stream()
+                .filter(notification -> !notification.getIsSeen())
+                .count();
     }
 }
