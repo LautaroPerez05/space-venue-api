@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,11 +19,11 @@ public class Comment {
     private Integer idComment;
 
     @ManyToOne
-    @JoinColumn(name = "idConsumer")
+    @JoinColumn(name = "idConsumer") @JsonIgnoreProperties
     private Consumer consumer;
 
     @ManyToOne
-    @JoinColumn(name = "idSpace")
+    @JoinColumn(name = "idSpace") @JsonIgnoreProperties //Por si Spring Boot entra en bucle
     private Space space;
 
     private String description;

@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/spaceimages/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/spaces/search").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/comments/byspaceid/**").permitAll()
 
                         // RUTAS EXCLUSIVAS DE ADMINISTRADOR
                         // Todas las rutas que empiecen con /api/admin requieren obligatoriamente ROLE_ADMIN
