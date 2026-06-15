@@ -122,4 +122,42 @@ public class PaymentServiceImpl implements IPaymentService {
             log.error("Error al procesar la notificación de Mercado Pago para el ID: {}", paymentId, e);
         }
     }
+
+    @Override
+    @Transactional
+    public void processMockNotification(Long paymentId, Integer reservationId) {
+        try {
+            log.info("🎮 Ejecutando SIMULACIÓN LOCAL de pago para Reserva ID: {}", reservationId);
+
+            // 1. Buscamos o creamos el modelo de pago local
+            PaymentModel paymentEntity = paymentRepository.findById(paymentId)
+                    .orElse(new PaymentModel());
+
+            Reservation actualReservation = reservationRepository.findById(reservationId)
+                    .orElseThrow(() -> new IdNotFoundException("Reservation", reservationId));
+
+            // 2. Llenamos los datos simulando que Mercado Pago nos dio el OK
+            paymentEntity.setIdPayment(paymentId);
+            paymentEntity.setReservation(actualReservation);
+            paymentEntity.setPaymentMethodType("credit_card");
+            paymentEntity.setPaymentMethodId("visa");
+            paymentEntity.setStatus("approved"); // Simulamos aprobación directa
+            paymentEntity.setStatusDetail("accredited");
+            paymentEntity.setCurrencyCode("ARS");
+            paymentEntity.setTransactionAmount(actualReservation.getFinalPrice());
+            paymentEntity.setNetReceivedAmount(actualReservation.getFinalPrice());
+            paymentEntity.setExternalReference(reservationId.toString());
+
+            // 3. Mutamos el estado de la reserva tal como lo haría el flujo real
+            actualReservation.setStatus(ReservationStatus.CONFIRMED);
+
+            reservationRepository.save(actualReservation);
+            paymentRepository.save(paymentEntity);
+
+            log.info("🎮 Simulación completada. Reserva #{} CONFIRMADA en Base de Datos.", reservationId);
+
+        } catch (Exception e) {
+            log.error("Error en la simulación del pago", e);
+        }
+    }
 }

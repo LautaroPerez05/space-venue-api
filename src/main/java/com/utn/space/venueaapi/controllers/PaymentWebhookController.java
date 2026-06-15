@@ -22,25 +22,39 @@ public class PaymentWebhookController {
             @RequestParam(value = "id", required = false) Long id,
             @RequestBody(required = false) Map<String, Object> data) {
 
-        // Mercado Pago a veces envía el topic y el id por Query Params ("topic=payment"),
-        // y otras veces (en formatos más nuevos) los envía dentro del Body JSON.
         String currentTopic = topic;
         Long currentId = id;
 
-        if (data != null && data.containsKey("action")) {
-            currentTopic = (String) data.get("type");
+        if (data != null) {
+            if (data.containsKey("type")) {
+                currentTopic = (String) data.get("type");
+            } else if (data.containsKey("action")) {
+                currentTopic = "payment"; // Mapeo por descarte de acción
+            }
+
             if (data.containsKey("data")) {
                 Map<String, Object> dataContent = (Map<String, Object>) data.get("data");
-                currentId = Long.parseLong((String) dataContent.get("id"));
+                if (dataContent != null && dataContent.containsKey("id")) {
+                    currentId = Long.parseLong(String.valueOf(dataContent.get("id")));
+                }
             }
         }
 
         if ("payment".equals(currentTopic) && currentId != null) {
-            log.info("Webhook recibido de Mercado Pago para el pago ID: {}", currentId);
-            paymentService.processNotification(currentId);
+            log.info("Webhook recibido para el pago ID: {}", currentId);
+
+            // Si el body contiene un flag de simulación, manejamos datos de prueba
+            boolean isSimulation = data != null && data.containsKey("isSimulation");
+            if (isSimulation) {
+                // Pasamos un ID de reserva ficticio o dinámico (ej: tomamos el de la última creada)
+                Integer resId = data.containsKey("reservationId") ? Integer.parseInt(String.valueOf(data.get("reservationId"))) : 1;
+                paymentService.processMockNotification(currentId, resId);
+            } else {
+                // Flujo real con tokens del Sandbox conectándose a internet
+                paymentService.processNotification(currentId);
+            }
         }
 
-        // Siempre devolvemos 200 OK a Mercado Pago para que no reintente el envío
         return ResponseEntity.ok().build();
     }
 }
