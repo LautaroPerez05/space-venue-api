@@ -91,11 +91,6 @@ public class ReservationService {
             throw new InvalidReservationException("La reserva no esta disponible en la fechas seleccionadas");
         }
 
-        Reservation aux = reservationMapper.toEntity(dto);
-        aux.setCreatedAt(LocalDateTime.now());
-        aux.setStatus(ReservationStatus.TENTATIVE); // Aseguramos el estado inicial por defecto
-        aux.setIsActive(true);
-
         Consumer client = consumerService.findById(dto.idConsumer());
         if(!idLogueado.equals(dto.idConsumer())) {
             client = consumerService.findById(idLogueado);
@@ -103,9 +98,19 @@ public class ReservationService {
                     "usLog=" + idLogueado + ", usDto=" + dto.idConsumer());*/
         }
 
+        Space space = spaceService.findById(dto.idSpace());
+
+        if (space.getConsumerOwner().getIdConsumer().equals(idLogueado)) {
+            throw new SelfReservationException("Señor Administrador/Anfitrión: No puede reservar su propio espacio comercial.");
+        }
+
+        Reservation aux = reservationMapper.toEntity(dto);
+        aux.setCreatedAt(LocalDateTime.now());
+        aux.setStatus(ReservationStatus.TENTATIVE); // Aseguramos el estado inicial por defecto
+        aux.setIsActive(true);
+
         aux.setConsumer(client);
 
-        Space space = spaceService.findById(dto.idSpace());
         aux.setSpace(space);
 
         List<ServiceSelected> serviciosSeleccionados = new ArrayList<>();

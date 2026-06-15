@@ -21,6 +21,13 @@ public class GlobalExceptionHandler {
                 .body(e.getMessage());
     }
 
+    @ExceptionHandler(SelfReservationException.class)
+    public ResponseEntity<String> selfReservation (SelfReservationException e){
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(e.getMessage());
+    }
+
     @ExceptionHandler(InvalidDateException.class)
     public ResponseEntity<String> invalidDate(InvalidDateException e){
         return ResponseEntity
