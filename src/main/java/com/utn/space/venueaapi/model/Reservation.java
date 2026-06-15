@@ -1,6 +1,7 @@
 package com.utn.space.venueaapi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,6 +51,7 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "idConsumer")
+    @JsonIgnoreProperties({"reservations", "password", "credentials"}) // Rompe con el bucle infinito de mapeo, el cual resulta en un código de error 403
     private Consumer consumer;
 
     @ManyToOne

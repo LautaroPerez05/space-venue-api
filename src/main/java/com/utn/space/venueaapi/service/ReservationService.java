@@ -59,6 +59,11 @@ public class ReservationService {
         return reservationRepository.findAllByConsumer_IdConsumer(id);
     }
 
+    public List<Reservation> findAllForLoggedConsumer() {
+        Integer loggedCustomerId = consumerService.getLoggedConsumerId();
+        return reservationRepository.findAllByConsumer_IdConsumer(loggedCustomerId);
+    }
+
     @Transactional
     public Reservation create(ReservationDTO dto) throws IOException {
         if (dto.untilDate().isBefore(dto.fromDate())) {
@@ -68,12 +73,20 @@ public class ReservationService {
             throw new InvalidDateException("La Fecha de Inicio no puede ser en el pasado.");
         }
 
+        Integer idLogueado = consumerService.getLoggedConsumerId();
+
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
         aux.setStatus(ReservationStatus.TENTATIVE); // Aseguramos el estado inicial por defecto
         aux.setIsActive(true);
 
         Consumer client = consumerService.findById(dto.idConsumer());
+        if(!idLogueado.equals(dto.idConsumer())) {
+            client = consumerService.findById(idLogueado);
+            /*throw new InvalidDataException("El id del usuario logeado no coresponde con el ingresado por el front: " +
+                    "usLog=" + idLogueado + ", usDto=" + dto.idConsumer());*/
+        }
+
         aux.setConsumer(client);
 
         Space space = spaceService.findById(dto.idSpace());

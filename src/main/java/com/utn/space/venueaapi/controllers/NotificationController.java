@@ -38,7 +38,7 @@ public class NotificationController {
             summary = "Cuenta las notificaciones no vistas del usuario logueado.",
             description = "Devuelve un objeto JSON con el conteo de notificaciones donde isSeen = false."
     )
-    @PreAuthorize("hasRole('CLIENT')")
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     public ResponseEntity<java.util.Map<String, Long>> getUnreadCount() {
         long count = notificationService.countUnseenForConsumer();
         return ResponseEntity.ok(java.util.Map.of("count", count));
