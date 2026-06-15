@@ -1,5 +1,6 @@
 package com.utn.space.venueaapi.service;
 
+import com.google.api.client.util.DateTime;
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.Comment;
@@ -52,8 +53,8 @@ public class CommentService {
             throw new InvalidDataException("Por favor ingrese una descripcion para su comentario");
         }
 
-        if((commentDTO.score()*2) % 1 != 0){
-            throw new InvalidDataException("El score ingresado es invalido");
+        if(commentDTO.score() < 0 || commentDTO.score() > 5){
+            throw new InvalidDataException("El score debe estar entre 0 y 5");
         }
 
         Integer currentUserId = consumerService.getLoggedConsumerId(); //Comentamos siempre con el id de quien esta loggeado
@@ -64,7 +65,7 @@ public class CommentService {
                 spaceService.findById(commentDTO.idSpace()),
                 commentDTO.description(),
                 commentDTO.score(),
-                commentDTO.created_at());
+                java.time.LocalDateTime.now());//Se guarda en el back el momento en el que se comento
 
         commentRepository.save(commentToInsert);
     }
@@ -118,11 +119,13 @@ public class CommentService {
     }
 
     public void consumerInsertCommentOnSpace(CommentDTO commentDTO){
+        Integer loggedConsumerId = consumerService.getLoggedConsumerId();
         //Averiguamos las reservas del consumer loggeado
-        List<Reservation> reservationsForConsumer = reservationService.findByIdConsumer(consumerService.getLoggedConsumerId());
-        //Filtramos para que queden solo reservas activas y completas
+        List<Reservation> reservationsForConsumer = reservationService.findByIdConsumer(loggedConsumerId);
+        //Filtramos para que queden solo reservas activas, que ademas esten COMPLETED o CONFIRMED
         reservationsForConsumer = reservationsForConsumer.stream()
-                .filter(reservation -> reservation.getIsActive() && reservation.getStatus().equals(ReservationStatus.COMPLETED)).toList();
+                .filter(reservation -> reservation.getIsActive() &&
+                        (reservation.getStatus().equals(ReservationStatus.COMPLETED) || reservation.getStatus().equals(ReservationStatus.CONFIRMED))).toList();
 
         //Verificamos que alguna de las reservas fue sobre el espacio que queremos comentar
         if(!reservationsForConsumer.stream().anyMatch(reservation -> reservation.getSpace().getIdSpace().equals(commentDTO.idSpace()))){

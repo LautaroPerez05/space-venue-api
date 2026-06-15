@@ -64,8 +64,8 @@ public class CommentController {
     @PostMapping()
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     @Operation(
-            summary = "Busca TODOS los Comentarios.",
-            description = "Devuelve una lista Completa de Comentarios."
+            summary = "Permite comentar sobre un espacio",
+            description = "Permite a un usuario con permisos de CLIENT o ADMIN comentar sobre un espacio sobre el que tengan registrada al menos una reserva."
     )
     public void insertComment(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
