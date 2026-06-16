@@ -47,7 +47,7 @@ Antes de comenzar con la instalación, asegúrate de tener instaladas las siguie
 ### 1. Clonar el Repositorio
 Abre una terminal y clona el proyecto en tu máquina local:
 ```bash
-git clone https://github.com/tu-usuario/space-venue.git
+git clone https://github.com/FeijooCiro4/space-venue-api.git
 cd space-venue
 ```
 
