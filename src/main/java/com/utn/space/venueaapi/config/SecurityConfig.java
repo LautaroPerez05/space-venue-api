@@ -51,6 +51,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/spaces/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/byspaceid/**").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/webjars/**",
+                                "/swagger-resources/**",
+                                "/configuration/ui",
+                                "/configuration/security"
+                        ).permitAll()
 
                         // RUTAS EXCLUSIVAS DE ADMINISTRADOR
                         // Todas las rutas que empiecen con /api/admin requieren obligatoriamente ROLE_ADMIN
