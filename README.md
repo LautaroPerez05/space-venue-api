@@ -32,6 +32,7 @@ https://space-venue-front.onrender.com
 
 ---
 
+
 ## 📋 Requisitos Previos
 
 Antes de comenzar con la instalación, asegúrate de tener instaladas las siguientes herramientas en tu máquina de desarrollo:
@@ -101,6 +102,99 @@ docker run -d -p 80:80 space-venue-front
 docker-compose up -d
 ```
 3. Una vez iniciado el contenedor, abre Google Chrome e ingresa a `http://localhost` para interactuar con la interfaz.
+
+---
+
+## 📅 Integración con Google Calendar API (Flujo de Sincronización)
+
+
+
+El sistema cuenta con un módulo de sincronización automática que registra las reservas confirmadas en un calendario de Google. Dado que el backend opera de forma autónoma (sin intervención de un usuario humano que inicie sesión en su navegador), la integración se diseñó utilizando una **Cuenta de Servicio (Service Account)** de Google Cloud bajo la especificación **OAuth2**.
+
+
+
+A continuación, se detalla el flujo de arquitectura y los pasos configurados para que las reservas impacten correctamente en el calendario:
+
+
+
+### 1. Configuración en la Consola de Google Cloud (IAM)
+
+* **Creación del Proyecto:** Se dio de alta un proyecto dedicado en Google Cloud Console para gestionar las credenciales de la API.
+
+* **Habilitación de la API:** Se activó la **Google Calendar API v3** para el proyecto.
+
+* **Service Account:** Se creó una cuenta de servicio, la cual actúa como un "usuario robótico" con una identidad propia expresada en un correo electrónico con el siguiente formato:  
+
+  `tu-cuenta-servicio@proyecto.iam.gserviceaccount.com`
+
+* **Descarga de Claves:** Se generó una clave privada en formato **JSON** que contiene el par de llaves criptográficas necesarias para que Spring Boot demuestre su identidad ante Google.
+
+
+
+### 2. Estrategia Híbrida de Almacenamiento de Credenciales
+
+Para resguardar la seguridad de las claves privadas y evitar subir el archivo JSON a repositorios públicos de GitHub, el archivo `GoogleCalendarConfig.java` implementa un flujo de lectura inteligente:
+
+
+
+* **En Entorno de Desarrollo (Localhost):** El backend busca un archivo físico local llamado `google-credentials.json` dentro de la ruta `src/main/resources/`.
+
+* **En Entorno de Producción (Docker / OnRender):** El contenido completo del archivo JSON se codifica en un string **Base64** y se almacena en la variable de entorno del servidor llamada `GOOGLE_CREDENTIALS_BASE64`. El backend detecta esta variable, la decodifica en memoria y levanta las credenciales de forma 100% segura sin necesidad de archivos físicos.
+
+
+
+### 3. Autorización por "Scopes" y Autenticación de Red
+
+Al arrancar el servidor, la clase de configuración ejecuta los siguientes pasos:
+
+1. Inicializa un transporte HTTP seguro (`GoogleNetHttpTransport.newTrustedTransport()`) que cifra los datos de viaje.
+
+2. Mapea un **Scope (Alcance)** restringido mediante `CalendarScopes.CALENDAR`. Esto le avisa a Google que este robot solo solicita permisos de lectura y escritura sobre el calendario, bloqueando el acceso a cualquier otra herramienta (como Gmail o Drive).
+
+3. Construye y expone un componente `@Bean` global del cliente `Calendar` de Google listo para ser inyectado en el código.
+
+
+
+### 4. Permisos en el Calendario de Google (Paso Crítico)
+
+Para que el robot de la cuenta de servicio pueda escribir eventos en el calendario personal del dueño de los espacios o de la aplicación, se requiere un paso de delegación de acceso:
+
+1. Se copia la dirección de correo electrónico de la cuenta de servicio (`...-account.com`).
+
+2. Se accede al Google Calendar de destino desde el navegador, se ingresa a la **Configuración del Calendario** y en el apartado **"Compartir con personas específicas"**, se añade el mail del robot otorgándole el permiso de **"Hacer cambios y administrar el uso compartido"**.
+
+
+
+### 5. Flujo de Registro de una Reserva (Tiempo de Ejecución)
+
+Cuando un cliente solicita una reserva exitosa desde el Frontend, el backend ejecuta la siguiente secuencia en cascada:
+
+
+
+```text
+
+[Frontend: app.js] ──(Petición Reserva)──> [Backend: ReservationService]
+
+                                                    │
+
+                                         (Valida disponibilidad)
+
+                                                    │
+
+                                                    ▼
+
+[Google Calendar] <──(Inyecta Evento v3)─── [GoogleCalendarService]
+
+        │
+
+(Devuelve ID Único)
+
+        │
+
+        ▼
+
+[Base de Datos] ──(Guarda googleCalendarId en tabla 'spaces'/'reservations')
+```
 
 ---
 
