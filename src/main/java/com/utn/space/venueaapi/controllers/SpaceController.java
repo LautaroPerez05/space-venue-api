@@ -32,7 +32,7 @@ public class SpaceController {
     @GetMapping("/showinactives")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
-            summary = "Busca TODOS los Espacios incluidos los inactivos."
+            summary = "Busca TODOS los Espacios, incluidos los inactivos."
     )
     public ResponseEntity<List<Space>> listSpaces(){
         return ResponseEntity.ok(spaceService.findAll());
@@ -261,7 +261,7 @@ public class SpaceController {
     @GetMapping("/ownedspaces/byfields")
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     @Operation(
-            summary = "Busca TODOS los Espacios filtrados de un sueño."
+            summary = "Busca TODOS los Espacios filtrados de un dueño."
     )
     public ResponseEntity<List<Space>> findAllOwnedSpacesbyFields(@RequestBody SpaceFilterDTO spaceFilterDTO){
         return ResponseEntity.ok(spaceService.findAllByFieldsForOwner(spaceFilterDTO));
@@ -270,8 +270,8 @@ public class SpaceController {
     @DeleteMapping("/ownedspace/{id}")
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
     @Operation(
-            summary = "Borra un Espacio proprio.",
-            description = "Borra un Espacio proprio por su ID."
+            summary = "Borra un Espacio propio.",
+            description = "Borra un Espacio propio por su ID."
     )
     public ResponseEntity<String> deleteOwnedSpace(@PathVariable Integer id){
         spaceService.deleteOwnedSpace(id);

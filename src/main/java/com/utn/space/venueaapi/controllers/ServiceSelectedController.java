@@ -31,13 +31,6 @@ public class ServiceSelectedController {
         return ResponseEntity.ok(service.getServicesSelectedOfReservation(idReservation));
     }
 
-    //Este un metodo que inserta servicios sin una reserva?
-    /*
-    @PostMapping("/insert")
-    public void selectOneServiceForAReservation(@RequestBody ServiceSelectedDTO serviceSelectedDTO){
-        service.insertServiceForAReservation(serviceSelectedDTO);
-    }
-    */
 
 
     //Este es un metodo que usaría un Consumer para seleccionar los servicios de un espacio que quiere para una reserva
