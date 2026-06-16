@@ -212,8 +212,7 @@ public class SpaceController {
         spaceService.modifySpace(id,spaceDTO);
     }
 
-    //Se modifico de GET a POST porque en los navegadores los GET no permiten mandar un Body
-    @GetMapping("/byfields")
+    @PostMapping("/byfields")
     @Operation(
             summary = "Busca TODOS los Espacios Filtrados.",
             description = "Devuelve una lista Completa de Espacios Disponibles."
