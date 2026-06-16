@@ -16,7 +16,7 @@ public class CancellationPolicies {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_cancellation_policies")
-    private Integer idCancellationPolicies; // Se cambió de Long a Integer por exigencias de Hibernate
+    private Integer idCancellationPolicies;
 
     @Enumerated(EnumType.STRING)
     private EPolicyType type;

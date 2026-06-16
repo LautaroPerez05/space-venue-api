@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 @AllArgsConstructor
 @Service
 public class SpaceServiceItemService {
@@ -36,8 +37,7 @@ public class SpaceServiceItemService {
         Integer currentConsumerId = consumerService.getLoggedConsumerId();
 
         if(!spaceService.findById(id).getConsumerOwner().getIdConsumer().equals(currentConsumerId)){
-            //Si no soy el dueño del espacio
-            //se filtraran espacios inactivos
+            //Si no soy el dueño del espacio, se filtraran espacios inactivos
             List<SpaceServiceItemDTO> spaceServiceItemDTOs = spaceServiceItemRepository.findAllSpaceServicesBySpaceId(id).stream()
                     .filter(spaceServiceItemDTO -> spaceService.findById(spaceServiceItemDTO.idSpace()).getIsActive()).toList();
 

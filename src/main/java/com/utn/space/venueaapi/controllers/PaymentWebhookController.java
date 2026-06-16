@@ -46,7 +46,7 @@ public class PaymentWebhookController {
             // Si el body contiene un flag de simulación, manejamos datos de prueba
             boolean isSimulation = data != null && data.containsKey("isSimulation");
             if (isSimulation) {
-                // Pasamos un ID de reserva ficticio o dinámico (ej: tomamos el de la última creada)
+                // Se pasa un ID de reserva ficticio o dinámico
                 Integer resId = data.containsKey("reservationId") ? Integer.parseInt(String.valueOf(data.get("reservationId"))) : 1;
                 paymentService.processMockNotification(currentId, resId);
             } else {

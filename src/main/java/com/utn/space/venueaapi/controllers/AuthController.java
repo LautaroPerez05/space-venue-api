@@ -58,7 +58,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(username, password)
             );
 
-            // 2. Extraemos el rol REAL que Spring Security cargó desde tu base de datos
+            // Se extrae el rol REAL que Spring Security cargó desde la base de datos
             String rol = auth.getAuthorities().stream()
                     .map(org.springframework.security.core.GrantedAuthority::getAuthority)
                     .findFirst()
@@ -75,35 +75,35 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody com.utn.space.venueaapi.model.records.RegistroDTO dto) {
 
-        // 1. Validar que no vengan datos vacíos esenciales (usando los métodos del record)
+        // Validar que no vengan datos vacíos esenciales (usando los métodos del record)
         if (dto.username() == null || dto.username().trim().isEmpty() ||
                 dto.password() == null || dto.password().trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Faltan los datos de usuario o contraseña");
         }
 
-        // 2. Validar si el usuario ya existe
+        // Validar si el usuario ya existe
         if (credentialService.existsByUsername(dto.username())) {
             return ResponseEntity.badRequest().body("El nombre de usuario ya está en uso");
         }
 
-        // 3. Creamos la Credencial limpia accediendo con dto.username() y dto.password()
+        // Se crea la Credencial limpia accediendo con dto.username() y dto.password()
         Credential credential = new Credential();
         credential.setUsername(dto.username());
         credential.setPassword(passwordEncoder.encode(dto.password())); // Encriptamos
         credential.setIsActive(true);
         credential.setRol(ERoles.ROLE_CLIENT);
 
-        // 4. Creamos el Consumer con el resto de los componentes del record
+        // Se crea el Consumer con el resto de los componentes del record
         Consumer consumer = new Consumer();
         consumer.setFirstname(dto.firstname());
         consumer.setLastname(dto.lastname());
         consumer.setEmail(dto.email());
         consumer.setPhone(dto.phone());
 
-        // 5. Vinculamos la credencial al consumidor
+        // Se vincula la credencial al consumidor
         consumer.setCredentials(credential);
 
-        // 6. Guardamos en cascada a través de tu servicio
+        // Se guarda en cascada a través del service
         consumerService.saveConsumer(consumer);
 
         return ResponseEntity.status(201).body("Usuario y perfil registrados con éxito");

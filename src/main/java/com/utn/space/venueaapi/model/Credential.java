@@ -1,6 +1,5 @@
 package com.utn.space.venueaapi.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -28,7 +27,7 @@ public class Credential implements UserDetails {
     @NotNull
     private Boolean isActive = true;
 
-    // CORRECCIÓN ATÓMICA: Forzamos a Jackson a que mapee este campo bajo este nombre exacto, vaya a donde vaya
+    // Forzamos a Jackson a que mapee este campo bajo este nombre exacto, vaya a donde vaya
     @JsonProperty("password")
     @Column(name = "password")
     @NotBlank
@@ -43,19 +42,16 @@ public class Credential implements UserDetails {
         return List.of(new SimpleGrantedAuthority(rol.name()));
     }
 
-    // 3. Devuelve tu campo de contraseña
     @Override
     public String getPassword() {
         return this.password;
     }
 
-    // 4. Devuelve tu campo de usuario
     @Override
     public String getUsername() {
         return this.username;
     }
 
-    // 5. Métodos de estado de cuenta (puedes usar tu bandera isActive)
     @Override
     public boolean isAccountNonExpired() {
         return true;

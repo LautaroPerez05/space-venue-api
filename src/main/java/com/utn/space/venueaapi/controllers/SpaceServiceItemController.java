@@ -2,7 +2,6 @@ package com.utn.space.venueaapi.controllers;
 
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
-import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.records.SpaceServiceItemDTO;
 import com.utn.space.venueaapi.service.SpaceServiceItemService;

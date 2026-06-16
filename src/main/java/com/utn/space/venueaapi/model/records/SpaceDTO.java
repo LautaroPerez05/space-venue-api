@@ -33,7 +33,6 @@ public record SpaceDTO (
         @Schema(description = "Una Politica de cancelación")
         String cancellationPolicies,
 
-        // 🟢 QUITAMOS Create.class: Solo se valida al actualizar, en la creación puede ser null
         @NotBlank(groups = Update.class)
         String googleCalendarId,
 
@@ -50,7 +49,6 @@ public record SpaceDTO (
         @Schema(description = "Precio del alquiler", example = "250000")
         BigDecimal basePrice,
 
-        // 🟢 QUITAMOS VALIDACIÓN DE CREACIÓN: El backend se encargará de setearlo
         LocalDate publicationDate,
 
         @NotNull(groups = {Create.class, Update.class})

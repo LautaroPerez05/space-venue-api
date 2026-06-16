@@ -1,4 +1,5 @@
 package com.utn.space.venueaapi.service;
+
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.*;
@@ -23,8 +24,6 @@ public class SpaceService {
     LocationService locationService;
     @Autowired
     CancellationPoliciesService cancellationPoliciesService;
-    @Autowired
-    GoogleCalendarService googleCalendarService;
 
 
     public List<Space> findAll(){
@@ -36,7 +35,7 @@ public class SpaceService {
     }
 
     public Boolean existsById(Integer id){
-        return spaceRepository.existsByIdSpaceAndIsActiveTrue(id); //Modifique esta logica para no buscar espacios inactivos
+        return spaceRepository.existsByIdSpaceAndIsActiveTrue(id);
     }
 
     public Space findById(Integer id){
@@ -110,8 +109,6 @@ public class SpaceService {
                 spaceDTO.basePrice(),
                 spaceDTO.publicationDate(),
                 spaceDTO.bufferTime());
-               // spaceDTO.isActive());// <--Con esta parte el Admin puede verificar espacios, Fede: para que en una DTO?
-
         spaceRepository.save(spaceToInsert);
     }
 
@@ -125,7 +122,7 @@ public class SpaceService {
             throw new IdNotFoundException("Location",spaceFilterDTO.idLocation());
         }
 
-        //Filtro inicial de mi base de datos
+        //Filtro inicial de la base de datos
         List<Space> spaces = spaceRepository.findAllByFields(
                 spaceFilterDTO.idConsumerOwner(),
                 spaceFilterDTO.minPrice(),
@@ -133,11 +130,11 @@ public class SpaceService {
                 spaceFilterDTO.nameSpace(),
                 spaceFilterDTO.idLocation());//Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
 
-        //Hago un filtro por proximidad al usuario, solo si este mando latitud y longitud
+        //Se hace un filtro por proximidad al usuario, solo si este mando latitud y longitud
         if(spaceFilterDTO.lat() != null && spaceFilterDTO.lng() != null){
-            //Si no encuentro un radio de filtrado en el DTO pongo 5Km de base
+            //Si no encuentra un radio de filtrado en el DTO pongo 5Km de base
             BigDecimal maxRadious = spaceFilterDTO.radious() != null ? spaceFilterDTO.radious() : new BigDecimal("5.0");
-            //Uso isSpaceNearBy para filtrar la lista de espacios, primero filtro los espacios que tengan datos de ubicacion incompletos para evitar errores
+            //Se usa isSpaceNearBy para filtrar la lista de espacios, primero filtro los espacios que tengan datos de ubicacion incompletos para evitar errores
             spaces = spaces.stream()
                     .filter(space ->space.getLocation()!= null && space.getLocation().getLatitude() != null && space.getLocation().getLongitude() != null)
                     .filter(space -> locationService.isSpaceNearby(spaceFilterDTO.lat(),spaceFilterDTO.lng(),maxRadious,space))
@@ -158,7 +155,7 @@ public class SpaceService {
             throw new IdNotFoundException("Location",spaceFilterDTO.idLocation());
         }
 
-        //Filtro inicial de mi base de datos
+        //Filtro inicial de la base de datos
         List<Space> spaces = spaceRepository.findAllByFieldsWithInactives(
                 spaceFilterDTO.idConsumerOwner(),
                 spaceFilterDTO.minPrice(),
@@ -166,11 +163,11 @@ public class SpaceService {
                 spaceFilterDTO.nameSpace(),
                 spaceFilterDTO.idLocation());//Sigo filtrando por localizacion para poder filtrar por lugares como un shpping.
 
-        //Hago un filtro por proximidad al usuario, solo si este mando latitud y longitud
+        //Se hace un filtro por proximidad al usuario, solo si este mando latitud y longitud
         if(spaceFilterDTO.lat() != null && spaceFilterDTO.lng() != null){
-            //Si no encuentro un radio de filtrado en el DTO pongo 5Km de base
+            //Si no encuentra un radio de filtrado en el DTO pongo 5Km de base
             BigDecimal maxRadious = spaceFilterDTO.radious() != null ? spaceFilterDTO.radious() : new BigDecimal("5.0");
-            //Uso isSpaceNearBy para filtrar la lista de espacios, primero filtro los espacios que tengan datos de ubicacion incompletos para evitar errores
+            //Se usa isSpaceNearBy para filtrar la lista de espacios, primero filtro los espacios que tengan datos de ubicacion incompletos para evitar errores
             spaces = spaces.stream()
                     .filter(space ->space.getLocation()!= null && space.getLocation().getLatitude() != null && space.getLocation().getLongitude() != null)
                     .filter(space -> locationService.isSpaceNearby(spaceFilterDTO.lat(),spaceFilterDTO.lng(),maxRadious,space))
@@ -191,7 +188,7 @@ public class SpaceService {
                 null,
                 null,
                 null
-        );//Creo un nuevo record porque no se pueden modificar directamente
+        );
 
         return findAllByFieldsWithInactives(auxDTO);
     }
@@ -207,7 +204,7 @@ public class SpaceService {
                 spaceFilterDTO.lat(),
                 spaceFilterDTO.lng(),
                 spaceFilterDTO.radious()
-        );//Creo un nuevo record porque no se pueden modificar directamente
+        );
 
         return findAllByFieldsWithInactives(auxDTO);
     }
@@ -233,17 +230,16 @@ public class SpaceService {
         space.setBufferTime(spaceDTO.bufferTime());
         space.setIsActive(true);
 
-        // 1. FECHA AUTOMÁTICA: Asignamos la fecha del día de hoy del servidor
         space.setPublicationDate(java.time.LocalDate.now());
 
-        // 2. GOOGLE CALENDAR ID:
+        // GOOGLE CALENDAR ID:
         // Hardcodeado para guardar el evento en el calendario principal de la cuenta que está
-        // conectada (implementando variable de entorno que puede tener el valo de "primary" o
+        // conectada (implementando variable de entorno que puede tener el valor de "primary" o
         // el id del calendario compartido entre el mail de servicio proveido en
         // googles-credentials.json y la cuenta que reserve x espacio)
         space.setGoogleCalendarId(System.getenv("ID_FOR_GOOGLE_CALENDAR"));
 
-        // 3. LEAFLET
+        // LEAFLET
         if (spaceDTO.location() != null) {
             Location nuevaLocacion = new Location();
             nuevaLocacion.setLatitude(spaceDTO.location().latitude());
@@ -266,7 +262,7 @@ public class SpaceService {
                 item.setDescription(sDto.description());
                 item.setPrice(sDto.price());
                 item.setIsActive(true);
-                item.setSpace(space); // Relación bidireccional
+                item.setSpace(space);
                 return item;
             }).toList();
             space.setServices(items);

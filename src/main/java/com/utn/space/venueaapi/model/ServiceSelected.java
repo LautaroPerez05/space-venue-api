@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-// Este objeto guarda los servicios asociados a una cuenta en el momento de su reserva con el precio que tenian
+
+/// Este objeto guarda los servicios asociados a una cuenta en el momento de su reserva con el precio que tenian
 @Entity
 @Table(name = "servicesselected")
 @Getter @Setter

@@ -19,19 +19,18 @@ public class PaymentModel {
     @Column(name = "id_payment")
     private Long idPayment; // ID provisto directamente por Mercado Pago
 
-    // Relación con tu entidad Reserva existente
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_reservation", nullable = false)
     private Reservation reservation;
 
     @Column(name = "payment_method_type", length = 50)
-    private String paymentMethodType; // credit_card, debit_card, etc.
+    private String paymentMethodType;
 
     @Column(name = "payment_method_id", length = 50)
-    private String paymentMethodId; // visa, master, pix, etc.
+    private String paymentMethodId;
 
     @Column(length = 30, nullable = false)
-    private String status; // approved, pending, rejected, etc.
+    private String status;
 
     @Column(name = "status_detail", length = 100)
     private String statusDetail;

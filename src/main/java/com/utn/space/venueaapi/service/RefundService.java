@@ -20,27 +20,27 @@ public class RefundService {
 
     @Transactional
     public void refundPayment(Long idPayment, BigDecimal amountToRefund) {
-        // 1. Verificar que el pago original exista en nuestra BD
+        // Verificar que el pago original exista en la BD
         PaymentModel payment = paymentRepository.findById(idPayment)
                 .orElseThrow(() -> new IllegalArgumentException("No se encontró el pago con ID: " + idPayment));
 
         try {
             PaymentRefundClient refundClient = new PaymentRefundClient();
 
-            // 2. Ejecutar el reembolso en la API de Mercado Pago (Sandbox)
-            // Usamos la ruta completa del SDK para no chocar con tu entidad local
+            // Ejecutar el reembolso en la API de Mercado Pago (Sandbox)
+            // Usamos la ruta completa del SDK para no chocar con la entidad local
             com.mercadopago.resources.payment.PaymentRefund mpRefund = refundClient.refund(idPayment, amountToRefund);
 
-            // 3. Crear y guardar el registro en nuestra tabla 'payment_refunds'
+            // Crear y guardar el registro en la tabla 'payment_refunds'
             PaymentRefund localRefund = new PaymentRefund();
             localRefund.setIdPaymentRefund(mpRefund.getId());
             localRefund.setPayment(payment);
             localRefund.setAmountRefunded(mpRefund.getAmount());
-            localRefund.setStatus(mpRefund.getStatus()); // approved, pending, etc.
+            localRefund.setStatus(mpRefund.getStatus());
 
             paymentRefundRepository.save(localRefund);
 
-            // 4. Actualizar los montos acumulados en la entidad Payment principal
+            // Actualizar los montos acumulados en la entidad Payment principal
             BigDecimal nuevoTotalReembolsado = payment.getTotalRefundedAmount().add(amountToRefund);
             payment.setTotalRefundedAmount(nuevoTotalReembolsado);
 

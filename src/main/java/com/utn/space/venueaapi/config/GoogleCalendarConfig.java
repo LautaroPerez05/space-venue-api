@@ -21,7 +21,7 @@ import java.util.Collections;
 @Configuration
 public class GoogleCalendarConfig {
 
-    // Nombre identificativo de tu aplicación para las auditorías en la consola de Google
+    // Nombre identificativo de aplicación para las auditorías en la consola de Google
     private static final String APPLICATION_NAME = "VenueAPI";
     // Ruta del archivo de claves privadas de la Cuenta de Servicio dentro de src/main/resources
     private static final String CREDENTIALS_FILE_PATH = "google-credentials.json";
@@ -36,7 +36,7 @@ public class GoogleCalendarConfig {
 
             InputStream in;
 
-            // 1. Intentar leer desde la variable de entorno Base64 (Estrategia para Docker / Nube)
+            // Intentar leer desde la variable de entorno Base64 (Estrategia para Docker / Nube)
             String base64Credentials = System.getenv("GOOGLE_CREDENTIALS_BASE64");
 
             if (base64Credentials != null && !base64Credentials.trim().isEmpty()) {
@@ -44,7 +44,7 @@ public class GoogleCalendarConfig {
                 byte[] decodedBytes = Base64.getDecoder().decode(base64Credentials.trim());
                 in = new ByteArrayInputStream(decodedBytes);
             } else {
-                // 2. Plan de respaldo: Leer el archivo físico (Estrategia local en IntelliJ)
+                // Plan de respaldo: Leer el archivo físico (Estrategia local en IntelliJ)
                 System.out.println("[Google Calendar] Variable no detectada. Buscando archivo físico en classpath...");
                 ClassPathResource resource = new ClassPathResource(CREDENTIALS_FILE_PATH);
                 if (!resource.exists()) {

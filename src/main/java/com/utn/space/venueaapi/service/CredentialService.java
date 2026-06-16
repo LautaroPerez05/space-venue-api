@@ -25,9 +25,7 @@ public class CredentialService {
         return credentialRepository.existsByUsername(username);
     }
 
-    /**
-     * Registra o actualiza una credencial aplicando algoritmos de hashing delegados
-     */
+    //Registra o actualiza una credencial aplicando algoritmos de hashing delegados
     public void saveCredential(Credential credential) {
         if (credential.getPassword() == null || credential.getPassword().isEmpty()) {
             throw new IllegalArgumentException("La contraseña de la credencial no puede ser nula o vacía.");
@@ -41,7 +39,6 @@ public class CredentialService {
         credentialRepository.save(credential);
     }
 
-    // Este metodo debería modificarse para que devuelva un DTO (con datos de credenciales, sin contraseñas, y consumers)
     public List<Credential> findAll() {
         return credentialRepository.findAll();
     }

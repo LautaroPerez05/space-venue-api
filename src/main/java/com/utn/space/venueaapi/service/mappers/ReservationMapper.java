@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface ReservationMapper {
 
-    // Cambiamos ignore = true por una expresión/metodo que extraiga solo los IDs de los servicios congelados
     @Mapping(target = "idConsumer", source = "consumer.idConsumer")
     @Mapping(target = "idSpace", source = "space.idSpace")
     @Mapping(target = "idServicesSelec", source = "services", qualifiedByName = "mapServicesToIds")
@@ -24,10 +23,10 @@ public interface ReservationMapper {
     @Mapping(target = "consumer", ignore = true)
     @Mapping(target = "space", ignore = true)
     @Mapping(target = "googleEventCode", ignore = true)
-    @Mapping(target = "services", ignore = true) // Ignoramos en la conversión a entidad limpia, los creamos a mano en el Service
+    @Mapping(target = "services", ignore = true)
     Reservation toEntity(ReservationDTO dto);
 
-    // METODO DE SOPORTE: Convierte la lista de entidades complejas a un array plano de IDs para el Front
+    // Convierte la lista de entidades complejas a un array plano de IDs para el Front
     @Named("mapServicesToIds")
     default List<Integer> mapServicesToIds(List<ServiceSelected> services) {
         if (services == null) return null;

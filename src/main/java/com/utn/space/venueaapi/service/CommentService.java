@@ -1,6 +1,5 @@
 package com.utn.space.venueaapi.service;
 
-import com.google.api.client.util.DateTime;
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
 import com.utn.space.venueaapi.exceptions.InvalidDataException;
 import com.utn.space.venueaapi.model.Comment;
@@ -65,7 +64,7 @@ public class CommentService {
                 spaceService.findById(commentDTO.idSpace()),
                 commentDTO.description(),
                 commentDTO.score(),
-                java.time.LocalDateTime.now());//Se guarda en el back el momento en el que se comento
+                java.time.LocalDateTime.now());
 
         commentRepository.save(commentToInsert);
     }
@@ -84,7 +83,7 @@ public class CommentService {
             throw new InvalidDataException("El score ingresado es invalido");
         }
 
-        Integer currentUserId = consumerService.getLoggedConsumerId(); //Comentamos siempre con el id de quien esta loggeado
+        Integer currentUserId = consumerService.getLoggedConsumerId();
 
         Comment commentToInsert = new Comment(
                 id,
@@ -132,7 +131,6 @@ public class CommentService {
             throw new InvalidDataException("No puede comentar sobre un espacio que nunca reservo o cuya reserva no completo");
         }
 
-        //Finalmente insertamos el comentario
         insertComment(commentDTO);
     }
 

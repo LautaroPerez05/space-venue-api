@@ -1,12 +1,9 @@
 package com.utn.space.venueaapi.repository;
 
-import com.utn.space.venueaapi.model.Notification;
 import com.utn.space.venueaapi.model.Space;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -41,7 +38,7 @@ public interface SpaceRepository extends JpaRepository<Space, Integer> {
             @Param("idConsumerOwner") Integer id_consumer_owner,
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice,
-            @Param("nameSpace") String name_space, // <- Corregido a String
+            @Param("nameSpace") String name_space,
             @Param("idLocation") Integer id_location
     );
 

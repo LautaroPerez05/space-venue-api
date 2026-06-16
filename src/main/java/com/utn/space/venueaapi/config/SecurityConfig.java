@@ -78,7 +78,7 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider(
-            UserDetailsService userDetailsService, // Spring inyectará automáticamente tu servicio que implementa la carga de usuarios
+            UserDetailsService userDetailsService, // Spring inyectará automáticamente el servicio que implementa la carga de usuarios
             PasswordEncoder passwordEncoder) {
 
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
@@ -100,21 +100,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // IMPORTANTÍSIMO: Define qué URLs públicas pueden consumir tu API
-        // Se puede agregar "http://localhost" para pruebas locales y la URL de Render para producción
+        // Define qué URLs públicas pueden consumir la API
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost",           // Docker Front estándar (Puerto 80)
                 "http://localhost:3000",      // Servidores locales comunes (Node/React/Python)
                 "http://localhost:5500",      // Live Server de VS Code común
                 "http://127.0.0.1:5500",      // Live Server por IP
                 "http://127.0.0.1",           // Loopback local estándar
-                "https://space-venue-front.onrender.com"
+                "https://space-venue-front.onrender.com" // DNS del front desplegado
         ));
 
         // Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // Cabeceras permitidas. Al usar JWT, es vital permitir "Authorization"
+        // Cabeceras permitidas
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Cache-Control"));
 
         // Permitir que el navegador envíe credenciales (cookies, headers de auth) si fuera necesario

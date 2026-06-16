@@ -5,7 +5,6 @@ import com.utn.space.venueaapi.model.Credential;
 import com.utn.space.venueaapi.model.ERoles;
 import com.utn.space.venueaapi.model.records.ConsumerFilterDTO;
 
-import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.ConsumerService;
 import com.utn.space.venueaapi.service.CredentialService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -29,7 +27,7 @@ import java.util.List;
 @RestController
 @Tag(name = "Usuarios", description = "Operaciones sobre Consumer.")
 
-@RequestMapping("/api") // CORREGIDO: Se remueve la barra final para evitar URLs del tipo /api//usuarios
+@RequestMapping("/api")
 public class ConsumerController {
 
     @Autowired
@@ -63,37 +61,36 @@ public class ConsumerController {
                     )
             )
             @RequestBody Credential credential) {
-        // 1. Encriptas la contraseña recibida y la asignas de nuevo al objeto
+        // Se encripta la contraseña recibida y se asigna de nuevo al objeto
         String passwordEncriptada = passwordEncoder.encode(credential.getPassword());
         credential.setPassword(passwordEncriptada);
 
-        // 1. Validar duplicados
+        // Validar duplicados
         if (credentialService.existsByUsername(credential.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("{\"error\": \"El nombre de usuario ya se encuentra registrado.\"}");
         }
 
-        // 2. Configurar la credencial de forma explícita
+        // Configurar la credencial de forma explícita
         credential.setRol(ERoles.ROLE_CLIENT);
         credential.setIsActive(Boolean.TRUE);
 
-        // 3. Guardamos la credencial en su repositorio
+        // Guardar la credencial en su repositorio
         credentialService.saveCredential(credential);
 
-        // 4. CREACIÓN ESPEJO MANUAL: Forzamos la asignación del ID en el objeto Consumer
+        // Forzar la asignación del ID en el objeto Consumer
         Consumer nuevoConsumer = new Consumer();
 
-        // IMPORTANTE: Al ser una relación donde compartes el ID (o se mapea por String),
-        // vinculamos la credencial que ya tiene el ID asignado y en limpio
+        // Vincular la credencial que ya tiene el ID asignado y en limpio
         nuevoConsumer.setCredentials(credential);
 
-        // Inicializamos las cadenas vacías obligatorias de tu DTO/Modelo
+        // Inicializar las cadenas vacías obligatorias
         nuevoConsumer.setFirstname("");
         nuevoConsumer.setLastname("");
         nuevoConsumer.setEmail("");
         nuevoConsumer.setPhone("");
 
-        // 5. Guardamos y flusheamos en la tabla 'consumers'
+        // Guardar y flushear en la tabla 'consumers'
         consumerService.saveConsumer(nuevoConsumer);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -101,7 +98,7 @@ public class ConsumerController {
     }
 
     @GetMapping("/usuarios")
-    @PreAuthorize("hasRole('ADMIN')")// CORREGIDO: URL limpia. Suficiente y seguro.
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Busca todos los usuarios.",
             description = "Devuelve una lista de todos los usuario."
@@ -111,7 +108,7 @@ public class ConsumerController {
     }
 
     @GetMapping("/usuarios/{id}")
-    @PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')") // CORREGIDO: Sintaxis 'hasRole' estricta
+    @PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
     @Operation(
             summary = "Busca un Usuario",
             description = "Busca un usuarios usando su ID."
@@ -120,7 +117,7 @@ public class ConsumerController {
         return ResponseEntity.ok(consumerService.findById(id));
     }
 
-    @PutMapping("/usuarios/{id}/status") // CORREGIDO: Estandarizado a /api/usuarios/...
+    @PutMapping("/usuarios/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Cambia el estado de un Usuario.",

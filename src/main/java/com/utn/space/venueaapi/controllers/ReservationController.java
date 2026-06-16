@@ -6,7 +6,6 @@ import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
-import com.utn.space.venueaapi.service.GoogleCalendarService;
 import com.utn.space.venueaapi.service.IPaymentService;
 import com.utn.space.venueaapi.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,11 +37,8 @@ public class ReservationController {
     @Autowired
     private final IPaymentService paymentService;
 
-    private final GoogleCalendarService googleCalendarService;
-
-    public ReservationController(IPaymentService paymentService, GoogleCalendarService googleCalendarService) {
+    public ReservationController(IPaymentService paymentService) {
         this.paymentService = paymentService;
-        this.googleCalendarService = googleCalendarService;
     }
 
 ///---------------------------Metodos------------------------------------------------------------------------------------

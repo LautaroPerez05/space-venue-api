@@ -1,11 +1,8 @@
 package com.utn.space.venueaapi.service;
 
-import com.google.api.client.util.DateTime;
 import com.utn.space.venueaapi.exceptions.*;
 import com.utn.space.venueaapi.model.*;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
-import com.utn.space.venueaapi.repository.ConsumerRepository;
-import com.utn.space.venueaapi.repository.SpaceRepository;
 import com.utn.space.venueaapi.repository.SpaceServiceItemRepository;
 import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
@@ -74,7 +71,7 @@ public class ReservationService {
 
         Integer bufferTime = spaceService.findById(spaceId).getBufferTime();
 
-        //Busco si alguna de las reservas que quedan se solapa con la reserva actual. Se el suma el buffer time a el untilDate de la reserva
+        //Busco si alguna de las reservas que quedan se solapa con la reserva actual. Se le suma el buffer time a el untilDate de la reserva
         return !reservationsForSpace.stream().anyMatch(reservation -> !reservation.getFromDate().isAfter(until) && !reservation.getUntilDate().plusMinutes(bufferTime).isBefore(from));
     }
 
@@ -96,8 +93,6 @@ public class ReservationService {
         Consumer client = consumerService.findById(dto.idConsumer());
         if(!idLogueado.equals(dto.idConsumer())) {
             client = consumerService.findById(idLogueado);
-            /*throw new InvalidDataException("El id del usuario logeado no coresponde con el ingresado por el front: " +
-                    "usLog=" + idLogueado + ", usDto=" + dto.idConsumer());*/
         }
 
         Space space = spaceService.findById(dto.idSpace());
@@ -108,7 +103,7 @@ public class ReservationService {
 
         Reservation aux = reservationMapper.toEntity(dto);
         aux.setCreatedAt(LocalDateTime.now());
-        aux.setStatus(ReservationStatus.TENTATIVE); // Aseguramos el estado inicial por defecto
+        aux.setStatus(ReservationStatus.TENTATIVE);
         aux.setIsActive(true);
 
         aux.setConsumer(client);
@@ -137,12 +132,8 @@ public class ReservationService {
         aux.setServices(serviciosSeleccionados);
         aux.setFinalPrice(space.getBasePrice().add(totalServicios));
 
-        // =================================================================
-        // INTEGRACIÓN GOOGLE CALENDAR (IGNORA EL NULL DE FORMA SEGURA) Por si no quiero usar Google Calendar
-        // =================================================================
         String googleCalendarId = space.getGoogleCalendarId();
 
-        // 1. Filtro inteligente: Solo entra a Google si el ID NO es nulo ni está vacío
         if (googleCalendarId != null && !googleCalendarId.trim().isEmpty()) {
             String emailCliente = client.getEmail();
             String emailOferente = space.getConsumerOwner().getEmail();
@@ -163,16 +154,12 @@ public class ReservationService {
                 aux.setGoogleEventCode(idEventoGoogle);
                 System.out.println("✅ Sincronización con Google Calendar exitosa.");
             } catch (IOException e) {
-                // Logueamos el error de red/credenciales, pero NO tiramos "throw e;"
-                // Así, si Google falla, la reserva en tu BD local SE GUARDA IGUAL.
                 System.err.println("⚠️ ALERTA: Falló la API de Google, pero la reserva se creó localmente.");
             }
         } else {
-            // 2. Si el espacio se creó recién y está en NULL, el flujo pasa por acá limpiamente
             System.out.println("ℹ️ El espacio #" + space.getIdSpace() + " no tiene Google Calendar configurado. Saltando paso.");
         }
 
-        // Se guarda en la BD local pase lo que pase con Google
         return reservationRepository.save(aux);
     }
 
@@ -198,7 +185,6 @@ public class ReservationService {
         //limpiar servicios seleccionados anteriores
         serviceSelectedService.deleteSelectedServiceByReserveId(dto.id());
 
-        //Los cargo de nuevo y actualizado
         List<ServiceSelected> list= new ArrayList<>();
         list= nuevaReserva.getSpace().getServices().stream()
                 .filter(item->dto.idServicesSelec().contains(item.getId()))//filtro todos los serviceItem Seleccionados para la reserva
@@ -239,7 +225,6 @@ public class ReservationService {
     public Reservation completeReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new IdNotFoundException ("Reservation", id));
         aux.setStatus(ReservationStatus.COMPLETED);
-        //falta sacarlo de googlecalendar
         return reservationRepository.save(aux);
     }
 

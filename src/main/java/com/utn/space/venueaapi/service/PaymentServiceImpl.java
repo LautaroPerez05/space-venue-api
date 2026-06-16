@@ -34,7 +34,7 @@ public class PaymentServiceImpl implements IPaymentService {
     public String createPreference(Reservation reservation) throws MPException, MPApiException {
         PreferenceClient client = new PreferenceClient();
 
-        // 1. Crear el ítem (el espacio reservado)
+        // Crear el ítem (el espacio reservado)
         PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
                 .id(reservation.getId().toString())
                 .title("Reserva de Espacio: " + reservation.getSpace().getNameSpace())
@@ -47,19 +47,19 @@ public class PaymentServiceImpl implements IPaymentService {
         List<PreferenceItemRequest> items = new ArrayList<>();
         items.add(itemRequest);
 
-        // 2. Configurar las URLs de retorno (Back Urls)
+        // Configurar las URLs de retorno (Back Urls)
         PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
                 .success("https://tu-frontend.com/payment/success")
                 .failure("https://tu-frontend.com/payment/failure")
                 .pending("https://tu-frontend.com/payment/pending")
                 .build();
 
-        // 3. Construir la preferencia de Mercado Pago
+        // Construir la preferencia de Mercado Pago
         PreferenceRequest preferenceRequest = PreferenceRequest.builder()
                 .items(items)
                 .backUrls(backUrls)
                 .autoReturn("approved") // Retorna automáticamente al front si se aprueba
-                .externalReference(reservation.getId().toString()) // Enlace clave con tu BD
+                .externalReference(reservation.getId().toString()) // Enlace clave con la BD
                 .build();
 
         Preference preference = client.create(preferenceRequest);
@@ -108,7 +108,6 @@ public class PaymentServiceImpl implements IPaymentService {
             if ("approved".equals(mpPayment.getStatus())) {
                 // Si Mercado Pago aprueba el dinero, consolidamos la reserva
                 actualReservation.setStatus(ReservationStatus.CONFIRMED);
-                // Aquí podrías disparar el envío de un correo de confirmación al cliente
             } else if ("rejected".equals(mpPayment.getStatus())) {
                 // Si el pago es rechazado por falta de fondos, fraude, etc.
                 actualReservation.setStatus(ReservationStatus.CANCELLED);
@@ -129,14 +128,14 @@ public class PaymentServiceImpl implements IPaymentService {
         try {
             log.info("🎮 Ejecutando SIMULACIÓN LOCAL de pago para Reserva ID: {}", reservationId);
 
-            // 1. Buscamos o creamos el modelo de pago local
+            // Buscamos o creamos el modelo de pago local
             PaymentModel paymentEntity = paymentRepository.findById(paymentId)
                     .orElse(new PaymentModel());
 
             Reservation actualReservation = reservationRepository.findById(reservationId)
                     .orElseThrow(() -> new IdNotFoundException("Reservation", reservationId));
 
-            // 2. Llenamos los datos simulando que Mercado Pago nos dio el OK
+            // Llenamos los datos simulando que Mercado Pago nos dio el OK
             paymentEntity.setIdPayment(paymentId);
             paymentEntity.setReservation(actualReservation);
             paymentEntity.setPaymentMethodType("credit_card");
@@ -148,7 +147,7 @@ public class PaymentServiceImpl implements IPaymentService {
             paymentEntity.setNetReceivedAmount(actualReservation.getFinalPrice());
             paymentEntity.setExternalReference(reservationId.toString());
 
-            // 3. Mutamos el estado de la reserva tal como lo haría el flujo real
+            // Mutamos el estado de la reserva tal como lo haría el flujo real
             actualReservation.setStatus(ReservationStatus.CONFIRMED);
 
             reservationRepository.save(actualReservation);

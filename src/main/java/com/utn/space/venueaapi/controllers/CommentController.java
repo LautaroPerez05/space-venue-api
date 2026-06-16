@@ -2,7 +2,6 @@ package com.utn.space.venueaapi.controllers;
 
 import com.utn.space.venueaapi.model.Comment;
 import com.utn.space.venueaapi.model.records.CommentDTO;
-import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -56,7 +55,7 @@ public class CommentController {
             //Logica si es un Admin
             commentService.deleteById(id);
         }else {
-            //Logica si es un client, Fede: no va a eliminar todos los comentarios de un Usuario?
+            //Logica si es un client
             commentService.deleteByIdCustomer(id);
         }
     }
@@ -92,7 +91,7 @@ public class CommentController {
             commentService.insertComment(commentDTO);
         }else {
             //Logica si es un client
-            commentService.consumerInsertCommentOnSpace(commentDTO); //Uso el nuevo metodo que verifica que se pueda hacer el comentario
+            commentService.consumerInsertCommentOnSpace(commentDTO);
         }
     }
 

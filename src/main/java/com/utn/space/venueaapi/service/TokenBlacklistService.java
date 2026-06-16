@@ -23,7 +23,7 @@ public class TokenBlacklistService {
 
     public long getRemainingExpirationTime(String token) {
         // Lógica para leer los Claims del JWT y restar (ExpirationTime - CurrentTime)
-        // Por simplicidad, si expira en 1 hora por defecto, puedes retornar 3600000ms
+        // Por simplicidad, si expira en 1 hora por defecto, se puede retornar 3600000ms
         return 3600000;
     }
 

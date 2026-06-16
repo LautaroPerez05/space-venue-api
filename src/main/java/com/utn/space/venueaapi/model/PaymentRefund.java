@@ -26,7 +26,7 @@ public class PaymentRefund {
     private BigDecimal amountRefunded;
 
     @Column(length = 30, nullable = false)
-    private String status; // approved, pending
+    private String status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
