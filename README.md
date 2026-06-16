@@ -9,7 +9,7 @@ Este repositorio contiene la arquitectura completa del proyecto (**Backend** y *
 ## 🛠️ Stack Tecnológico
 
 ### Backend
-* **Lenguaje:** Java 25
+* **Lenguaje:** Java 17
 * **Framework:** Spring Boot
 * **Mapeo Objeto-Relacional (ORM):** Spring Data JPA / Hibernate
 * **Gestor de Dependencias:** Maven
