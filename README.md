@@ -18,6 +18,10 @@ Este repositorio contiene la arquitectura completa del proyecto (**Backend** y *
 ### Frontend
 * **Tecnologías:** HTML, CSS, JavaScript (Vanilla)
 * **Despliegue Local:** Dockerizado (Contenedor aislado)
+* **Despliegue a Producción:** Render para Backend y Frontend, Aiven para Base de Datos MySQL en la nube.
+
+## Link del proyecto desplegado
+https://space-venue-front.onrender.com
 
 ---
 
