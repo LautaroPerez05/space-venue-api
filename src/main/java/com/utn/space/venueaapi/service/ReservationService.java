@@ -72,8 +72,10 @@ public class ReservationService {
                         || reservation.getStatus().equals(ReservationStatus.REJECTED)
                         || !reservation.getIsActive()).toList(); //filtro reservas canceladas rechazadas o inactivas
 
-        //Busco si alguna de las reservas que quedan se solapa con la reserva actual
-        return !reservationsForSpace.stream().anyMatch(reservation -> !reservation.getFromDate().isAfter(until) && !reservation.getUntilDate().isBefore(from));
+        Integer bufferTime = spaceService.findById(spaceId).getBufferTime();
+
+        //Busco si alguna de las reservas que quedan se solapa con la reserva actual. Se el suma el buffer time a el untilDate de la reserva
+        return !reservationsForSpace.stream().anyMatch(reservation -> !reservation.getFromDate().isAfter(until) && !reservation.getUntilDate().plusMinutes(bufferTime).isBefore(from));
     }
 
     @Transactional
