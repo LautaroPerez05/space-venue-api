@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+
+  # ──────────────────────────────────────────────
+  #  Base de datos MySQL
+  # ──────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: spacevenue-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: space_venue_db
+      MYSQL_USER: bdd1
+      MYSQL_PASSWORD: bdd1
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ──────────────────────────────────────────────
+  #  Backend Spring Boot
+  # ──────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spacevenue-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Base de datos — apunta al servicio "db" definido arriba
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/space_venue_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: bdd1
+      SPRING_DATASOURCE_PASSWORD: bdd1
+      # MercadoPago — reemplazá con tu access token real
+      MP_ACCESS_TOKEN: APP_USR-6890947877746193-061318-c2f9178cddbfc89eed6496f62db68fe7-3470891928
+      PORT: 8080
+    ports:
+      - "8080:8080"   # expuesto sólo para debug; el front lo accede vía Nginx
+
+  # ──────────────────────────────────────────────
+  #  Frontend Nginx
+  # ──────────────────────────────────────────────
+  frontend:
+    image: nginx:alpine
+    container_name: spacevenue-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+
+volumes:
+  db_data:

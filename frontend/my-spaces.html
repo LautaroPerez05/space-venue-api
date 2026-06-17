@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis espacios | SpaceVenue</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="navbar">
+    <a href="index.html" class="brand">Space<span>Venue</span></a>
+    <nav id="nav-links"></nav>
+</header>
+
+<div class="container">
+    <div class="flex between">
+        <h2 class="section-title">Mis espacios</h2>
+        <button class="btn" onclick="openSpaceModal()">+ Publicar espacio</button>
+    </div>
+    <div id="alert"></div>
+    <div id="my-spaces" class="grid"></div>
+</div>
+
+<!-- ===== Modal: Crear / Editar espacio ===== -->
+<div id="space-modal" class="modal-bg hidden">
+    <div class="modal">
+        <h2 id="space-modal-title">Nuevo espacio</h2>
+        <input type="hidden" id="s-id">
+
+        <div class="form-group">
+            <label>Nombre del espacio *</label>
+            <input id="s-name" placeholder="Ej: Salón de fiestas El Jardín">
+        </div>
+        <div class="form-group">
+            <label>Descripción *</label>
+            <textarea id="s-desc" rows="3" placeholder="Describí el espacio, capacidad, amenities…"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Precio base (ARS) *</label>
+            <input id="s-price" type="number" min="0" placeholder="Ej: 150000">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 12px">
+            <div class="form-group">
+                <label>Latitud</label>
+                <input id="s-lat" type="number" step="any" placeholder="-34.6037">
+            </div>
+            <div class="form-group">
+                <label>Longitud</label>
+                <input id="s-lng" type="number" step="any" placeholder="-58.3816">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Tiempo entre reservas (horas) *</label>
+            <input id="s-buffer" type="number" min="1" value="2">
+        </div>
+        <div class="form-group">
+            <label>Política de cancelación *</label>
+            <select id="s-policy">
+                <option value="FLEXIBLE">FLEXIBLE – Cancelación hasta 24 hs antes</option>
+                <option value="MODERATE">MODERATE – Cancelación hasta 72 hs antes</option>
+                <option value="STRICT">STRICT – Sin cancelación</option>
+            </select>
+        </div>
+
+        <div class="flex between mt">
+            <button class="btn secondary" onclick="closeSpaceModal()">Cancelar</button>
+            <button class="btn success"   onclick="saveSpace()">Guardar espacio</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Modal: Servicios del espacio ===== -->
+<div id="srv-modal" class="modal-bg hidden">
+    <div class="modal">
+        <div class="flex between mb">
+            <h2>Servicios del espacio</h2>
+            <button class="btn secondary small" onclick="closeSrvModal()">✕ Cerrar</button>
+        </div>
+        <div id="srv-list"></div>
+        <hr style="margin:18px 0;border:none;border-top:1px solid var(--border)">
+        <h3 class="mb">Agregar nuevo servicio</h3>
+        <div class="form-group">
+            <label>Descripción *</label>
+            <input id="srv-desc" placeholder="Ej: Decoración con globos">
+        </div>
+        <div class="form-group">
+            <label>Precio (ARS) *</label>
+            <input id="srv-price" type="number" min="0" placeholder="Ej: 25000">
+        </div>
+        <button class="btn success" onclick="addService()">+ Agregar servicio</button>
+    </div>
+</div>
+
+<!-- ===== Modal: Reservas recibidas por espacio ===== -->
+<div id="res-modal" class="modal-bg hidden">
+    <div class="modal" style="max-width:700px">
+        <div class="flex between mb">
+            <h2>Reservas recibidas</h2>
+            <button class="btn secondary small" onclick="closeResModal()">✕ Cerrar</button>
+        </div>
+        <div id="res-list"></div>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/index.js"></script>
+<script src="js/my-spaces.js"></script>
+</body>
+</html>
