@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración de Espacios | SpaceVenue</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="navbar">
+    <a href="index.html" class="brand">Space<span>Venue</span></a>
+    <nav id="nav-links"></nav>
+</header>
+
+<div class="container">
+    <div class="flex between align-center" style="margin: 2rem 0;">
+        <h1>Administración de Espacios</h1>
+        <button class="btn primary" onclick="showCreateModal()">+ Nuevo Espacio</button>
+    </div>
+
+    <div id="alert"></div>
+
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Buscar por nombre..." onkeyup="filterSpaces()">
+        <button class="btn secondary" onclick="loadAllSpaces()">↺ Actualizar</button>
+    </div>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Propietario</th>
+                <th>Precio</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="spaces-table">
+            <tr><td colspan="6" class="text-center">Cargando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal para crear/editar espacio -->
+<div id="space-modal" class="modal-overlay">
+    <div class="modal-overlay-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modal-title">Crear Nuevo Espacio</h2>
+        
+        <form id="space-form" onsubmit="saveSpace(event)">
+            <div class="form-group">
+                <label>Nombre del Espacio</label>
+                <input type="text" id="space-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="space-desc" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Precio Base ($)</label>
+                <input type="number" id="space-price" min="0" step="100" required>
+            </div>
+
+            <div class="form-group">
+                <label>Latitud</label>
+                <input type="number" id="space-lat" step="0.0001" required>
+            </div>
+
+            <div class="form-group">
+                <label>Longitud</label>
+                <input type="number" id="space-lng" step="0.0001" required>
+            </div>
+
+            <div class="form-group">
+                <label>Política de Cancelación</label>
+                <select id="space-policy" required>
+                    <option value="FLEXIBLE">Flexible</option>
+                    <option value="MODERATE">Moderada</option>
+                    <option value="STRICT">Estricta</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tiempo Buffer (horas)</label>
+                <input type="number" id="space-buffer" min="0" step="1" value="0">
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="space-active" checked>
+                    Activo
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn primary">Guardar</button>
+                <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/admin-spaces.js"></script>
+</body>
+</html>
