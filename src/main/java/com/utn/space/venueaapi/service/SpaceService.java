@@ -63,18 +63,18 @@ public class SpaceService {
             throw new InvalidDataException("Por favor ingrese un precio valido");
         }
 
-        Space spaceToInsert = new Space(
-                null,
-                consumerService.findById(spaceDTO.idConsumerOwner()),
-                locationService.findByLongitudeAndLatitude(spaceDTO.location().longitude(), spaceDTO.location().latitude()),
-                cancellationPoliciesService.findByType(EPolicyType.valueOf(spaceDTO.cancellationPolicies())),
-                spaceDTO.googleCalendarId(),
-                spaceDTO.nameSpace(),
-                spaceDTO.description(),
-                spaceDTO.basePrice(),
-                spaceDTO.publicationDate(),
-                spaceDTO.bufferTime(),
-                true);
+        Space spaceToInsert = new Space();
+        spaceToInsert.setIdSpace(null);
+        spaceToInsert.setConsumerOwner(consumerService.findById(spaceDTO.idConsumerOwner()));
+        spaceToInsert.setLocation(locationService.findByLongitudeAndLatitude(spaceDTO.location().longitude(), spaceDTO.location().latitude()));
+        spaceToInsert.setCancellationPolicies(cancellationPoliciesService.findByType(EPolicyType.valueOf(spaceDTO.cancellationPolicies())));
+        spaceToInsert.setGoogleCalendarId(spaceDTO.googleCalendarId());
+        spaceToInsert.setNameSpace(spaceDTO.nameSpace());
+        spaceToInsert.setDescription(spaceDTO.description());
+        spaceToInsert.setBasePrice(spaceDTO.basePrice());
+        spaceToInsert.setPublicationDate(spaceDTO.publicationDate());
+        spaceToInsert.setBufferTime(spaceDTO.bufferTime());
+        spaceToInsert.setIsActive(true);
 
         spaceRepository.save(spaceToInsert);
     }
@@ -98,17 +98,18 @@ public class SpaceService {
             throw new InvalidDataException("Por favor ingrese un precio valido");
         }
 
-        Space spaceToInsert = new Space(
-                id,
-                consumerService.findById(spaceDTO.idConsumerOwner()),
-                locationService.findByLongitudeAndLatitude(spaceDTO.location().longitude(), spaceDTO.location().latitude()),
-                cancellationPoliciesService.findByType(EPolicyType.valueOf(spaceDTO.cancellationPolicies())),
-                spaceDTO.googleCalendarId(),
-                spaceDTO.nameSpace(),
-                spaceDTO.description(),
-                spaceDTO.basePrice(),
-                spaceDTO.publicationDate(),
-                spaceDTO.bufferTime());
+        Space spaceToInsert = new Space();
+        spaceToInsert.setIdSpace(id);
+        spaceToInsert.setConsumerOwner(consumerService.findById(spaceDTO.idConsumerOwner()));
+        spaceToInsert.setLocation(locationService.findByLongitudeAndLatitude(spaceDTO.location().longitude(), spaceDTO.location().latitude()));
+        spaceToInsert.setCancellationPolicies(cancellationPoliciesService.findByType(EPolicyType.valueOf(spaceDTO.cancellationPolicies())));
+        spaceToInsert.setGoogleCalendarId(spaceDTO.googleCalendarId());
+        spaceToInsert.setNameSpace(spaceDTO.nameSpace());
+        spaceToInsert.setDescription(spaceDTO.description());
+        spaceToInsert.setBasePrice(spaceDTO.basePrice());
+        spaceToInsert.setPublicationDate(spaceDTO.publicationDate());
+        spaceToInsert.setBufferTime(spaceDTO.bufferTime());
+        
         spaceRepository.save(spaceToInsert);
     }
 

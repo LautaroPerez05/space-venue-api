@@ -64,14 +64,16 @@ public class ReservationService {
 
     private boolean isSpaceAvailableBetweenDates(LocalDateTime from, LocalDateTime until, Integer spaceId){
         List<Reservation> reservationsForSpace = reservationRepository.findAllBySpace_IdSpace(spaceId);
+        
+        // Filtro para mantener SOLO las reservas activas y confirmadas (no canceladas/rechazadas)
         reservationsForSpace = reservationsForSpace.stream().
-                filter(reservation -> reservation.getStatus().equals(ReservationStatus.CANCELLED)
-                        || reservation.getStatus().equals(ReservationStatus.REJECTED)
-                        || !reservation.getIsActive()).toList(); //filtro reservas canceladas rechazadas o inactivas
+                filter(reservation -> !reservation.getStatus().equals(ReservationStatus.CANCELLED)
+                        && !reservation.getStatus().equals(ReservationStatus.REJECTED)
+                        && reservation.getIsActive()).toList();
 
         Integer bufferTime = spaceService.findById(spaceId).getBufferTime();
 
-        //Busco si alguna de las reservas que quedan se solapa con la reserva actual. Se le suma el buffer time a el untilDate de la reserva
+        // Busco si alguna de las reservas que quedan se solapa con la reserva actual. Se le suma el buffer time a el untilDate de la reserva
         return !reservationsForSpace.stream().anyMatch(reservation -> !reservation.getFromDate().isAfter(until) && !reservation.getUntilDate().plusMinutes(bufferTime).isBefore(from));
     }
 

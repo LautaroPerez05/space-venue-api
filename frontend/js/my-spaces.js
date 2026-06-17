@@ -101,7 +101,7 @@ async function saveSpace() {
 
     const dto = {
         idSpace:              id ? Number(id) : null,
-        idConsumerOwner:      0,        // el backend lo resuelve por JWT
+        idConsumerOwner:      null,        // El backend obtiene el ID del JWT
         location: {
             latitude:  numOrNull(document.getElementById("s-lat").value),
             longitude: numOrNull(document.getElementById("s-lng").value)

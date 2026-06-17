@@ -33,14 +33,14 @@ function renderSpacesTable(spaces) {
 
     table.innerHTML = spaces.map(s => `
         <tr>
-            <td>${s.id || s.idSpace || '-'}</td>
-            <td>${s.nameSpace || s.name || '-'}</td>
-            <td>${s.idConsumerOwner || '-'}</td>
+            <td>${s.idSpace || '-'}</td>
+            <td>${s.nameSpace || '-'}</td>
+            <td>${s.consumerOwner?.idConsumer || s.idConsumerOwner || '-'}</td>
             <td>$${(s.basePrice || 0).toLocaleString("es-AR")}</td>
-            <td><span class="badge ${s.active ? 'success' : 'danger'}">${s.active ? 'Activo' : 'Inactivo'}</span></td>
+            <td><span class="badge ${s.isActive ? 'success' : 'danger'}">${s.isActive ? 'Activo' : 'Inactivo'}</span></td>
             <td>
-                <button class="btn small" onclick="editSpace(${s.id || s.idSpace})">Editar</button>
-                <button class="btn small danger" onclick="deleteSpace(${s.id || s.idSpace})">Eliminar</button>
+                <button class="btn small" onclick="editSpace(${s.idSpace})">Editar</button>
+                <button class="btn small danger" onclick="deleteSpace(${s.idSpace})">Eliminar</button>
             </td>
         </tr>
     `).join("");
@@ -67,14 +67,15 @@ async function editSpace(spaceId) {
         editingSpaceId = spaceId;
         document.getElementById("modal-title").textContent = "Editar Espacio";
         
-        document.getElementById("space-name").value = space.nameSpace || space.name || "";
+        document.getElementById("space-name").value = space.nameSpace || "";
         document.getElementById("space-desc").value = space.description || "";
         document.getElementById("space-price").value = space.basePrice || 0;
         document.getElementById("space-lat").value = space.location?.latitude || 0;
         document.getElementById("space-lng").value = space.location?.longitude || 0;
-        document.getElementById("space-policy").value = space.cancellationPolicies || "FLEXIBLE";
+        const pol = space.cancellationPolicies?.policyType || space.cancellationPolicies || "FLEXIBLE";
+        document.getElementById("space-policy").value = pol;
         document.getElementById("space-buffer").value = space.bufferTime || 0;
-        document.getElementById("space-active").checked = space.active !== false;
+        document.getElementById("space-active").checked = space.isActive !== false;
         
         document.getElementById("space-modal").style.display = "block";
     } catch (error) {

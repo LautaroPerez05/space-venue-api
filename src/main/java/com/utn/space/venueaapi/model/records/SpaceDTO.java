@@ -1,6 +1,8 @@
 package com.utn.space.venueaapi.model.records;
 
 import com.utn.space.venueaapi.model.flags.Create;
+import com.utn.space.venueaapi.model.flags.CreateAdmin;
+import com.utn.space.venueaapi.model.flags.CreateOwned;
 import com.utn.space.venueaapi.model.flags.Update;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -12,14 +14,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-@Schema( description = "DTO de Espacio")
-public record SpaceDTO (
+@Schema(description = "DTO de Espacio")
+public record SpaceDTO(
         @NotNull(groups = Update.class)
         @Schema(description = "Identificador único", example = "1")
         Integer idSpace,
 
-        @NotNull(groups = {Create.class, Update.class})
-        @Positive(groups = {Create.class, Update.class})
+        @NotNull(groups = {CreateAdmin.class, Update.class})
+        @Positive(groups = {CreateAdmin.class, Update.class})
         @Schema(description = "Identificador único del dueño", example = "22")
         Integer idConsumerOwner,
 
@@ -29,7 +31,7 @@ public record SpaceDTO (
         LocationDTO location,
 
         @NotNull(groups = {Create.class, Update.class})
-        @Valid
+        @NotBlank(groups = {Create.class, Update.class})
         @Schema(description = "Una Politica de cancelación")
         String cancellationPolicies,
 
@@ -52,6 +54,7 @@ public record SpaceDTO (
         LocalDate publicationDate,
 
         @NotNull(groups = {Create.class, Update.class})
+        @Positive(groups = {Create.class, Update.class})
         @Schema(description = "Tiempo entre alquileres")
         Integer bufferTime,
 

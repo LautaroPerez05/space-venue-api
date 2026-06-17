@@ -60,10 +60,4 @@ public class Space {
     @OneToMany(mappedBy = "space", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonManagedReference
     private List<SpaceServiceItem> services;
-
-    public Space(Integer id, Consumer consumer, Location location, CancellationPolicies cancellationPolicies, String s, String s1, String description, BigDecimal bigDecimal, LocalDate localDate, Integer integer) {
-    }
-
-    public Space(Object o, Consumer byId, Location byId1, CancellationPolicies byId2, @NotBlank(groups = {Create.class, Update.class}) String s, @NotBlank(groups = {Create.class, Update.class}) String s1, @NotBlank(groups = {Create.class, Update.class}) String description, @NotBlank(groups = {Create.class, Update.class}) @Positive(groups = {Create.class, Update.class}) BigDecimal bigDecimal, @NotBlank(groups = {Create.class, Update.class}) LocalDate localDate, @NotBlank(groups = {Create.class, Update.class}) Integer integer, boolean b) {
-    }
 }

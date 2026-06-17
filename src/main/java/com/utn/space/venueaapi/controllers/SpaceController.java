@@ -1,7 +1,9 @@
 package com.utn.space.venueaapi.controllers;
 
 import com.utn.space.venueaapi.model.flags.Create;
+import com.utn.space.venueaapi.model.flags.CreateAdmin;
 import com.utn.space.venueaapi.model.flags.Update;
+import com.utn.space.venueaapi.model.flags.UpdateAdmin;
 import com.utn.space.venueaapi.model.records.SpaceDTO;
 import com.utn.space.venueaapi.model.Space;
 import com.utn.space.venueaapi.model.records.SpaceFilterDTO;
@@ -75,7 +77,7 @@ public class SpaceController {
 
     @PostMapping()
     @PreAuthorize("hasRole('ADMIN')")
-    public void insertSpace(
+    public ResponseEntity<String> insertSpace(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Entra los datos obligatorios de la creación de un nuevo Espacio",
                     required = true,
@@ -101,8 +103,9 @@ public class SpaceController {
                                     """)
                     )
             )
-            @Validated(Create.class)@RequestBody SpaceDTO spaceDTO){
+            @Validated(CreateAdmin.class)@RequestBody SpaceDTO spaceDTO){
         spaceService.insertSpace(spaceDTO);
+        return ResponseEntity.ok("Espacio creado exitosamente");
     }
 
     //Lo que hace @Validated es no permitir que se mande un DTO incompleto
@@ -111,7 +114,7 @@ public class SpaceController {
     @Operation(
             summary = "Crea un nuevo Espacio."
     )
-    public void insertOwnedSpace(
+    public ResponseEntity<String> insertOwnedSpace(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Entra los datos obligatorios de la creación de un nuevo Espacio",
                     required = true,
@@ -123,7 +126,7 @@ public class SpaceController {
                                     value = """
                                     {
                                       "id": null,
-                                      "idConsumerOwner": 4,
+                                      "idConsumerOwner": null,
                                       "location": ,
                                       "cancellationPolicies": ,
                                       "googleCalendarId": ,
@@ -139,6 +142,7 @@ public class SpaceController {
             )
             @Validated(Create.class)@RequestBody SpaceDTO spaceDTO){
         spaceService.insertOwnedSpace(spaceDTO);
+        return ResponseEntity.ok("Espacio publicado con éxito");
     }
 
     @PutMapping("/ownedspace/{id}")
@@ -146,7 +150,7 @@ public class SpaceController {
     @Operation(
             summary = "Modifica un Espacio."
     )
-    public void modifyOwnedSpace(@PathVariable Integer id,
+    public ResponseEntity<String> modifyOwnedSpace(@PathVariable Integer id,
                                  @io.swagger.v3.oas.annotations.parameters.RequestBody(
                                          description = "Entra los datos obligatorios de la creación de un nuevo Espacio",
                                          required = true,
@@ -158,7 +162,7 @@ public class SpaceController {
                                                          value = """
                                     {
                                       "id": 85,
-                                      "idConsumerOwner": 4,
+                                      "idConsumerOwner": null,
                                       "location": ,
                                       "cancellationPolicies": ,
                                       "googleCalendarId": ,
@@ -174,6 +178,7 @@ public class SpaceController {
                                  )
                                  @Validated(Update.class)@RequestBody SpaceDTO spaceDTO){
         spaceService.modifyOwnedSpace(id,spaceDTO);
+        return ResponseEntity.ok("Espacio actualizado exitosamente");
     }
 
     @PutMapping("/{id}")
@@ -181,7 +186,7 @@ public class SpaceController {
     @Operation(
             summary = "Modifica un Espacio como Admin"
     )
-    public void modifySpace(@PathVariable Integer id,
+    public ResponseEntity<String> modifySpace(@PathVariable Integer id,
                             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                                     description = "Entra los datos obligatorios de la creación de un nuevo Espacio",
                                     required = true,
@@ -207,8 +212,9 @@ public class SpaceController {
                                     """)
                                     )
                             )
-                            @Validated(Update.class)@RequestBody SpaceDTO spaceDTO){
+                            @Validated(UpdateAdmin.class)@RequestBody SpaceDTO spaceDTO){
         spaceService.modifySpace(id,spaceDTO);
+        return ResponseEntity.ok("Espacio actualizado exitosamente");
     }
 
     @PostMapping("/byfields")
