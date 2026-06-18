@@ -4,6 +4,8 @@
 
 let allSpaces = [];
 let editingSpaceId = null;
+let adminMap = null;
+let adminMarker = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!Auth.isAdmin()) {
@@ -59,6 +61,7 @@ function showCreateModal() {
     document.getElementById("modal-title").textContent = "Crear Nuevo Espacio";
     document.getElementById("space-form").reset();
     document.getElementById("space-modal").style.display = "flex";
+    initAdminMap();
 }
 
 async function editSpace(spaceId) {
@@ -74,10 +77,16 @@ async function editSpace(spaceId) {
         document.getElementById("space-lng").value = space.location?.longitude || 0;
         const pol = space.cancellationPolicies?.policyType || space.cancellationPolicies || "FLEXIBLE";
         document.getElementById("space-policy").value = pol;
-        document.getElementById("space-buffer").value = space.bufferTime || 0;
+        // Mostrar buffer en minutos en la UI (backend guarda horas)
+        document.getElementById("space-buffer").value = (space.bufferTime != null) ? (Number(space.bufferTime) * 60) : 0;
         document.getElementById("space-active").checked = space.isActive !== false;
         
         document.getElementById("space-modal").style.display = "block";
+        initAdminMap();
+        // colocar marcador si la ubicación existe
+        const lat = numOrNull(document.getElementById("space-lat").value);
+        const lng = numOrNull(document.getElementById("space-lng").value);
+        if (lat != null && lng != null) setAdminMarker(lat, lng, true);
     } catch (error) {
         showAlert("Error cargando espacio: " + error.message, "error");
     }
@@ -95,7 +104,8 @@ async function saveSpace(event) {
             longitude: parseFloat(document.getElementById("space-lng").value)
         },
         cancellationPolicies: document.getElementById("space-policy").value,
-        bufferTime: parseInt(document.getElementById("space-buffer").value),
+        // El input está en minutos; convertir a horas para el backend
+        bufferTime: (function(){ const mins = parseInt(document.getElementById("space-buffer").value); return (Number.isFinite(mins) && mins>0) ? (mins/60) : 0; })(),
         active: document.getElementById("space-active").checked
     };
 
@@ -128,6 +138,40 @@ async function deleteSpace(spaceId) {
 
 function closeModal() {
     document.getElementById("space-modal").style.display = "none";
+}
+
+// Inicializa mapa para admin (crear/editar espacio)
+function initAdminMap() {
+    // Si Leaflet no está cargado aún, reintentar dentro de 200ms
+    if (typeof L === 'undefined') { setTimeout(initAdminMap, 200); return; }
+    console.debug('initAdminMap: L present=', typeof L !== 'undefined', 'adminMap exists=', !!adminMap);
+    const el = document.getElementById('admin-space-map');
+    if (!el) return;
+    if (!adminMap) {
+        const DEFAULT = [-34.6037, -58.3816];
+        adminMap = L.map('admin-space-map', { attributionControl: false }).setView(DEFAULT, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(adminMap);
+        adminMap.on('click', (e) => {
+            setAdminMarker(e.latlng.lat, e.latlng.lng, false);
+        });
+    }
+    setTimeout(() => { try { adminMap.invalidateSize(); console.debug('adminMap.invalidateSize called'); } catch (e) { console.error('admin invalidateSize', e); } }, 200);
+}
+
+function setAdminMarker(lat, lng, fly) {
+    if (!adminMap) return;
+    if (adminMarker) adminMarker.setLatLng([lat, lng]);
+    else {
+        adminMarker = L.marker([lat, lng], { draggable: true }).addTo(adminMap);
+        adminMarker.on('dragend', (ev) => {
+            const p = ev.target.getLatLng();
+            document.getElementById('space-lat').value = p.lat;
+            document.getElementById('space-lng').value = p.lng;
+        });
+    }
+    document.getElementById('space-lat').value = lat;
+    document.getElementById('space-lng').value = lng;
+    if (fly) adminMap.flyTo([lat, lng], 15); else adminMap.setView([lat, lng], 15);
 }
 
 function showAlert(message, type = "info") {

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administración de Espacios | SpaceVenue</title>
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>#admin-space-map{width:100%;height:260px;border:1px solid var(--border);border-radius:8px;margin-bottom:12px}</style>
 </head>
 <body>
 
@@ -66,26 +69,23 @@
             </div>
 
             <div class="form-group">
-                <label>Latitud</label>
-                <input type="number" id="space-lat" step="0.0001" required>
-            </div>
-
-            <div class="form-group">
-                <label>Longitud</label>
-                <input type="number" id="space-lng" step="0.0001" required>
+                <label>Ubicación</label>
+                <div id="admin-space-map" aria-label="Mapa para seleccionar ubicación"></div>
+                <input type="hidden" id="space-lat" required>
+                <input type="hidden" id="space-lng" required>
             </div>
 
             <div class="form-group">
                 <label>Política de Cancelación</label>
                 <select id="space-policy" required>
                     <option value="FLEXIBLE">Flexible</option>
-                    <option value="MODERATE">Moderada</option>
+                    <option value="MODERATED">Moderada</option>
                     <option value="STRICT">Estricta</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Tiempo Buffer (horas)</label>
+                <label>Tiempo entre reservas (minutos)</label>
                 <input type="number" id="space-buffer" min="0" step="1" value="0">
             </div>
 
@@ -105,6 +105,9 @@
 </div>
 
 <script src="js/api.js"></script>
+<script src="js/index.js"></script>
+<!-- Leaflet JS (debe cargarse antes del script que usa el mapa) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/admin-spaces.js"></script>
 </body>
 </html>

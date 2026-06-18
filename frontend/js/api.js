@@ -62,6 +62,34 @@ function safeJson(text) {
     try { return JSON.parse(text); } catch (e) { return text; }
 }
 
+// Normaliza un objeto de filtro para que cumpla exactamente la forma
+// esperada por SpaceFilterDTO en el backend.
+function normalizeSpaceFilter(f) {
+    f = f || {};
+    const idConsumerOwner = (f.idConsumerOwner == null || f.idConsumerOwner === "" ) ? null : Number(f.idConsumerOwner);
+    const idLocation      = (f.idLocation == null || f.idLocation === "" ) ? null : Number(f.idLocation);
+    const nameSpace       = (f.nameSpace == null || (typeof f.nameSpace === 'string' && f.nameSpace.trim() === '')) ? null : String(f.nameSpace).trim();
+    const minPrice        = (f.minPrice == null || f.minPrice === "") ? null : Number(f.minPrice);
+    const maxPrice        = (f.maxPrice == null || f.maxPrice === "") ? null : Number(f.maxPrice);
+
+    // lat/lng/radious: si vienen presentes los convertimos a string para
+    // que Jackson los pueda mapear a BigDecimal en el backend sin sorpresas.
+    const lat = (f.lat == null || f.lat === "") ? null : String(f.lat);
+    const lng = (f.lng == null || f.lng === "") ? null : String(f.lng);
+    const radious = (f.radious == null || f.radious === "") ? null : String(f.radious);
+
+    return {
+        idConsumerOwner,
+        idLocation,
+        nameSpace,
+        minPrice,
+        maxPrice,
+        lat,
+        lng,
+        radious
+    };
+}
+
 // =============================================================
 //  ENDPOINTS  — mapeo 1:1 con los controllers del backend
 // =============================================================
@@ -84,9 +112,11 @@ const API = {
     // ---------- SPACES ----------
     listActiveSpaces:      ()        => apiFetch("/spaces"),
     getSpace:              (id)      => apiFetch(`/spaces/${id}`),
-    filterSpaces:          (filter)  => apiFetch("/spaces/byfields",              { method: "POST", body: filter }),
+    // filterSpaces y filterMySpaces usan normalizeSpaceFilter para asegurar
+    // que el objeto enviado coincide exactamente con SpaceFilterDTO del backend.
+    filterSpaces:          (filter)  => apiFetch("/spaces/byfields",              { method: "POST", body: normalizeSpaceFilter(filter), auth: Auth.isLogged() }),
     myOwnedSpaces:         ()        => apiFetch("/spaces/ownedspaces",           { auth: true }),
-    filterMySpaces:        (filter)  => apiFetch("/spaces/ownedspaces/byfields",  { method: "POST", body: filter, auth: true }),
+    filterMySpaces:        (filter)  => apiFetch("/spaces/ownedspaces/byfields",  { method: "POST", body: normalizeSpaceFilter(filter), auth: true }),
     createOwnedSpace:      (dto)     => apiFetch("/spaces/ownedspace",            { method: "POST", body: dto, auth: true }),
     updateOwnedSpace:      (id, dto) => apiFetch(`/spaces/ownedspace/${id}`,      { method: "PUT",  body: dto, auth: true }),
     deleteOwnedSpace:      (id)      => apiFetch(`/spaces/ownedspace/${id}`,      { method: "DELETE", auth: true }),

@@ -2,6 +2,9 @@ if (!Auth.isLogged()) location.href = "login.html";
 
 let mySpaces = [];
 let currentSrvSpaceId = null;
+// Leaflet map variables para seleccionar ubicación al crear/editar espacio
+let spaceMap = null;
+let spaceMarker = null;
 
 // =====================================================
 //  Carga y render de los espacios del dueño
@@ -62,9 +65,11 @@ function openSpaceModal() {
     document.getElementById("s-price").value  = "";
     document.getElementById("s-lat").value    = "";
     document.getElementById("s-lng").value    = "";
-    document.getElementById("s-buffer").value = 2;
+    document.getElementById("s-buffer").value = 120; // minutos por defecto
     document.getElementById("s-policy").value = "FLEXIBLE";
     document.getElementById("space-modal").classList.remove("hidden");
+    // Inicializa o refresca el mapa cuando se abre el modal
+    initSpaceMap();
 }
 
 function closeSpaceModal() {
@@ -81,11 +86,19 @@ function editSpace(id) {
     document.getElementById("s-price").value  = s.basePrice   || "";
     document.getElementById("s-lat").value    = s.location?.latitude  || "";
     document.getElementById("s-lng").value    = s.location?.longitude || "";
-    document.getElementById("s-buffer").value = s.bufferTime  || 2;
+    // Mostrar buffer en minutos en la UI (backend guarda horas)
+    document.getElementById("s-buffer").value = (s.bufferTime != null) ? (Number(s.bufferTime) * 60) : 120;
     // intenta mapear la política
     const pol = s.cancellationPolicies?.policyType || s.cancellationPolicies || "FLEXIBLE";
     document.getElementById("s-policy").value = pol;
     document.getElementById("space-modal").classList.remove("hidden");
+    // Inicializa el mapa y coloca el marcador en la ubicación existente (si la hay)
+    initSpaceMap();
+    const lat = numOrNull(document.getElementById("s-lat").value);
+    const lng = numOrNull(document.getElementById("s-lng").value);
+    if (lat != null && lng != null) {
+        setSpaceMarker(lat, lng, true);
+    }
 }
 
 async function saveSpace() {
@@ -96,6 +109,12 @@ async function saveSpace() {
 
     if (!name || !desc || !price) {
         alertBox("Completá al menos nombre, descripción y precio.");
+        return;
+    }
+    const lat = numOrNull(document.getElementById("s-lat").value);
+    const lng = numOrNull(document.getElementById("s-lng").value);
+    if (lat == null || lng == null) {
+        alertBox("Seleccioná la ubicación del espacio en el mapa.");
         return;
     }
 
@@ -112,7 +131,11 @@ async function saveSpace() {
         description:          desc,
         basePrice:            price,
         publicationDate:      null,
-        bufferTime:           Number(document.getElementById("s-buffer").value) || 2,
+        // El campo en la UI está en minutos; convertir a horas para el backend
+        bufferTime: (function(){
+            const mins = Number(document.getElementById("s-buffer").value);
+            return (Number.isFinite(mins) && mins > 0) ? (mins / 60) : 2;
+        })(),
         active:               true,
         services:             null
     };
@@ -134,6 +157,62 @@ async function saveSpace() {
         alertBox(e.message || "No se pudo guardar el espacio.");
     } finally {
         btn.disabled = false; btn.textContent = "Guardar espacio";
+    }
+}
+
+// Inicializa el mapa Leaflet dentro del modal si aún no existe
+function initSpaceMap() {
+    // Si Leaflet no está cargado aún, reintentar dentro de 200ms (evita condiciones de carrera)
+    if (typeof L === 'undefined') { setTimeout(initSpaceMap, 200); return; }
+
+    const mapContainer = document.getElementById('s-map');
+    if (!mapContainer) return;
+
+    console.debug('initSpaceMap: L present=', typeof L !== 'undefined', 'spaceMap exists=', !!spaceMap);
+    // Crear mapa solo una vez
+    if (!spaceMap) {
+        // Coordenadas por defecto (centro de Buenos Aires)
+        const DEFAULT = [-34.6037, -58.3816];
+        spaceMap = L.map('s-map', { attributionControl: false }).setView(DEFAULT, 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(spaceMap);
+
+        // Click en el mapa para crear/mover marcador
+        spaceMap.on('click', function (e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            setSpaceMarker(lat, lng, false);
+        });
+    }
+
+    // Forzar recalculo de tamaño cuando el modal queda visible
+    setTimeout(() => { try { spaceMap.invalidateSize(); console.debug('spaceMap.invalidateSize called'); } catch (e) { console.error('invalidateSize error', e); } }, 200);
+}
+
+function setSpaceMarker(lat, lng, fly) {
+    if (!spaceMap) return;
+    if (spaceMarker) {
+        spaceMarker.setLatLng([lat, lng]);
+    } else {
+        spaceMarker = L.marker([lat, lng], { draggable: true }).addTo(spaceMap);
+        // Permitir arrastrar el marcador para ajustar la posición
+        spaceMarker.on('dragend', function (ev) {
+            const p = ev.target.getLatLng();
+            document.getElementById('s-lat').value = p.lat;
+            document.getElementById('s-lng').value = p.lng;
+        });
+    }
+
+    // Actualiza los inputs ocultos
+    document.getElementById('s-lat').value = lat;
+    document.getElementById('s-lng').value = lng;
+
+    if (fly) {
+        spaceMap.flyTo([lat, lng], 15);
+    } else {
+        spaceMap.setView([lat, lng], 15);
     }
 }
 
