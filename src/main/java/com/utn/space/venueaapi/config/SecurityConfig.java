@@ -47,6 +47,7 @@ public class SecurityConfig {
                         // RUTAS PÚBLICAS (Visitantes sin loguear)
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/spaces/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/spaces/byfields").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/spaceimages/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/spaces/search").permitAll()
