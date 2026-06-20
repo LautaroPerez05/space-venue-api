@@ -9,40 +9,43 @@ services:
     image: mysql:8.0
     container_name: spacevenue-db
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: space_venue_db
-      MYSQL_USER: bdd1
-      MYSQL_PASSWORD: bdd1
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # <-- Esto le dice a MySQL que acepte no tener contraseña
+    #  MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    #  MYSQL_USER: ${DB_USER}
+    #  MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
+      # Usamos la variable acá también para que el healthcheck no falle
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD}" ]
+   #  interval: 3s
       timeout: 5s
       retries: 10
 
-  # ──────────────────────────────────────────────
-  #  Backend Spring Boot
-  # ──────────────────────────────────────────────
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: spacevenue-api
     restart: unless-stopped
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
     environment:
-      # Base de datos — apunta al servicio "db" definido arriba
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/space_venue_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: bdd1
-      SPRING_DATASOURCE_PASSWORD: bdd1
-      # MercadoPago — reemplazá con tu access token real
-      MP_ACCESS_TOKEN: APP_USR-6890947877746193-061318-c2f9178cddbfc89eed6496f62db68fe7-3470891928
+      # Construimos la URL inyectando el nombre de la base de datos desde el .env
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${DB_NAME}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      # Inyectamos el token secreto
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
       PORT: 8080
     ports:
       - "8080:8080"   # expuesto sólo para debug; el front lo accede vía Nginx
