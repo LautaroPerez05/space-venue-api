@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -50,7 +51,7 @@ public class SpaceServiceItemController {
     @Operation(
             summary = "Crear un Servicio."
     )
-    public void insertServiceItem(
+    public ResponseEntity<Void> insertServiceItem(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Entra los datos obligatorios de la creación de un nuevo Servicio",
                     required = true,
@@ -78,13 +79,14 @@ public class SpaceServiceItemController {
             //Logica si no es Admin
             service.insertServiceItemOwner(serviceItemDTO);
         }
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/update/{id}")
     @Operation(
             summary = "Actualiza un Servicio."
     )
-    public void updateServiceItem(
+    public ResponseEntity<Void> updateServiceItem(
             @PathVariable Integer id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Entra los datos obligatorios de la modificacion de un nuevo Servicio",
@@ -113,13 +115,14 @@ public class SpaceServiceItemController {
             //Logica si no es Admin
             service.updateServiceItemOwner(id,serviceItemDTO);
         }
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/delete/{id}")
     @Operation(
             summary = "Elimina un Servicio."
     )
-    public void deleteServiceFromSpace(
+    public ResponseEntity<Void> deleteServiceFromSpace(
             @PathVariable Integer id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Entra los datos obligatorios de la creación de un nuevo Servicio",
@@ -148,5 +151,6 @@ public class SpaceServiceItemController {
             //Logica si no es Admin
             service.deleteServiceItemOwner(id,spaceDTO.idSpace());
         }
+        return ResponseEntity.ok().build();
     }
 }

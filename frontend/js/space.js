@@ -142,6 +142,9 @@ function renderDetail(s, images, comments) {
         </div>`;
 
     bindServiceTotals();
+
+    // Actualizar UI de Google OAuth2 si el módulo está cargado
+    try { if (typeof GoogleOAuth2 !== 'undefined') GoogleOAuth2.updateUI('google-calendar-container'); } catch (e) { /* no-op */ }
 }
 
 // ---- Formulario de reserva ----
@@ -162,6 +165,10 @@ function renderBookingForm() {
             <input id="r-from" type="datetime-local"></div>
         <div class="form-group"><label>Hasta</label>
             <input id="r-until" type="datetime-local"></div>
+        <div class="form-group"><label style="display:flex;align-items:center">
+            <input id="r-save-calendar" type="checkbox" style="margin-right:8px"> Guardar en mi calendario
+        </label></div>
+        <div id="google-calendar-container"></div>
         <div class="flex between mb" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
             <span>Total estimado</span>
             <strong id="r-total">$${Number(currentSpace.basePrice||0).toLocaleString("es-AR")}</strong>
@@ -213,8 +220,8 @@ async function doReserve() {
         status: null,
         createdAt: null,
         isActive: true,
-        saveToMyCalendar: false,
-        idConsumer: 0,      // el backend lo resuelve por el JWT del usuario logueado
+        saveToMyCalendar: (document.getElementById('r-save-calendar')?.checked) ? true : false,
+        idConsumer: null,      // el backend lo resuelve por el JWT del usuario logueado
         idSpace: spaceId,
         idServicesSelec: selected
     };
@@ -238,7 +245,7 @@ async function submitComment() {
     const score = Number(document.getElementById("c-score")?.value);
     if (!desc) { alertBox("Escribí algo en tu comentario."); return; }
 
-    const dto = { idConsumer: 0, idSpace: spaceId, description: desc, score };
+    const dto = { idConsumer: null, idSpace: spaceId, description: desc, score };
     try {
         await API.createComment(dto);
         alertBox("¡Comentario enviado!", "success");

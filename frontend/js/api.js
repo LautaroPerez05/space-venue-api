@@ -164,5 +164,10 @@ const API = {
     getUnreadCount:          ()             => apiFetch("/notifications/unread-count",         { auth: true }),
     getUserNotifications:    (id)           => apiFetch(`/notifications/consumer/${id}`,        { auth: true }),
     getUnseenNotifications:  ()             => apiFetch("/notifications/consumer/onlyunseen",  { auth: true }),
-    markNotificationAsRead:  (id)           => apiFetch(`/notifications/${id}`,                 { method: "POST", auth: true })
+    markNotificationAsRead:  (id)           => apiFetch(`/notifications/${id}`,                 { method: "POST", auth: true }),
+
+    // ---------- GOOGLE OAUTH2 ----------
+    googleOAuth2AuthUrl:     ()             => apiFetch("/google-oauth2/auth-url",             { auth: true }),
+    googleOAuth2Status:      ()             => apiFetch("/google-oauth2/status",               { auth: true }),
+    googleOAuth2Disconnect:  ()             => apiFetch("/google-oauth2/disconnect",           { method: "POST", auth: true })
 };

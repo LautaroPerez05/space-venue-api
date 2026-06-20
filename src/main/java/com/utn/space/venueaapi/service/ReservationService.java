@@ -92,9 +92,15 @@ public class ReservationService {
             throw new InvalidReservationException("La reserva no esta disponible en la fechas seleccionadas");
         }
 
-        Consumer client = consumerService.findById(dto.idConsumer());
-        if(!idLogueado.equals(dto.idConsumer())) {
+        // Determinar el consumidor asociado a la reserva.
+        // El frontend envía `idConsumer: 0` como placeholder; no debemos intentar
+        // buscar el consumer con id 0. Usamos el id del usuario logueado salvo que
+        // el DTO explícitamente indique el mismo id.
+        Consumer client;
+        if (dto.idConsumer() == null || !idLogueado.equals(dto.idConsumer())) {
             client = consumerService.findById(idLogueado);
+        } else {
+            client = consumerService.findById(dto.idConsumer());
         }
 
         Space space = spaceService.findById(dto.idSpace());
@@ -151,7 +157,8 @@ public class ReservationService {
                         aux.getUntilDate(),
                         emailCliente,
                         emailOferente,
-                        dto.getSaveToMyCalendar()
+                        dto.getSaveToMyCalendar(),
+                        client.getIdConsumer()  // Pasar el ID del cliente para OAuth2
                 );
                 aux.setGoogleEventCode(idEventoGoogle);
                 System.out.println("✅ Sincronización con Google Calendar exitosa.");

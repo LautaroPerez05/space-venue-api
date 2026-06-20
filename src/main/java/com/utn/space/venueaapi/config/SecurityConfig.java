@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/spaces/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/spaces/byfields").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/spaceimages/**").permitAll()
+                        .requestMatchers("/api/google-oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/spaces/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/byspaceid/**").permitAll()

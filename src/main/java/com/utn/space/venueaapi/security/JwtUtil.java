@@ -28,6 +28,18 @@ public class JwtUtil {
                 .compact();
     }
 
+    // Sobrecarga para incluir consumerId en el token
+    public String generarToken(String username, String rol, Integer consumerId) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("rol", rol)
+                .claim("consumerId", consumerId)  // Agrega el consumerId al payload
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + TIEMPO_EXPIRACION))
+                .signWith(CLAVE_SECRETA)
+                .compact();
+    }
+
     // Abre el token y extrae su payload de datos (Claims) usando la firma secreta de control
     public Claims extraerClaims(String token) {
         return Jwts.parser()
@@ -45,6 +57,17 @@ public class JwtUtil {
     // Metodo para recuperar el rol
     public String extraerRol(String token) {
         return extraerClaims(token).get("rol", String.class);
+    }
+
+    // Metodo para recuperar el consumerId
+    public Integer extraerConsumerId(String token) {
+        Object consumerId = extraerClaims(token).get("consumerId");
+        if (consumerId instanceof Integer) {
+            return (Integer) consumerId;
+        } else if (consumerId instanceof Long) {
+            return ((Long) consumerId).intValue();
+        }
+        return null;
     }
 
     // Verifica que el token pertenezca al usuario en cuestión y que la fecha actual no supere la de expiración

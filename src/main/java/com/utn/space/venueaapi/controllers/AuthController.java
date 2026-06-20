@@ -64,7 +64,11 @@ public class AuthController {
                     .findFirst()
                     .orElse("ROLE_CLIENT"); // Rol por defecto si el usuario no tuviera ninguno
 
-            String token = jwtUtil.generarToken(username,rol);
+            // Obtener el consumerId del usuario autenticado
+            Consumer consumer = consumerService.findByCredentialsUsername(username);
+            Integer consumerId = consumer.getIdConsumer();
+
+            String token = jwtUtil.generarToken(username, rol, consumerId);
             return ResponseEntity.ok("Bearer " + token);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401).body("Credenciales inválidas");

@@ -47,7 +47,9 @@ public record ReservationDTO (
     Boolean isActive,
     Boolean saveToMyCalendar,
 
-    @NotNull(groups = {Create.class, Update.class})
+    // Para la creación (Create) el backend toma el consumidor del JWT, por eso
+    // solo es obligatorio en el grupo Update (cuando se modifica una reserva existente).
+    @NotNull(groups = {Update.class})
     @Schema(description = "ID del usuario que creo la reserva")
     Integer idConsumer,
 
