@@ -32,6 +32,17 @@
         <label>Precio máximo $</label>
         <input type="number" id="f-max" placeholder="Sin límite" min="0">
     </div>
+
+    <div class="field">
+        <label>Radio (km)</label>
+        <input type="number" id="f-radious" placeholder="5.0">
+    </div>
+
+    <button type="button" onclick="useCurrentLocation()">📍 Ubicación</button>
+
+    <input type="hidden" id="f-lat" value = "">
+    <input type="hidden" id="f-lng" value = "">
+
     <button onclick="searchSpaces()">🔍 Buscar</button>
 </div>
 

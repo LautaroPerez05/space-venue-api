@@ -551,6 +551,9 @@ tr:hover td { background: #f0f6ff; }
     color: var(--text);
 }
 
+
+
+
 /* -------------------- UTILITIES -------------------- */
 .align-center {
     align-items: center;

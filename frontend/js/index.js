@@ -112,7 +112,9 @@ async function searchSpaces() {
         nameSpace:       document.getElementById("f-name")?.value.trim() || null,
         minPrice:        numOrNull(document.getElementById("f-min")?.value),
         maxPrice:        numOrNull(document.getElementById("f-max")?.value),
-        lat: null, lng: null, radious: null
+        lat:             numOrNull(document.getElementById("f-lat")?.value),   // <-- CAMBIO AQUÍ
+        lng:             numOrNull(document.getElementById("f-lng")?.value),   // <-- CAMBIO AQUÍ
+        radious:         numOrNull(document.getElementById("f-radious")?.value) // <-- CAMBIO AQUÍ
     };
     loading("spaces");
     try {
@@ -122,9 +124,36 @@ async function searchSpaces() {
         alertBox("Error al filtrar los espacios.");
     }
 }
-
 // ====================================================
 //  Inicialización (solo se ejecuta en index.html)
 // ====================================================
 renderNav();
 if (document.getElementById("spaces")) loadSpaces();
+
+// Agrega esto al final de index.js
+async function useCurrentLocation() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = "Obteniendo...";
+
+    try {
+        const pos = await new Promise((resolve, reject) => {
+            if (!navigator.geolocation) reject(new Error("No soportado"));
+            navigator.geolocation.getCurrentPosition(
+                (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+                (err) => reject(err)
+            );
+        });
+
+        // Guardamos en campos ocultos (asegúrate de que existan en tu HTML)
+        document.getElementById("f-lat").value = pos.lat;
+        document.getElementById("f-lng").value = pos.lng;
+
+        await searchSpaces(); // Ejecutamos la búsqueda
+    } catch (e) {
+        alertBox("No pudimos obtener tu ubicación: " + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "📍 Cerca de mí";
+    }
+}
