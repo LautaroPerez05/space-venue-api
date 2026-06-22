@@ -30,7 +30,7 @@ public class CommentController {
             summary = "Busca TODOS los Comentarios.",
             description = "Devuelve una lista Completa de Comentarios."
     )
-    public ResponseEntity<List<Comment>> listAllComments(){
+    public ResponseEntity<List<CommentDTO>> listAllComments(){
         return ResponseEntity.ok(commentService.findAll());
     }
 
@@ -39,7 +39,7 @@ public class CommentController {
             summary = "Busca un Comentario.",
             description = "Busca un Comentario por su ID."
     )
-    public ResponseEntity<Comment> findCommentById(@PathVariable Integer id){
+    public ResponseEntity<CommentDTO> findCommentById(@PathVariable Integer id){
         return ResponseEntity.ok(commentService.findById(id));
     }
 
@@ -135,7 +135,7 @@ public class CommentController {
             summary = "Busca TODOS los Comentarios de un espacio.",
             description = "Devuelve una lista Completa de Comentarios por el id del espacio."
     )
-    public ResponseEntity<List<Comment>> findAllBySpaceId(@PathVariable Integer id){
+    public ResponseEntity<List<CommentDTO>> findAllBySpaceId(@PathVariable Integer id){
         return ResponseEntity.ok(commentService.findAllBySpaceId(id));
     }
 
@@ -144,7 +144,7 @@ public class CommentController {
             summary = "Busca TODOS los Comentarios de un usuario.",
             description = "Devuelve una lista Completa de Comentarios de una ID de usuario."
     )
-    public ResponseEntity<List<Comment>> findAllByConsumerId(@PathVariable Integer id){
+    public ResponseEntity<List<CommentDTO>> findAllByConsumerId(@PathVariable Integer id){
         return ResponseEntity.ok(commentService.findAllByConsumerId(id));
     }
     @GetMapping("/byscore/asc")
@@ -152,7 +152,7 @@ public class CommentController {
             summary = "Busca TODOS los Comentarios.",
             description = "Devuelve una lista Completa de Comentarios de forma Ascendiente por su puntuación."
     )
-    public ResponseEntity<List<Comment>> findAllByScoreASC(){
+    public ResponseEntity<List<CommentDTO>> findAllByScoreASC(){
         return ResponseEntity.ok(commentService.filterByScoreASC());
     }
 
@@ -161,7 +161,7 @@ public class CommentController {
             summary = "Busca TODOS los Comentarios.",
             description = "Devuelve una lista Completa de Comentarios de forma Descendiente por su puntuación."
     )
-    public ResponseEntity<List<Comment>> findAllByScoreDesc(){
+    public ResponseEntity<List<CommentDTO>> findAllByScoreDesc(){
         return ResponseEntity.ok(commentService.filterByScoreDESC());
     }
 }

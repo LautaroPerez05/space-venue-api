@@ -7,6 +7,7 @@ import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.ReservationStatus;
 import com.utn.space.venueaapi.model.records.CommentDTO;
 import com.utn.space.venueaapi.repository.CommentRepository;
+import com.utn.space.venueaapi.service.mappers.CommentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +24,13 @@ public class CommentService {
     @Autowired
     ReservationService reservationService;
 
-    public List<Comment> findAll(){
-        return commentRepository.findAll();
+    public List<CommentDTO> findAll(){
+        List<Comment> commentList = commentRepository.findAll();
+         return commentList.stream().map(CommentMapper::mapToDTO).toList();
     }
 
-    public Comment findById(Integer id){
-        return commentRepository.findById(id).orElseThrow(()-> new IdNotFoundException("No se encontro el comentario buscado: ", id));
+    public CommentDTO findById(Integer id){
+        return CommentMapper.mapToDTO(commentRepository.findById(id).orElseThrow(()-> new IdNotFoundException("No se encontro el comentario buscado: ", id)));
     }
 
     public void deleteById(Integer id){
@@ -96,25 +98,29 @@ public class CommentService {
         commentRepository.save(commentToInsert);
     }
 
-    public List<Comment> findAllBySpaceId(Integer spaceId){
+    public List<CommentDTO> findAllBySpaceId(Integer spaceId){
         if(!spaceService.existsById(spaceId)){
             throw new IdNotFoundException("No se encontro el espacio del cual se quieren buscar comentarios: ", spaceId);
         }
-        return commentRepository.findAllBySpaceIdSpace(spaceId);
+        List<Comment> commentList = commentRepository.findAllBySpaceIdSpace(spaceId);
+        return commentList.stream().map(comment -> CommentMapper.mapToDTO(comment)).toList();
     }
 
-    public List<Comment> findAllByConsumerId(Integer consumerId){
+    public List<CommentDTO> findAllByConsumerId(Integer consumerId){
         if(!consumerService.existsById(consumerId)){
             throw new IdNotFoundException("No se encontro el consumidor del cual se quieren buscar comentarios: ", consumerId);
         }
-        return commentRepository.findAllByConsumerIdConsumer(consumerId);
+        List<Comment> commentList = commentRepository.findAllByConsumerIdConsumer(consumerId);
+        return commentList.stream().map(comment -> CommentMapper.mapToDTO(comment)).toList();
     }
-    public List<Comment> filterByScoreASC(){
-        return commentRepository.findAllByOrderByScoreAsc();
+    public List<CommentDTO> filterByScoreASC(){
+        List<Comment> commentList =commentRepository.findAllByOrderByScoreAsc();
+        return commentList.stream().map(comment -> CommentMapper.mapToDTO(comment)).toList();
     }
 
-    public List<Comment> filterByScoreDESC(){
-        return commentRepository.findAllByOrderByScoreDesc();
+    public List<CommentDTO> filterByScoreDESC(){
+        List<Comment> commentList =commentRepository.findAllByOrderByScoreDesc();
+        return commentList.stream().map(comment -> CommentMapper.mapToDTO(comment)).toList();
     }
 
     public void consumerInsertCommentOnSpace(CommentDTO commentDTO){

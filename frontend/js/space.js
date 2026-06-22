@@ -72,16 +72,16 @@ function renderDetail(s, images, comments) {
     let commentsHtml = "";
     if (comments && comments.length) {
         commentsHtml = comments.map(c => {
-            const userId = c.consumer?.idConsumer ?? c.idConsumer ?? "—";
+            const nombreParaMostrar = c.username || "Usuario Anónimo";
             const stars  = c.score || 0;
             return `
-                <div class="comment">
-                    <div class="flex between">
-                        <strong>Usuario #${userId}</strong>
-                        <span class="stars">${"★".repeat(stars)}${"☆".repeat(Math.max(0, 5-stars))}</span>
-                    </div>
-                    <p>${escapeHtml(c.description || "")}</p>
-                </div>`;
+            <div class="comment">
+                <div class="flex between">
+                    <strong>${escapeHtml(nombreParaMostrar)}</strong>
+                    <span class="stars">${"★".repeat(stars)}${"☆".repeat(Math.max(0, 5-stars))}</span>
+                </div>
+                <p>${escapeHtml(c.description || "")}</p>
+            </div>`;
         }).join("");
     } else {
         commentsHtml = `<p class="muted">Todavía no hay comentarios para este espacio.</p>`;

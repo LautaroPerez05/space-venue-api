@@ -19,6 +19,10 @@ public record CommentDTO (
         Integer idConsumer,
 
         @NotEmpty(groups = {Create.class, Update.class})
+        @Schema(description = "Username del usuario que lo creo", example = "Pepe")
+        String username,
+
+        @NotEmpty(groups = {Create.class, Update.class})
         @Schema(description = "Identificador del espacio en el que se hace el comentario", example = "40")
         Integer idSpace,
 
