@@ -100,18 +100,40 @@ public class SpaceServiceItemService {
     }
 
     @Transactional
-    public void deleteServiceItem(Integer id, Integer idSpace){
-        if(!spaceServiceItemRepository.existsServiceItemInSpace(id, idSpace)) throw new IdNotFoundException("No se ha encontrado el servicio a eliminar: ", id);
-        spaceServiceItemRepository.deleteById(id);
+    public void deleteServiceItemOwner(Integer id, Integer idSpace) {
+        Integer currentConsumerId = consumerService.getLoggedConsumerId();
+
+        // LOG DE SEGURIDAD
+        System.out.println("DEBUG SERVICE: Intento de borrado por usuario ID: " + currentConsumerId);
+
+        // Obtener dueño
+        var space = spaceService.findById(idSpace);
+        Integer ownerId = space.getConsumerOwner().getIdConsumer();
+
+        System.out.println("DEBUG SERVICE: Dueño del espacio es ID: " + ownerId);
+
+        if (!ownerId.equals(currentConsumerId)) {
+            System.out.println("DEBUG SERVICE: ERROR - El usuario no es dueño. Abortando.");
+            throw new InvalidDataException("No puede eliminar servicios en un espacio del que no es dueño");
+        }
+
+        deleteServiceItem(id, idSpace);
     }
 
     @Transactional
-    public void deleteServiceItemOwner(Integer id, Integer idSpace){
-        Integer currentConsumerId = consumerService.getLoggedConsumerId();
+    public void deleteServiceItem(Integer id, Integer idSpace) {
+        System.out.println("DEBUG SERVICE: Verificando existencia de servicio " + id + " en espacio " + idSpace);
 
-        if(!spaceService.findById(idSpace).getConsumerOwner().getIdConsumer().equals(currentConsumerId)){
-            throw new InvalidDataException("No puede eliminar servicios en un espacio del que no es duenio");
+        boolean exists = spaceServiceItemRepository.existsServiceItemInSpace(id, idSpace);
+
+        if (!exists) {
+            System.out.println("DEBUG SERVICE: ERROR - No se encontró la relación Servicio-Espacio. Abortando.");
+            throw new IdNotFoundException("No se ha encontrado el servicio a eliminar: ", id);
         }
-        deleteServiceItem(id,idSpace);
+
+        System.out.println("DEBUG SERVICE: Ejecutando borrado real en base de datos...");
+        System.out.println("DEBUG: El ID que voy a borrar es: " + id);
+        spaceServiceItemRepository.deleteById(id);
+        System.out.println("DEBUG SERVICE: Borrado ejecutado con éxito.");
     }
 }

@@ -118,38 +118,22 @@ public class SpaceServiceItemController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/space/{idSpace}/delete/{id}")
     @Operation(
             summary = "Elimina un Servicio."
     )
     public ResponseEntity<Void> deleteServiceFromSpace(
             @PathVariable Integer id,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Entra los datos obligatorios de la creación de un nuevo Servicio",
-                    required = true,
-                    content = @Content(
-                            schema = @Schema(
-                                    implementation = SpaceServiceItemDTO.class),
-                            examples = @ExampleObject(
-                                    name = "Ejemplo",
-                                    value = """
-                                    {
-                                      "id": null,
-                                      "description":"Globos Inflables",
-                                      "price":75000.00,
-                                      "isActive":true,
-                                      "idSpace":48
-                                    """)
-                    )
-            )
-            @Validated(Create.class) @RequestBody SpaceDTO spaceDTO,        //Revisar
+            @PathVariable Integer idSpace,        //Revisar
             Authentication authentication){
         if (authentication.getAuthorities().stream().anyMatch(r -> Objects.equals(r.getAuthority(), "ROLE_ADMIN"))){
             //Logica si es un Admin
-            service.deleteServiceItem(id, spaceDTO.idSpace());
+            System.out.println("DEBUG: Ejecutando lógica ADMIN");
+            service.deleteServiceItem(id, idSpace);
         }else {
             //Logica si no es Admin
-            service.deleteServiceItemOwner(id,spaceDTO.idSpace());
+            System.out.println("DEBUG: Ejecutando lógica DUEÑO (no admin)");
+            service.deleteServiceItemOwner(id,idSpace);
         }
         return ResponseEntity.ok().build();
     }

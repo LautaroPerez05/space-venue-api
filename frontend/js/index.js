@@ -112,9 +112,9 @@ async function searchSpaces() {
         nameSpace:       document.getElementById("f-name")?.value.trim() || null,
         minPrice:        numOrNull(document.getElementById("f-min")?.value),
         maxPrice:        numOrNull(document.getElementById("f-max")?.value),
-        lat:             numOrNull(document.getElementById("f-lat")?.value),   // <-- CAMBIO AQUÍ
-        lng:             numOrNull(document.getElementById("f-lng")?.value),   // <-- CAMBIO AQUÍ
-        radious:         numOrNull(document.getElementById("f-radious")?.value) // <-- CAMBIO AQUÍ
+        lat:             numOrNull(document.getElementById("f-lat")?.value),
+        lng:             numOrNull(document.getElementById("f-lng")?.value),
+        radious:         numOrNull(document.getElementById("f-radious")?.value)
     };
     loading("spaces");
     try {

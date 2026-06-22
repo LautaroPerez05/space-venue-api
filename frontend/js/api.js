@@ -135,7 +135,7 @@ const API = {
     servicesOfSpace: (idSpace)     => apiFetch(`/services/space/${idSpace}`, { auth: true }),
     createService:   (dto)         => apiFetch("/services/insert",           { method: "POST",   body: dto, auth: true }),
     updateService:   (id, dto)     => apiFetch(`/services/update/${id}`,     { method: "PUT",    body: dto, auth: true }),
-    deleteService:   (id, idSpace) => apiFetch(`/services/delete/${id}`,     { method: "DELETE", body: { idSpace }, auth: true }),
+    deleteService:   (id, idSpace) => apiFetch(`/services/space/${idSpace}/delete/${id}`,     { method: "DELETE", auth: true }),
 
     // ---------- RESERVAS ----------
     listAllReservations: ()    => apiFetch("/reservations",               { auth: true }),
