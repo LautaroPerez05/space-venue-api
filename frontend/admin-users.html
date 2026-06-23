@@ -14,94 +14,28 @@
 </header>
 
 <div class="container">
-    <div class="flex between align-center" style="margin: 2rem 0;">
+    <div style="margin: 2rem 0;">
         <h1>Administración de Usuarios</h1>
-        <button class="btn primary" onclick="showCreateModal()">+ Nuevo Usuario</button>
     </div>
 
     <div id="alert"></div>
 
-    <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Buscar por nombre o email..." onkeyup="filterUsers()">
-        <button class="btn secondary" onclick="loadAllUsers()">↺ Actualizar</button>
-    </div>
-
     <table class="admin-table">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Rol</th>
-                <th>Activo</th>
-                <th>Acciones</th>
-            </tr>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Rol</th>
+            <th>Activo</th>
+            <th>Acciones</th>
+        </tr>
         </thead>
         <tbody id="users-table">
-            <tr><td colspan="7" class="text-center">Cargando...</td></tr>
+        <tr><td colspan="7" class="text-center">Cargando...</td></tr>
         </tbody>
     </table>
-</div>
-
-<!-- Modal para crear/editar usuario -->
-<div id="user-modal" class="modal-overlay">
-    <div class="modal-overlay-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2 id="modal-title">Crear Nuevo Usuario</h2>
-        
-        <form id="user-form" onsubmit="saveUser(event)">
-            <div class="form-group">
-                <label>Nombre</label>
-                <input type="text" id="user-firstname" required>
-            </div>
-
-            <div class="form-group">
-                <label>Apellido</label>
-                <input type="text" id="user-lastname" required>
-            </div>
-
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="user-email" required>
-            </div>
-
-            <div class="form-group">
-                <label>Teléfono</label>
-                <input type="tel" id="user-phone">
-            </div>
-
-            <div class="form-group">
-                <label>Nombre de Usuario</label>
-                <input type="text" id="user-username" required>
-            </div>
-
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="user-password" required>
-            </div>
-
-            <div class="form-group">
-                <label>Rol</label>
-                <select id="user-role" required>
-                    <option value="ROLE_CLIENT">Cliente</option>
-                    <option value="ROLE_ADMIN">Administrador</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="user-active" checked>
-                    Activo
-                </label>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn primary">Guardar</button>
-                <button type="button" class="btn secondary" onclick="closeModal()">Cancelar</button>
-            </div>
-        </form>
-    </div>
 </div>
 
 <script src="js/api.js"></script>

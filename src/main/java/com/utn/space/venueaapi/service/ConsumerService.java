@@ -25,6 +25,10 @@ public class ConsumerService {
         return consumerRepository.existsById(id);
     }
 
+    public List<Consumer> findAll(){
+        return consumerRepository.findAll();
+    }
+
     public Consumer findById(Integer id){
         return consumerRepository.findById(id).orElseThrow(()-> new IdNotFoundException("Consumer",id));
     }
@@ -91,6 +95,19 @@ public class ConsumerService {
             throw new RuntimeException("No se encontraron credenciales para este usuario");
         }
 
+        credential.setIsActive(false);
+        consumerRepository.save(consumer);
+    }
+
+    public void deleteUserLogicallyById(Integer id) {
+        Consumer consumer = findById(id);
+
+        Credential credential = consumer.getCredentials();
+        if (credential == null) {
+            throw new RuntimeException("No se encontraron credenciales para este usuario");
+        }
+
+        // Apagamos el flag de activo
         credential.setIsActive(false);
         consumerRepository.save(consumer);
     }

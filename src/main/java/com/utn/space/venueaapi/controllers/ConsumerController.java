@@ -101,10 +101,10 @@ public class ConsumerController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Busca todos los usuarios.",
-            description = "Devuelve una lista de todos los usuario."
+            description = "Devuelve una lista de todos los usuarios."
     )
-    public ResponseEntity<List<Credential>> listAllUsers() {
-        return ResponseEntity.ok(credentialService.findAll());
+    public ResponseEntity<List<Consumer>> listAllUsers() {
+        return ResponseEntity.ok(consumerService.findAll());
     }
 
     @GetMapping("/usuarios/{id}")
@@ -163,8 +163,8 @@ public class ConsumerController {
             summary = "Elimina un usuario por ID."
     )
     public ResponseEntity<String> deleteById(@PathVariable Integer id){
-        consumerService.deleteById(id);
-        return ResponseEntity.ok("Usuario eliminado con exito");
+        consumerService.deleteUserLogicallyById(id);
+        return ResponseEntity.ok("Usuario desactivado con exito");
     }
 
     @PutMapping("/usuario")
