@@ -27,7 +27,7 @@ async function loadAllSpaces() {
 
 function renderSpacesTable(spaces) {
     const table = document.getElementById("spaces-table");
-    
+
     if (!spaces || spaces.length === 0) {
         table.innerHTML = `<tr><td colspan="6" class="text-center">No hay espacios</td></tr>`;
         return;
@@ -41,7 +41,6 @@ function renderSpacesTable(spaces) {
             <td>$${(s.basePrice || 0).toLocaleString("es-AR")}</td>
             <td><span class="badge ${s.isActive ? 'success' : 'danger'}">${s.isActive ? 'Activo' : 'Inactivo'}</span></td>
             <td>
-                <button class="btn small" onclick="editSpace(${s.idSpace})">Editar</button>
                 <button class="btn small danger" onclick="deleteSpace(${s.idSpace})">Eliminar</button>
             </td>
         </tr>

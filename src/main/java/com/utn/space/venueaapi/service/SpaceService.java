@@ -46,7 +46,10 @@ public class SpaceService {
         if(!spaceRepository.existsById(id)){
             throw new IdNotFoundException("Space", id);
         }
-        spaceRepository.deleteById(id);
+        //Este metodo efectua soft DELETE
+        Space space = spaceRepository.findById(id).orElseThrow(() -> new IdNotFoundException("Space", id));
+        space.setIsActive(false);
+        spaceRepository.save(space);
     }
 
     @Transactional(rollbackFor = Exception.class)
