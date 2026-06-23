@@ -15,7 +15,7 @@ public record SpaceImageDTO (
         @Schema(description = "Identificador único", example = "1")
         Integer idImage,
 
-        @NotEmpty(groups = {Create.class, Update.class})
+        @NotNull(groups = {Create.class, Update.class})
         @Schema(description = "Identificador del Espacio al que pertenece", example = "74")
         Integer idSpace,
 
@@ -27,7 +27,7 @@ public record SpaceImageDTO (
         @Schema(description = "Dirección del archivo")
         String urlImage,
 
-        @NotEmpty(groups =  Update.class)
+        @NotNull(groups =  Update.class)
         @Schema(description = "Fecha en la que se subió la imagen",  example = "2026-06-13T011:25:31")
         LocalDateTime dateSend){
 }

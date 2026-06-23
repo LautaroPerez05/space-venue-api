@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -54,7 +55,7 @@ public class NotificationService {
         List<Notification> notificationList = notificationRepository.findByConsumer_IdConsumer(consumerService.getLoggedConsumerId());
 
         //filtro las notificacion ya vistas.
-        notificationList = notificationList.stream().filter(Notification::getIsSeen).toList();
+        notificationList = notificationList.stream().filter(notification -> !notification.getIsSeen()).toList();
 
         for (Notification notification : notificationList){
             markAsSeen(notification.getIdNotification()); //Marco cada una de las notificaciones mostradas como vistas
@@ -76,7 +77,8 @@ public class NotificationService {
         Notification notification = new Notification();
         notification.setConsumer(consumer);
         notification.setMessage(message);
-        notification.setCreatedAt(LocalDateTime.now());
+        // Guardamos la fecha en UTC para evitar desfasajes entre servidor/cliente
+        notification.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         notification.setIsSeen(false);
         return notificationRepository.save(notification);
     }

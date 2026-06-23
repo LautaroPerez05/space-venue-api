@@ -25,13 +25,13 @@ function renderNotifications(notifications) {
         return;
     }
 
-    const unseenCount = notifications.filter(n => !n.seen && !n.isRead).length;
+    const unseenCount = notifications.filter(n => (n.isSeen === false) || (n.seen === false) || (!n.isRead && n.isRead !== undefined && n.isRead === false)).length;
     if (unseenCount > 0) {
         document.getElementById("mark-all-btn").style.display = "inline-block";
     }
 
     container.innerHTML = notifications.map(n => `
-        <div class="notification-item ${!n.seen && !n.isRead ? 'unseen' : ''}" onclick="markAsRead(${n.idNotification || n.id})">
+        <div class="notification-item ${ (n.isSeen === false || n.seen === false) ? 'unseen' : '' }" onclick="markAsRead(${n.idNotification || n.id})">
             <div class="notification-header">
                 <span class="notification-type">${getNotificationType(n.type)}</span>
                 <span class="notification-time">${formatDate(n.createdAt)}</span>
@@ -56,8 +56,10 @@ async function markAllAsRead() {
     try {
         const notifications = await API.listAllNotifications();
         for (let n of notifications) {
-            if (!n.seen && !n.isRead) {
-                await API.markNotificationAsRead(n.id);
+            const id = n.idNotification || n.id;
+            const unseen = (n.isSeen === false) || (n.seen === false) || (n.isRead === false);
+            if (id && unseen) {
+                await API.markNotificationAsRead(id);
             }
         }
         loadNotifications();
@@ -114,25 +116,6 @@ function showAlert(message, type = "info") {
     setTimeout(() => alert.style.display = "none", 5000);
 }
 
-function renderNav() {
-    const nav = document.getElementById("nav-links");
-    if (!Auth.isLogged()) {
-        nav.innerHTML = `<a href="login.html">Ingresar</a>`;
-        return;
-    }
-
-    const isAdmin = Auth.isAdmin();
-    nav.innerHTML = `
-        <a href="index.html">Home</a>
-        <a href="my-spaces.html">Mis espacios</a>
-        <a href="reservations.html">Reservas</a>
-        <a href="notifications.html" class="active">Notificaciones</a>
-        ${isAdmin ? `<a href="admin-spaces.html">Admin Espacios</a>` : ""}
-        ${isAdmin ? `<a href="admin-users.html">Admin Usuarios</a>` : ""}
-        <a onclick="logout()">Salir</a>
-    `;
-}
-
 async function logout() {
     try {
         await API.logout();
@@ -142,4 +125,24 @@ async function logout() {
         Auth.clear();
         location.href = "login.html";
     }
+}
+
+function renderNav() {
+    const nav = document.getElementById("nav-links");
+    if (!nav) return;
+    if (!Auth.isLogged()) {
+        nav.innerHTML = `<a href="login.html">Ingresar</a>`;
+        return;
+    }
+
+    const isAdmin = Auth.isAdmin();
+    nav.innerHTML = `
+        <a href="index.html">Home</a>
+        <a href="reservations.html">Mis reservas</a>
+        <a href="my-spaces.html">Mis espacios</a>
+        <a href="notifications.html" class="active">Notificaciones</a>
+        ${isAdmin ? `<a href="admin-spaces.html">Admin Espacios</a>` : ""}
+        ${isAdmin ? `<a href="admin-users.html">Admin Usuarios</a>` : ""}
+        <a onclick="logout()">Salir</a>
+    `;
 }

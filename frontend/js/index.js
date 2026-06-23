@@ -63,6 +63,7 @@ function spaceCard(s) {
             <div class="thumb">🏛️</div>
             <div class="body">
                 <h3>${escapeHtml(s.nameSpace || "Espacio")}</h3>
+                <div class="owner">Creado por: ${escapeHtml((s.consumerOwner?.firstname || s.consumerOwner?.firstname) ? ((s.consumerOwner?.firstname || '') + ' ' + (s.consumerOwner?.lastname || '')) : '—')}</div>
                 <div class="loc">📍 ${escapeHtml(loc)}</div>
                 <div class="desc">${escapeHtml(desc)}${s.description && s.description.length > 90 ? "…" : ""}</div>
                 <div class="footer">

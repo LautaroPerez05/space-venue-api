@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.ZoneOffset;
 
 @Tag(name = "Notificaciones", description = "Operaciones sobre Notificaciones.")
 
@@ -30,8 +33,9 @@ public class NotificationController {
             description = "Devuelve la lista de TODAS las Notificaciones (solo accesible para administradores)."
     )
     @PreAuthorize("hasRole('ADMIN')")
-    public List<Notification> listAll (){
-        return notificationService.listAll();
+    public ResponseEntity<List<Map<String, Object>>> listAll (){
+        List<Map<String, Object>> out = notificationService.listAll().stream().map(this::toDto).toList();
+        return ResponseEntity.ok(out);
     }
 
     @GetMapping("/me")
@@ -40,8 +44,9 @@ public class NotificationController {
             description = "Devuelve las notificaciones del usuario logueado."
     )
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
-    public ResponseEntity<List<Notification>> getMyNotifications(){
-        return ResponseEntity.ok(notificationService.listAllByIdConsumerForConsumer());
+    public ResponseEntity<List<Map<String, Object>>> getMyNotifications(){
+        List<Map<String, Object>> out = notificationService.listAllByIdConsumerForConsumer().stream().map(this::toDto).toList();
+        return ResponseEntity.ok(out);
     }
 
     @GetMapping("/unread-count")
@@ -61,14 +66,16 @@ public class NotificationController {
             description = "Devuelve la lista de las Notificaciones un Usuario."
     )
     @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
-    public ResponseEntity<List<Notification>>findAllByIdConsumer(@Parameter(description = "ID del Usuario") @PathVariable Integer id, Authentication authentication){
+    public ResponseEntity<List<Map<String, Object>>>findAllByIdConsumer(@Parameter(description = "ID del Usuario") @PathVariable Integer id, Authentication authentication){
+        List<Notification> list;
         if (authentication.getAuthorities().stream().anyMatch(r -> Objects.equals(r.getAuthority(), "ROLE_ADMIN"))){
             //Logica si es un Admin
-            return ResponseEntity.ok(notificationService.listAllByIdConsumer(id));
+            list = notificationService.listAllByIdConsumer(id);
+        } else {
+            //El cliente solo puede ver sus propias notificaciones
+            list = notificationService.listAllByIdConsumerForConsumer();
         }
-
-        //El cliente solo puede ver sus propias notificaciones
-        return ResponseEntity.ok(notificationService.listAllByIdConsumerForConsumer());
+        return ResponseEntity.ok(list.stream().map(this::toDto).toList());
     }
 
     @GetMapping("/consumer/onlyunseen")
@@ -77,8 +84,9 @@ public class NotificationController {
             description = "Devuelve la lista de las Notificaciones con el Atributo (isSeen = false) un Usuario."
     )
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<List<Notification>> findAllUnseenByIdconsumer(@Parameter(description = "ID del Usuario") @PathVariable Integer id){
-        return ResponseEntity.ok(notificationService.listAllUnseenForConsumer());
+    public ResponseEntity<List<Map<String, Object>>> findAllUnseenByIdconsumer(){
+        List<Map<String, Object>> out = notificationService.listAllUnseenForConsumer().stream().map(this::toDto).toList();
+        return ResponseEntity.ok(out);
     }
 
     @GetMapping("/{id}")
@@ -86,10 +94,9 @@ public class NotificationController {
             summary = "Busca una notificación en particular.",
             description = "Busca una notificación por su ID."
     )
-    public ResponseEntity<Notification> findById(@Parameter(description = "ID de la notificación") @PathVariable Integer id){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(notificationService.findById(id));
+    public ResponseEntity<Map<String, Object>> findById(@Parameter(description = "ID de la notificación") @PathVariable Integer id){
+        Notification n = notificationService.findById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(toDto(n));
     }
 
 
@@ -99,9 +106,26 @@ public class NotificationController {
             summary = "Marca como vista a una notificación",
             description = "Busca una notificación por su ID y la marca como vista."
     )
-    public ResponseEntity<Notification> markAsSeen (@Parameter(description = "ID del notificación") @PathVariable Integer id){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(notificationService.markAsSeen(id));
+    public ResponseEntity<Map<String, Object>> markAsSeen (@Parameter(description = "ID del notificación") @PathVariable Integer id){
+        Notification updated = notificationService.markAsSeen(id);
+        return ResponseEntity.status(HttpStatus.OK).body(toDto(updated));
+    }
+
+    // --- Helper para serializar Notification con timestamp UTC en milisegundos ---
+    private Map<String, Object> toDto(Notification n) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("idNotification", n.getIdNotification());
+        m.put("id", n.getIdNotification());
+        m.put("message", n.getMessage());
+        m.put("isSeen", n.getIsSeen());
+        m.put("seen", n.getIsSeen());
+        Long createdMillis = null;
+        if (n.getCreatedAt() != null) {
+            createdMillis = n.getCreatedAt().atOffset(ZoneOffset.UTC).toInstant().toEpochMilli();
+        }
+        m.put("createdAt", createdMillis);
+        m.put("type", null);
+        m.put("detail", null);
+        return m;
     }
 }

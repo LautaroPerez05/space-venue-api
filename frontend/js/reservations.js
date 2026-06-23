@@ -42,6 +42,8 @@ function renderReservations(list) {
             ? `<a href="space.html?id=${r.space.idSpace}">${escapeHtml(spaceName)}</a>`
             : escapeHtml(spaceName);
 
+        const reserver = r.consumer ? (r.consumer.firstname + ' ' + r.consumer.lastname) : (r.consumerName || r.consumerFullName || '—');
+
         let actions = [];
         if (status === "CONFIRMED") {
             actions.push(`<button class="btn small success" onclick="pay(${r.id})">💳 Pagar</button>`);
@@ -54,7 +56,8 @@ function renderReservations(list) {
             <tr>
                 <td>
                     <strong>${escapeHtml(r.title || "")}</strong><br>
-                    <span class="muted">${escapeHtml(r.description || "")}</span>
+                    <span class="muted">${escapeHtml(r.description || "")}</span><br>
+                    <small class="muted">Reservado por: ${escapeHtml(reserver)}</small>
                 </td>
                 <td>${spaceLink}</td>
                 <td>${fmtDate(r.fromDate)}</td>

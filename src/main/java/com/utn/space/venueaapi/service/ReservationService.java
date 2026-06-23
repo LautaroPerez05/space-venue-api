@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,7 +126,7 @@ public class ReservationService {
         }
 
         Reservation aux = reservationMapper.toEntity(dto);
-        aux.setCreatedAt(LocalDateTime.now());
+        aux.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
         aux.setStatus(ReservationStatus.TENTATIVE);
         aux.setIsActive(true);
 

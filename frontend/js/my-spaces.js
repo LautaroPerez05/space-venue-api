@@ -343,7 +343,8 @@ async function openResModal(idSpace) {
         // Traemos TODAS las reservas y filtramos por espacio en el cliente
         // (el backend no tiene endpoint GET /reservations?spaceId= en los controllers visibles)
         const all = await API.listAllReservations();
-        const filtered = (all || []).filter(r => r.space?.idSpace === idSpace || r.idSpace === idSpace);
+        const spaceIdNum = Number(idSpace);
+        const filtered = (all || []).filter(r => Number(r.space?.idSpace) === spaceIdNum || Number(r.idSpace) === spaceIdNum);
 
         if (!filtered.length) {
             cont.innerHTML = `<p class="muted">Este espacio no tiene reservas todavía.</p>`;
@@ -352,6 +353,7 @@ async function openResModal(idSpace) {
 
         const rows = filtered.map(r => {
             const status = (r.status || "TENTATIVE").toString();
+            const reserver = r.consumer ? (r.consumer.firstname + ' ' + r.consumer.lastname) : (r.consumerName || r.consumerFullName || '—');
             let actions = "";
             if (status === "TENTATIVE") {
                 actions = `
@@ -362,7 +364,7 @@ async function openResModal(idSpace) {
             }
             return `
                 <tr>
-                    <td><strong>${escapeHtml(r.title||"")}</strong></td>
+                    <td><strong>${escapeHtml(r.title||"")}</strong><br><small class="muted">Por: ${escapeHtml(reserver)}</small></td>
                     <td>${r.fromDate ? new Date(r.fromDate).toLocaleDateString("es-AR") : "—"}</td>
                     <td>${r.untilDate ? new Date(r.untilDate).toLocaleDateString("es-AR") : "—"}</td>
                     <td><span class="status-${status}">${status}</span></td>
