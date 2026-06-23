@@ -31,7 +31,7 @@ function renderNotifications(notifications) {
     }
 
     container.innerHTML = notifications.map(n => `
-        <div class="notification-item ${!n.seen && !n.isRead ? 'unseen' : ''}" onclick="markAsRead(${n.id})">
+        <div class="notification-item ${!n.seen && !n.isRead ? 'unseen' : ''}" onclick="markAsRead(${n.idNotification || n.id})">
             <div class="notification-header">
                 <span class="notification-type">${getNotificationType(n.type)}</span>
                 <span class="notification-time">${formatDate(n.createdAt)}</span>

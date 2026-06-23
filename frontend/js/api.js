@@ -159,7 +159,7 @@ const API = {
     deleteComment:   (id)      => apiFetch(`/comments/${id}`, { method: "DELETE", auth: true }),
 
     // ---------- NOTIFICACIONES ----------
-    listAllNotifications:    ()             => apiFetch("/notifications",                       { auth: true }),
+    listAllNotifications:    ()             => apiFetch("/notifications/me",                    { auth: true }),
     getNotification:         (id)           => apiFetch(`/notifications/${id}`,                 { auth: true }),
     getUnreadCount:          ()             => apiFetch("/notifications/unread-count",         { auth: true }),
     getUserNotifications:    (id)           => apiFetch(`/notifications/consumer/${id}`,        { auth: true }),

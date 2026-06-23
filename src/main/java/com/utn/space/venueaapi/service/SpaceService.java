@@ -225,7 +225,7 @@ public class SpaceService {
     }
 
     @Transactional
-    public void insertOwnedSpace(SpaceDTO spaceDTO) {
+    public Space insertOwnedSpace(SpaceDTO spaceDTO) {
         Space space = new Space();
 
         space.setNameSpace(spaceDTO.nameSpace());
@@ -274,7 +274,7 @@ public class SpaceService {
 
         space.setConsumerOwner(consumerService.findById(consumerService.getLoggedConsumerId()));
 
-        spaceRepository.save(space);
+        return spaceRepository.save(space);
     }
 
     @Transactional

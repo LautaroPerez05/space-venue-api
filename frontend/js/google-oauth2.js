@@ -10,24 +10,24 @@ const GoogleOAuth2 = {
         try {
             const response = await API.googleOAuth2AuthUrl();
             if (response && response.authUrl) {
-                window.open(response.authUrl, '_blank', 'width=600,height=600');
-                // Poll de estado cada 2 segundos durante 5 minutos
-                let attempts = 0;
-                const maxAttempts = 150; // 5 minutos
-                const pollInterval = setInterval(async () => {
-                    attempts++;
-                    const status = await GoogleOAuth2.checkStatus();
-                    if (status && status.connected) {
-                        clearInterval(pollInterval);
+                // Abrimos el popup
+                const popup = window.open(response.authUrl, '_blank', 'width=600,height=600');
+
+                // Escuchamos el mensaje de éxito que inyectamos en el backend
+                const messageListener = async (event) => {
+                    if (event.data === 'google-calendar-connected') {
+                        // Removemos el listener para limpiar memoria
+                        window.removeEventListener('message', messageListener);
+
                         alertBox("🎉 ¡Google Calendar conectado exitosamente!", "success");
-                        // Recargar la página o actualizar UI según sea necesario
+
+                        // Actualizar UI sin recargar bruscamente toda la página si no quieres
                         setTimeout(() => location.reload(), 1500);
                     }
-                    if (attempts >= maxAttempts) {
-                        clearInterval(pollInterval);
-                        alertBox("⏱️ Tiempo agotado. Si ya conectaste tu calendario, recarga la página.", "warning");
-                    }
-                }, 2000);
+                };
+
+                window.addEventListener('message', messageListener);
+
             } else {
                 alertBox("No se pudo obtener la URL de autorización");
             }
@@ -35,7 +35,6 @@ const GoogleOAuth2 = {
             alertBox("Error al obtener URL de autorización: " + (e.message || e));
         }
     },
-
     /**
      * Verifica el estado de autorización
      */

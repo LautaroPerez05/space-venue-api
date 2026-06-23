@@ -135,7 +135,7 @@ function renderDetail(s, images, comments) {
 
             <aside>
                 <div class="booking-box">
-                    <div class="price">$${price} <small>precio base / evento</small></div>
+                    <div class="price">$${price} <small>por hora</small></div>
                     ${renderBookingForm()}
                 </div>
             </aside>
@@ -181,22 +181,54 @@ function renderBookingForm() {
 function bindServiceTotals() {
     document.querySelectorAll(".srv-chk").forEach(chk =>
         chk.addEventListener("change", recalcTotal));
+    
+    // Agregar listeners para cambios en las fechas
+    const fromInput = document.getElementById("r-from");
+    const untilInput = document.getElementById("r-until");
+    if (fromInput) fromInput.addEventListener("change", recalcTotal);
+    if (untilInput) untilInput.addEventListener("change", recalcTotal);
 }
 
 function recalcTotal() {
     const base  = Number(currentSpace?.basePrice || 0);
-    let   extra = 0;
+
+    // Calcular horas entre fechas
+    const fromInput = document.getElementById("r-from")?.value;
+    const untilInput = document.getElementById("r-until")?.value;
+
+    let horasReservation = 0;
+    if (fromInput && untilInput) {
+        const from = new Date(fromInput);
+        const until = new Date(untilInput);
+        const diffMs = until - from;
+        horasReservation = diffMs / (1000 * 60 * 60); // convertir ms a horas
+    }
+
+    let extra = 0;
     document.querySelectorAll(".srv-chk:checked").forEach(c => extra += Number(c.dataset.price || 0));
+
+    const precioTotal = (base * horasReservation) + extra;
     const el = document.getElementById("r-total");
-    if (el) el.textContent = "$" + (base + extra).toLocaleString("es-AR");
+    if (el) el.textContent = "$" + precioTotal.toLocaleString("es-AR");
 }
 
 // ---- Crear reserva ----
 async function doReserve() {
     const title = document.getElementById("r-title")?.value.trim();
     const desc  = document.getElementById("r-desc")?.value.trim();
-    const from  = document.getElementById("r-from")?.value;
-    const until = document.getElementById("r-until")?.value;
+    let from  = document.getElementById("r-from")?.value;
+    let until = document.getElementById("r-until")?.value;
+
+    // Algunos navegadores/devices devuelven datetime-local sin segundos (YYYY-MM-DDTHH:mm)
+    // El backend espera segundos. Normalizamos para añadir ":00" si faltan.
+    function ensureSeconds(s) {
+        if (!s) return s;
+        // formato esperado mínimo: 16 chars "yyyy-MM-ddTHH:mm"
+        if (s.length === 16) return s + ":00";
+        return s;
+    }
+    from = ensureSeconds(from);
+    until = ensureSeconds(until);
 
     if (!title || !desc || !from || !until) {
         alertBox("Completá todos los datos (título, descripción, fechas).");
@@ -214,13 +246,13 @@ async function doReserve() {
         title,
         description: desc,
         googleEventCode: null,
-        fromDate:  from  + ":00",
-        untilDate: until + ":00",
+        fromDate:  from,
+        untilDate: until,
         finalPrice: null,
         status: null,
         createdAt: null,
         isActive: true,
-        saveToMyCalendar: (document.getElementById('r-save-calendar')?.checked) ? true : false,
+        saveToMyCalendar: !!(document.getElementById('r-save-calendar')?.checked),
         idConsumer: null,      // el backend lo resuelve por el JWT del usuario logueado
         idSpace: spaceId,
         idServicesSelec: selected

@@ -114,7 +114,7 @@ public class SpaceController {
     @Operation(
             summary = "Crea un nuevo Espacio."
     )
-    public ResponseEntity<String> insertOwnedSpace(
+    public ResponseEntity<Object> insertOwnedSpace(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Entra los datos obligatorios de la creación de un nuevo Espacio",
                     required = true,
@@ -141,8 +141,9 @@ public class SpaceController {
                     )
             )
             @Validated(Create.class)@RequestBody SpaceDTO spaceDTO){
-        spaceService.insertOwnedSpace(spaceDTO);
-        return ResponseEntity.ok("Espacio publicado con éxito");
+        var created = spaceService.insertOwnedSpace(spaceDTO);
+        // Retornamos el id creado para que el frontend pueda subir imágenes
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(java.util.Map.of("idSpace", created.getIdSpace()));
     }
 
     @PutMapping("/ownedspace/{id}")

@@ -6,6 +6,7 @@ import com.utn.space.venueaapi.model.records.ReservationDTO;
 import com.utn.space.venueaapi.repository.SpaceServiceItemRepository;
 import com.utn.space.venueaapi.service.mappers.ReservationMapper;
 import com.utn.space.venueaapi.repository.ReservationRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class ReservationService {
     @Autowired
@@ -32,6 +34,9 @@ public class ReservationService {
 
     @Autowired
     private SpaceService spaceService;
+
+    @Autowired
+    private NotificationService notificationService;
 
 
     private final SpaceServiceItemRepository spaceServiceItemRepository;
@@ -78,7 +83,11 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation create(ReservationDTO dto) throws IOException {
+    public Reservation saveReservation(Reservation aux) {
+        return reservationRepository.save(aux);
+    }
+
+    public Reservation create(ReservationDTO dto, Integer consumerIdClient) throws IOException {
         if (dto.untilDate().isBefore(dto.fromDate())) {
             throw new InvalidDateException("La Fecha Final no puede ser antes que la Fecha de Inicio");
         }
@@ -107,6 +116,12 @@ public class ReservationService {
 
         if (space.getConsumerOwner().getIdConsumer().equals(idLogueado)) {
             throw new SelfReservationException("Señor Administrador/Anfitrión: No puede reservar su propio espacio comercial.");
+        }
+
+        // Validar límite de 5 reservas completadas/confirmadas por espacio
+        long reservasCompletadas = reservationRepository.countCompletedReservationsByConsumerAndSpace(idLogueado, dto.idSpace());
+        if (reservasCompletadas >= 5) {
+            throw new ReservationLimitException("Has alcanzado el límite máximo de 5 reservas en este espacio. No puedes reservar nuevamente este espacio.");
         }
 
         Reservation aux = reservationMapper.toEntity(dto);
@@ -138,10 +153,22 @@ public class ReservationService {
         }
 
         aux.setServices(serviciosSeleccionados);
-        aux.setFinalPrice(space.getBasePrice().add(totalServicios));
+
+        // Calcular precio por horas
+        long minutosDiferencia = java.time.temporal.ChronoUnit.MINUTES.between(dto.fromDate(), dto.untilDate());
+        double horasDiferencia = minutosDiferencia / 60.0;
+        BigDecimal precioBase = space.getBasePrice().multiply(BigDecimal.valueOf(horasDiferencia));
+
+        aux.setFinalPrice(precioBase.add(totalServicios));
+
+        Reservation reservaGuardada = saveReservation(aux);
+
+        // Crear notificación al dueño del espacio
+        String mensajeNotificacion = "Nueva reserva de " + client.getFirstname() + " " + client.getLastname() +
+                " para " + space.getNameSpace() + ". Confirmá o rechazá la reserva.";
+        notificationService.createNotification(space.getConsumerOwner(), mensajeNotificacion);
 
         String googleCalendarId = space.getGoogleCalendarId();
-
         if (googleCalendarId != null && !googleCalendarId.trim().isEmpty()) {
             String emailCliente = client.getEmail();
             String emailOferente = space.getConsumerOwner().getEmail();
@@ -153,23 +180,26 @@ public class ReservationService {
                         googleCalendarId,
                         tituloEvento,
                         descriptionEvento,
-                        aux.getFromDate(),
-                        aux.getUntilDate(),
+                        reservaGuardada.getFromDate(),
+                        reservaGuardada.getUntilDate(),
                         emailCliente,
                         emailOferente,
-                        dto.getSaveToMyCalendar(),
-                        client.getIdConsumer()  // Pasar el ID del cliente para OAuth2
+                        true,
+                        consumerIdClient  // Pasar el ID del cliente para OAuth2
                 );
-                aux.setGoogleEventCode(idEventoGoogle);
-                System.out.println("✅ Sincronización con Google Calendar exitosa.");
+                reservaGuardada.setGoogleEventCode(idEventoGoogle);
+                reservationRepository.save(reservaGuardada);
+                log.info("✅ Sincronización con Google Calendar exitosa para reserva ID: {}", reservaGuardada.getId());
             } catch (IOException e) {
-                System.err.println("⚠️ ALERTA: Falló la API de Google, pero la reserva se creó localmente.");
+                log.warn("⚠️ Error de IO al sincronizar con Google Calendar (reserva creada localmente): {}", e.getMessage(), e);
+            } catch (Exception e) {
+                log.warn("⚠️ Error inesperado al sincronizar con Google Calendar (reserva creada localmente): {}", e.getMessage(), e);
             }
         } else {
             System.out.println("ℹ️ El espacio #" + space.getIdSpace() + " no tiene Google Calendar configurado. Saltando paso.");
         }
 
-        return reservationRepository.save(aux);
+        return reservaGuardada;
     }
 
 
@@ -200,35 +230,59 @@ public class ReservationService {
                 .map(item-> new ServiceSelected(item, nuevaReserva))  //transformo los item en serviceSelected
                 .toList();
 
-        nuevaReserva.setServices(list);
+         nuevaReserva.setServices(list);
 
-        nuevaReserva.setFinalPrice(
-                nuevaReserva.getSpace().getBasePrice().add( //el + no funciona con bigDecimal
-                        nuevaReserva.getServices()
-                                .stream()
-                                .map(ServiceSelected::getPriceAtReservation)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                )
-        );
+         // Calcular precio por horas
+         long minutosDiferencia = java.time.temporal.ChronoUnit.MINUTES.between(dto.fromDate(), dto.untilDate());
+         double horasDiferencia = minutosDiferencia / 60.0;
+         BigDecimal precioBase = nuevaReserva.getSpace().getBasePrice().multiply(BigDecimal.valueOf(horasDiferencia));
+
+         nuevaReserva.setFinalPrice(
+                 precioBase.add( //el + no funciona con bigDecimal
+                         nuevaReserva.getServices()
+                                 .stream()
+                                 .map(ServiceSelected::getPriceAtReservation)
+                                 .reduce(BigDecimal.ZERO, BigDecimal::add)
+                 )
+         );
         return reservationRepository.save(nuevaReserva);
     }
 
     public Reservation confirmReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new IdNotFoundException ("Reservation", id));
         aux.setStatus(ReservationStatus.CONFIRMED);
-        return reservationRepository.save(aux);
+        Reservation confirmed = reservationRepository.save(aux);
+
+        // Notificar al usuario que su reserva fue confirmada
+        String mensaje = "Tu reserva en " + aux.getSpace().getNameSpace() + " ha sido confirmada. ¡Ya puedes pagar!";
+        notificationService.createNotification(aux.getConsumer(), mensaje);
+
+        return confirmed;
     }
 
     public Reservation rejectReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new IdNotFoundException ("Reservation", id));
         aux.setStatus(ReservationStatus.REJECTED);
-        return reservationRepository.save(aux);
+        Reservation rejected = reservationRepository.save(aux);
+
+        // Notificar al usuario que su reserva fue rechazada
+        String mensaje = "Tu reserva en " + aux.getSpace().getNameSpace() + " ha sido rechazada por el propietario.";
+        notificationService.createNotification(aux.getConsumer(), mensaje);
+
+        return rejected;
     }
 
     public Reservation cancelReservation(Integer id){
         Reservation aux= reservationRepository.findById(id).orElseThrow(()->new IdNotFoundException ("Reservation", id));
         aux.setStatus(ReservationStatus.CANCELLED);
-        return reservationRepository.save(aux);
+        Reservation cancelled = reservationRepository.save(aux);
+
+        // Notificar al dueño del espacio que la reserva fue cancelada
+        String mensaje = "La reserva de " + aux.getConsumer().getFirstname() + " " + aux.getConsumer().getLastname() +
+                " en " + aux.getSpace().getNameSpace() + " ha sido cancelada.";
+        notificationService.createNotification(aux.getSpace().getConsumerOwner(), mensaje);
+
+        return cancelled;
     }
 
     public Reservation completeReservation(Integer id){

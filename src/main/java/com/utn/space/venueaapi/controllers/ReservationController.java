@@ -6,6 +6,8 @@ import com.utn.space.venueaapi.model.Reservation;
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
 import com.utn.space.venueaapi.model.records.ReservationDTO;
+import com.utn.space.venueaapi.security.JwtUtil;
+import com.utn.space.venueaapi.service.ConsumerService;
 import com.utn.space.venueaapi.service.IPaymentService;
 import com.utn.space.venueaapi.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +40,15 @@ public class ReservationController {
     private ReservationService reservationService;
     @Autowired
     private final IPaymentService paymentService;
+    @Autowired
+    private final ConsumerService consumerService;
+    @Autowired
+    private final JwtUtil jwtUtil;
 
-    public ReservationController(IPaymentService paymentService) {
+    public ReservationController(IPaymentService paymentService, ConsumerService consumerService, JwtUtil jwtUtil) {
         this.paymentService = paymentService;
+        this.consumerService = consumerService;
+        this.jwtUtil = jwtUtil;
     }
 
 ///---------------------------Metodos------------------------------------------------------------------------------------
@@ -48,10 +58,10 @@ public class ReservationController {
         try {
             Reservation reservation = reservationService.findById(id);
 
-            // Validar que la reserva esté en un estado apto para ser pagada
-            if (!"TENTATIVE".equals(reservation.getStatus().toString())) {
+            // Validar que la reserva esté confirmada por el dueño antes de poder pagar
+            if (!"CONFIRMED".equals(reservation.getStatus().toString())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Collections.singletonMap("error", "Solo se pueden pagar reservas en estado TENTATIVE."));
+                        .body(Collections.singletonMap("error", "La reserva debe ser confirmada por el dueño del espacio antes de poder pagar."));
             }
 
             // Invocar al servicio de Mercado Pago para generar el link
@@ -62,9 +72,14 @@ public class ReservationController {
 
         } catch (MPException | MPApiException e) {
             // Errores específicos del SDK de Mercado Pago (credenciales inválidas, problemas de API, etc.)
+            String errorMsg = e.getMessage() != null ? e.getMessage() : "Error desconocido en Mercado Pago";
+            org.slf4j.LoggerFactory.getLogger(this.getClass())
+                    .error("❌ Error de Mercado Pago para reserva {}: {}", id, errorMsg, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("error", "Error al comunicarse con la pasarela de pagos: " + e.getMessage()));
+                    .body(Collections.singletonMap("error", "Error al comunicarse con la pasarela de pagos: " + errorMsg));
         } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(this.getClass())
+                    .error("❌ Error inesperado en checkout para reserva {}: {}", id, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("error", "Error interno del sistema: " + e.getMessage()));
         }
@@ -112,7 +127,7 @@ public class ReservationController {
             description = "El cliente entra un ReservaDTO por el body."
     )
     public ResponseEntity<Reservation> createReservation(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            /*@io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Entra los datos obligatorios de la creacion de una nueva Reserva",
                     required = true,
                     content = @Content(
@@ -135,12 +150,29 @@ public class ReservationController {
                                       "idServicesSelec":[1, 2, 5, 9]}
                                     """)
                     )
-            )
+            )*/
             @Validated(Create.class)
-            @RequestBody ReservationDTO dto) throws IOException {
+            @RequestBody ReservationDTO dto,
+            //Principal principal
+            HttpServletRequest request
+    ) throws IOException {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = bearerToken.substring(7);
+        Integer consumerIdReal = jwtUtil.extraerConsumerId(token);
+
+        if (consumerIdReal == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        Reservation nuevaReserva = reservationService.create(dto, consumerIdReal);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(reservationService.create(dto));
+                .body(nuevaReserva);
     }
 
     @PutMapping

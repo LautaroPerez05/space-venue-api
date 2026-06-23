@@ -22,4 +22,11 @@ public interface ReservationRepository extends JpaRepository<Reservation,Integer
 
     List<Reservation> findAllByConsumer_IdConsumer(Integer idConsumer);
     List<Reservation> findAllBySpace_IdSpace(Integer idSpace);
+
+    // Cuenta las reservas completadas o confirmadas de un usuario en un espacio específico
+    @Query("SELECT COUNT(r) FROM Reservation r WHERE r.consumer.idConsumer = :idConsumer " +
+            "AND r.space.idSpace = :idSpace " +
+            "AND (r.status = 'CONFIRMED' OR r.status = 'COMPLETED')")
+    long countCompletedReservationsByConsumerAndSpace(@Param("idConsumer") Integer idConsumer,
+                                                      @Param("idSpace") Integer idSpace);
 }

@@ -1,9 +1,6 @@
 package com.utn.space.venueaapi.service;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -16,7 +13,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 @Slf4j
 @Service
@@ -27,15 +24,10 @@ public class GoogleCalendarService {
     @Autowired(required = false)
     private GoogleOAuth2Service googleOAuth2Service;
 
-    // Inyección del cliente de Google Calendar previamente configurado como Bean
     public GoogleCalendarService(Calendar googleCalendar) {
         this.googleCalendarServiceAccount = googleCalendar;
     }
 
-    /**
-     * Crea un evento en el calendario del espacio e invita automáticamente al cliente y al oferente.
-     * Intenta usar el calendario OAuth2 del usuario. Si no existe, usa la Service Account como fallback.
-     */
     public String sincronizarReservaMultiplesCalendarios(
             String calendarIdSpace,
             String title,
@@ -47,39 +39,48 @@ public class GoogleCalendarService {
             boolean saveInClientCalendar,
             Integer consumerIdClient) throws IOException {
 
-        // Instancia el modelo del evento base de Google
+        if (googleCalendarServiceAccount == null) {
+            log.warn("⚠️ Google Calendar no disponible (bean nulo). Saltando sincronización.");
+            return null;
+        }
+
+        System.out.println("LOG-CALENDAR: saveInClientCalendar = " + saveInClientCalendar);
+        System.out.println("LOG-CALENDAR: consumerIdClient = " + consumerIdClient);
+
         Event evento = new Event()
                 .setSummary(title)
                 .setDescription(description + "\n\nCliente: " + emailClient + "\nDueño: " + emailOwner);
 
-        // Formatea y setea la fecha/hora de inicio
-        Date dateFrom = Date.from(introduction.atZone(ZoneId.systemDefault()).toInstant());
-        EventDateTime start = new EventDateTime().setDateTime(new DateTime(dateFrom));
+        ZoneId zonaLocal = ZoneId.of("America/Argentina/Buenos_Aires");
+
+        ZonedDateTime desdeConZona = introduction.atZone(zonaLocal);
+        EventDateTime start = new EventDateTime()
+                .setDateTime(new DateTime(desdeConZona.toInstant().toEpochMilli()))
+                .setTimeZone("America/Argentina/Buenos_Aires");
         evento.setStart(start);
 
-        // Formatea y setea la fecha/hora de finalización
-        Date dateUntil = Date.from(endLocal.atZone(ZoneId.systemDefault()).toInstant());
-        EventDateTime end = new EventDateTime().setDateTime(new DateTime(dateUntil));
+        ZonedDateTime hastaConZona = endLocal.atZone(zonaLocal);
+        EventDateTime end = new EventDateTime()
+                .setDateTime(new DateTime(hastaConZona.toInstant().toEpochMilli()))
+                .setTimeZone("America/Argentina/Buenos_Aires");
         evento.setEnd(end);
 
-        // Intenta usar el calendario personal del cliente si tiene OAuth2 autorizado
-        if (saveInClientCalendar && consumerIdClient != null && googleOAuth2Service != null) {
-            sincronizarEnCalendarioPersonal(consumerIdClient, evento);
-        }
-
-        // Siempre sincronizar en el calendario del espacio usando Service Account
         Event eventoEjecutado = googleCalendarServiceAccount.events().insert(calendarIdSpace, evento)
                 .setSendUpdates("none")
                 .execute();
 
         log.info("✅ Evento sincronizado en calendario del espacio. ID: {}", eventoEjecutado.getId());
 
+        if (saveInClientCalendar && consumerIdClient != null && googleOAuth2Service != null) {
+            System.out.println("LOG-CALENDAR: 🟢 Entrando a la sincronización personal...");
+            sincronizarEnCalendarioPersonal(consumerIdClient, evento);
+        } else {
+            System.out.println("LOG-CALENDAR: ❌ NO se cumplió la condición para el calendario personal.");
+        }
+
         return eventoEjecutado.getId();
     }
 
-    /**
-     * Sobrecarga para mantener compatibilidad con código anterior que no pasa consumerIdClient
-     */
     public String sincronizarReservaMultiplesCalendarios(
             String calendarIdSpace,
             String title,
@@ -95,42 +96,40 @@ public class GoogleCalendarService {
         );
     }
 
-    /**
-     * Intenta sincronizar el evento en el calendario personal del cliente usando OAuth2
-     */
     private void sincronizarEnCalendarioPersonal(Integer consumerId, Event evento) {
+        log.info("DEBUG: Intentando entrar a sincronizar calendario personal para usuario ID: {}", consumerId);
+
         try {
+            System.out.println("LOG-CALENDAR: Buscando token para el usuario: " + consumerId);
+
             if (googleOAuth2Service == null) {
                 log.debug("GoogleOAuth2Service no disponible, saltando sincronización personal");
                 return;
             }
 
-            // Verificar si el usuario tiene OAuth2 autorizado
             if (!googleOAuth2Service.hasValidToken(consumerId)) {
                 log.info("ℹ️ El usuario ID {} no tiene Google Calendar conectado. Saltando sincronización personal.", consumerId);
                 return;
             }
 
-            // Obtener el credential del usuario
             Credential userCredential = googleOAuth2Service.getCredential(consumerId);
 
-            // Crear cliente de Calendar con el credential del usuario
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-
-            Calendar userCalendar = new Calendar.Builder(httpTransport, jsonFactory, userCredential)
+            Calendar userCalendar = new Calendar.Builder(
+                    userCredential.getTransport(),
+                    userCredential.getJsonFactory(),
+                    userCredential)
                     .setApplicationName("VenueAPI")
                     .build();
 
-            // Insertar evento en el calendario personal del usuario
-            Event eventoPersonal = userCalendar.events().insert("primary", evento)
-                    .setSendUpdates("all")  // Enviar invitación al usuario
-                    .execute();
+            System.out.println("LOG-CALENDAR: Enviando evento a 'primary'...");
+            Event resultado = userCalendar.events().insert("primary", evento).execute();
 
-            log.info("✅ Evento sincronizado en calendario personal del usuario ID {}. ID del evento: {}",
-                    consumerId, eventoPersonal.getId());
+            System.out.println("LOG-CALENDAR: 🎉 ¡ÉXITO! Evento creado en cuenta personal. Link: " + resultado.getHtmlLink());
 
         } catch (GeneralSecurityException | IOException e) {
+            System.out.println("LOG-CALENDAR: 🚨 ERROR CRÍTICO EN CALENDARIO PERSONAL: " + e.getMessage());
+            e.printStackTrace();
+
             log.warn("⚠️ No se pudo sincronizar evento en calendario personal del usuario ID {}: {}",
                     consumerId, e.getMessage());
         }

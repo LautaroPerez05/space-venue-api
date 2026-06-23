@@ -16,11 +16,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.json.JsonFactory;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -40,6 +46,13 @@ public class GoogleOAuth2Service {
     @Value("${google.oauth2.redirect-uri}")
     private String redirectUri;
 
+    private static final List<String> SCOPES = Arrays.asList(
+            CalendarScopes.CALENDAR,
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile"
+    );
+
+
     /**
      * Genera la URL de autorización que el usuario debe visitar
      */
@@ -57,7 +70,7 @@ public class GoogleOAuth2Service {
                 jsonFactory,
                 clientId,
                 clientSecret,
-                Collections.singletonList(CalendarScopes.CALENDAR))
+                SCOPES)
                 .setAccessType("offline")
                 .setApprovalPrompt("force")
                 .build();
@@ -75,7 +88,6 @@ public class GoogleOAuth2Service {
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
-        // 1. Usamos AuthorizationCodeTokenRequest con el Builder explícito exigido por Google
         TokenResponse tokenResponse = new com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest(
                 httpTransport,
                 jsonFactory,
@@ -86,33 +98,23 @@ public class GoogleOAuth2Service {
                 .execute();
 
         String accessToken = tokenResponse.getAccessToken();
-        // Si el usuario ya dio permisos antes, Google podría no enviar el Refresh Token de nuevo a menos que fuerces la aprobación.
         String refreshToken = tokenResponse.getRefreshToken();
-        Long expiresInSeconds = tokenResponse.getExpiresInSeconds();
-
-        // Obtener el email real del usuario autenticado en lugar de hardcodearlo
         String googleEmail = obtenerGoogleEmailReal(accessToken, httpTransport, jsonFactory);
-        if (googleEmail == null) {
-            googleEmail = "google-user-" + consumerId;
+
+        if (googleEmail == null || googleEmail.isBlank()) {
+            throw new IllegalStateException("No se pudo recuperar el email real de la cuenta de Google. Verifica los permisos.");
         }
 
-        Consumer consumer = consumerService.findById(consumerId);
         GoogleOAuthToken oauthToken = googleOAuthTokenRepository
                 .findByConsumer_IdConsumer(consumerId)
                 .orElse(new GoogleOAuthToken());
 
-        oauthToken.setConsumer(consumer);
+        oauthToken.setConsumer(consumerService.findById(consumerId));
         oauthToken.setAccessToken(accessToken);
-
-        // Conservar el refresh token antiguo si la respuesta nueva viene vacía (comportamiento por defecto de Google)
-        if (refreshToken != null && !refreshToken.isBlank()) {
+        if (refreshToken != null) {
             oauthToken.setRefreshToken(refreshToken);
         }
-
         oauthToken.setGoogleEmail(googleEmail);
-        oauthToken.setExpiresAt(LocalDateTime.now().plusSeconds(expiresInSeconds != null ? expiresInSeconds : 3600));
-        oauthToken.setCreatedAt(oauthToken.getCreatedAt() != null ? oauthToken.getCreatedAt() : LocalDateTime.now());
-        oauthToken.setUpdatedAt(LocalDateTime.now());
         oauthToken.setIsActive(true);
 
         googleOAuthTokenRepository.save(oauthToken);
@@ -131,6 +133,7 @@ public class GoogleOAuth2Service {
             throw new IllegalStateException("El token de Google para el usuario no está activo");
         }
 
+        // Si el token va a expirar pronto, lo refrescamos internamente primero
         if (oauthToken.getExpiresAt() != null && LocalDateTime.now().isAfter(oauthToken.getExpiresAt().minusMinutes(5))) {
             refreshAccessTokenInternal(consumerId);
             oauthToken = googleOAuthTokenRepository
@@ -138,25 +141,36 @@ public class GoogleOAuth2Service {
                     .orElseThrow(() -> new IdNotFoundException("GoogleOAuthToken para consumidor", consumerId));
         }
 
-        // Construir correctamente el Credential usando BearerToken como AccessMethod
-        com.google.api.client.auth.oauth2.Credential credential = new com.google.api.client.auth.oauth2.Credential
-                .Builder(com.google.api.client.auth.oauth2.BearerToken.authorizationHeaderAccessMethod())
-                .setTransport(GoogleNetHttpTransport.newTrustedTransport())
-                .setJsonFactory(GsonFactory.getDefaultInstance())
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+
+        // CORRECCIÓN AQUÍ: Usar el Builder explícito con todos los parámetros obligatorios que pide el error
+        com.google.api.client.auth.oauth2.Credential credential = new com.google.api.client.auth.oauth2.Credential.Builder(
+                com.google.api.client.auth.oauth2.BearerToken.authorizationHeaderAccessMethod())
+                .setTransport(httpTransport)
+                .setJsonFactory(jsonFactory)
+                .setTokenServerUrl(new com.google.api.client.http.GenericUrl("https://oauth2.googleapis.com/token"))
+                .setClientAuthentication(new com.google.api.client.http.BasicAuthentication(clientId, clientSecret))
                 .build();
 
+        // Seteamos los tokens correspondientes
         credential.setAccessToken(oauthToken.getAccessToken());
-        if (oauthToken.getRefreshToken() != null) credential.setRefreshToken(oauthToken.getRefreshToken());
+        if (oauthToken.getRefreshToken() != null && !oauthToken.getRefreshToken().isBlank()) {
+            credential.setRefreshToken(oauthToken.getRefreshToken());
+        }
+
         if (oauthToken.getExpiresAt() != null) {
-            credential.setExpirationTimeMilliseconds(
-                    oauthToken.getExpiresAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
+            long expiresMillis = oauthToken.getExpiresAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+            // Le restamos el tiempo actual para calcular el tiempo restante en segundos (exigido por Google de forma interna)
+            long remainingSeconds = (expiresMillis - System.currentTimeMillis()) / 1000;
+            credential.setExpiresInSeconds(remainingSeconds > 0 ? remainingSeconds : 3600L);
         }
 
         return credential;
     }
 
     /**
-     * Método interno para refrescar el token (sin @Transactional para evitar warning)
+     * Metodo interno para refrescar el token (sin @Transactional para evitar warning)
      */
     private void refreshAccessTokenInternal(Integer consumerId) throws GeneralSecurityException, IOException {
         GoogleOAuthToken oauthToken = googleOAuthTokenRepository
@@ -190,22 +204,23 @@ public class GoogleOAuth2Service {
     /**
      * Extra (Opcional pero muy recomendado): Recupera el email real de la cuenta de Google vinculada
      */
-    private String obtenerGoogleEmailReal(String accessToken, HttpTransport transport, GsonFactory factory) {
+    private String obtenerGoogleEmailReal(String accessToken, HttpTransport transport, JsonFactory jsonFactory) {
         try {
-            com.google.api.client.http.HttpRequestFactory requestFactory = transport.createRequestFactory(
-                    request -> request.getHeaders().setAuthorization("Bearer " + accessToken)
-            );
-            com.google.api.client.http.GenericUrl url = new com.google.api.client.http.GenericUrl("https://www.googleapis.com/oauth2/v2/userinfo");
-            com.google.api.client.http.HttpRequest request = requestFactory.buildGetRequest(url);
+            // Endpoint oficial de Google para obtener información del usuario conectado
+            GenericUrl url = new GenericUrl("https://www.googleapis.com/oauth2/v2/userinfo");
+
+            HttpRequest request = transport.createRequestFactory().buildGetRequest(url);
+            request.getHeaders().setAuthorization("Bearer " + accessToken);
+
             String responseBody = request.execute().parseAsString();
 
-            // Un parseo rápido usando una expresión regular para no añadir librerías adicionales
-            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\"email\"\\s*:\\s*\"([^\"]+)\"").matcher(responseBody);
-            if (matcher.find()) {
-                return matcher.group(1);
+            // Parseamos el JSON de respuesta para extraer el campo "email"
+            JsonObject jsonObject = JsonParser.parseString(responseBody).getAsJsonObject();
+            if (jsonObject.has("email")) {
+                return jsonObject.get("email").getAsString();
             }
-        } catch (Exception e) {
-            log.warn("No se pudo obtener el email real de Google: {}", e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error al obtener el email real de Google: " + e.getMessage());
         }
         return null;
     }

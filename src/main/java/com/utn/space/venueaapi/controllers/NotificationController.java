@@ -26,11 +26,22 @@ public class NotificationController {
 ///------------------------------------------------Metodos--------------------------------------------------------------------
     @GetMapping
     @Operation(
-            summary = "Busca todas las notificaciones.",
-            description = "Devuelve la lista de TODAS las Notificaciones."
+            summary = "Busca todas las notificaciones (solo para ADMIN).",
+            description = "Devuelve la lista de TODAS las Notificaciones (solo accesible para administradores)."
     )
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Notification> listAll (){
         return notificationService.listAll();
+    }
+
+    @GetMapping("/me")
+    @Operation(
+            summary = "Busca notificaciones del usuario autenticado.",
+            description = "Devuelve las notificaciones del usuario logueado."
+    )
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN')")
+    public ResponseEntity<List<Notification>> getMyNotifications(){
+        return ResponseEntity.ok(notificationService.listAllByIdConsumerForConsumer());
     }
 
     @GetMapping("/unread-count")

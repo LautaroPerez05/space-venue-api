@@ -71,7 +71,7 @@ public class GoogleOAuth2Controller {
             description = "Endpoint al que Google redirige después de que el usuario autoriza. " +
                     "Requiere que el usuario esté autenticado en la aplicación (JWT en Authorization header)"
     )
-    public ResponseEntity<Map<String, String>> handleCallback(
+    public ResponseEntity<String> handleCallback(
             @RequestParam(value = "code") String code,
             @RequestParam(value = "state", required = false) String state,
             HttpServletRequest request) {
@@ -88,34 +88,42 @@ public class GoogleOAuth2Controller {
             }
 
             if (token == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "Usuario no autenticado - Token no encontrado ni en header ni en state");
+                String error = "Usuario no autenticado - Token no encontrado ni en header ni en state";
                 return ResponseEntity.status(401).body(error);
             }
 
             Integer consumerId = jwtUtil.extraerConsumerId(token);
 
             if (consumerId == null) {
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "No se pudo extraer el consumerId del token");
+                String error = "No se pudo extraer el consumerId del token";
                 return ResponseEntity.status(400).body(error);
             }
 
 
             googleOAuth2Service.exchangeCodeForToken(code, consumerId);
-            /*
-            Map<String, String> response = new HashMap<>();
-            response.put("success", "true");
-            response.put("message", "Calendario conectado exitosamente");
-            return ResponseEntity.ok(response);
-            */
 
-            return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(java.net.URI.create("http://localhost:8080/space.html?id=" + consumerId))
-                    .build();
+            String htmlCloseScript = """
+                    <html>
+                    <head><title>Conexión Exitosa</title></head>
+                    <body>
+                        <script>
+                            if (window.opener) {
+                                // Avisa a la pestaña principal que el estado cambió
+                                window.opener.postMessage('google-calendar-connected', '*');
+                            }
+                            window.close(); // Cierra esta ventana automáticamente
+                        </script>
+                        <h2>Conexión exitosa, cerrando ventana...</h2>
+                    </body>
+                    </html>
+                    """;
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "text/html; charset=UTF-8")
+                    .body(htmlCloseScript);
+
         } catch (GeneralSecurityException | IOException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Error al procesar la autorización: " + e.getMessage());
+            String error = "Error al procesar la autorización: " + e.getMessage();
             return ResponseEntity.status(500).body(error);
         }
     }

@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/spaces/search").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/comments/byspaceid/**").permitAll()
+                        .requestMatchers("/*.html", "/css/**", "/js/**", "/assets/**").permitAll()
+                        .requestMatchers("/").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml",

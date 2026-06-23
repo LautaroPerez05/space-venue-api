@@ -1,11 +1,13 @@
 package com.utn.space.venueaapi.service;
 
 import com.utn.space.venueaapi.exceptions.IdNotFoundException;
+import com.utn.space.venueaapi.model.Consumer;
 import com.utn.space.venueaapi.model.Notification;
 import com.utn.space.venueaapi.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -67,5 +69,15 @@ public class NotificationService {
         return notificationList.stream()
                 .filter(notification -> !notification.getIsSeen())
                 .count();
+    }
+
+    // Método para crear una notificación
+    public Notification createNotification(Consumer consumer, String message) {
+        Notification notification = new Notification();
+        notification.setConsumer(consumer);
+        notification.setMessage(message);
+        notification.setCreatedAt(LocalDateTime.now());
+        notification.setIsSeen(false);
+        return notificationRepository.save(notification);
     }
 }

@@ -43,7 +43,7 @@ function renderReservations(list) {
             : escapeHtml(spaceName);
 
         let actions = [];
-        if (status === "TENTATIVE") {
+        if (status === "CONFIRMED") {
             actions.push(`<button class="btn small success" onclick="pay(${r.id})">💳 Pagar</button>`);
         }
         if (status === "TENTATIVE" || status === "CONFIRMED") {

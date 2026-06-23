@@ -1,5 +1,7 @@
 package com.utn.space.venueaapi.model.records;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.utn.space.venueaapi.model.ReservationStatus;
 import com.utn.space.venueaapi.model.flags.Create;
 import com.utn.space.venueaapi.model.flags.Update;
@@ -28,10 +30,12 @@ public record ReservationDTO (
 
     @NotNull(groups = {Create.class, Update.class})
     @Schema(description = "Fecha de Inicio del Evento", example = "2026-09-15T21:00:00")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime fromDate,
 
     @NotNull(groups = {Create.class, Update.class})
     @Schema(description = "Fecha de Fin del Evento", example = "2026-09-16T05:00:00")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     LocalDateTime untilDate,
 
     @Schema(description = "Precio final de la reserva")

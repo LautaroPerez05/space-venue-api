@@ -32,40 +32,50 @@ public class PaymentServiceImpl implements IPaymentService {
 
     @Override
     public String createPreference(Reservation reservation) throws MPException, MPApiException {
-        PreferenceClient client = new PreferenceClient();
+        try {
+            PreferenceClient client = new PreferenceClient();
 
-        // Crear el ítem (el espacio reservado)
-        PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
-                .id(reservation.getId().toString())
-                .title("Reserva de Espacio: " + reservation.getSpace().getNameSpace())
-                .description("Pago de reserva nro: " + reservation.getId())
-                .quantity(1)
-                .currencyId("ARS") // O tu moneda local compatible con MP
-                .unitPrice(reservation.getFinalPrice())
-                .build();
+            // Crear el ítem (el espacio reservado)
+            PreferenceItemRequest itemRequest = PreferenceItemRequest.builder()
+                    .id(reservation.getId().toString())
+                    .title("Reserva de Espacio: " + reservation.getSpace().getNameSpace())
+                    .description("Pago de reserva nro: " + reservation.getId())
+                    .quantity(1)
+                    .currencyId("ARS") // O tu moneda local compatible con MP
+                    .unitPrice(reservation.getFinalPrice())
+                    .build();
 
-        List<PreferenceItemRequest> items = new ArrayList<>();
-        items.add(itemRequest);
+            List<PreferenceItemRequest> items = new ArrayList<>();
+            items.add(itemRequest);
 
-        // Configurar las URLs de retorno (Back Urls)
-        PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
-                .success("https://tu-frontend.com/payment/success")
-                .failure("https://tu-frontend.com/payment/failure")
-                .pending("https://tu-frontend.com/payment/pending")
-                .build();
+            // Configurar las URLs de retorno (Back Urls)
+            PreferenceBackUrlsRequest backUrls = PreferenceBackUrlsRequest.builder()
+                    .success("https://localhost/reservations.html")
+                    .failure("https://localhost/reservations.html")
+                    .pending("https://localhost/reservations.html")
+                    .build();
 
-        // Construir la preferencia de Mercado Pago
-        PreferenceRequest preferenceRequest = PreferenceRequest.builder()
-                .items(items)
-                .backUrls(backUrls)
-                .autoReturn("approved") // Retorna automáticamente al front si se aprueba
-                .externalReference(reservation.getId().toString()) // Enlace clave con la BD
-                .build();
+            // Construir la preferencia de Mercado Pago
+            PreferenceRequest preferenceRequest = PreferenceRequest.builder()
+                    .items(items)
+                    .backUrls(backUrls)
+                    .autoReturn("approved") // Retorna automáticamente al front si se aprueba
+                    .externalReference(reservation.getId().toString()) // Enlace clave con la BD
+                    .build();
 
-        Preference preference = client.create(preferenceRequest);
+            Preference preference = client.create(preferenceRequest);
 
-        // Retornamos el init_point para que el frontend redirija al Sandbox
-        return preference.getInitPoint();
+            log.info("✅ Preferencia de Mercado Pago creada exitosamente. Init Point: {}", preference.getInitPoint());
+
+            // Retornamos el init_point para que el frontend redirija al Sandbox
+            return preference.getInitPoint();
+        } catch (MPException | MPApiException e) {
+            log.error("❌ Error de Mercado Pago al crear la preferencia: {}", e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            log.error("❌ Error inesperado al crear la preferencia: {}", e.getMessage(), e);
+            throw new MPException("Error al crear preferencia de pago: " + e.getMessage());
+        }
     }
 
     @Override

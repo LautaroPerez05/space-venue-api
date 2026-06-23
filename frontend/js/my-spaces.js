@@ -9,6 +9,12 @@ let spaceMarker = null;
 // =====================================================
 //  Carga y render de los espacios del dueño
 // =====================================================
+// Helper: formatea Date a yyyy-MM-dd'T'HH:mm:ss (hora local)
+function formatLocalDateTime(d) {
+    const two = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${two(d.getMonth()+1)}-${two(d.getDate())}T${two(d.getHours())}:${two(d.getMinutes())}:${two(d.getSeconds())}`;
+}
+
 async function loadMySpaces() {
     loading("my-spaces");
     try {
@@ -67,9 +73,15 @@ function openSpaceModal() {
     document.getElementById("s-lng").value    = "";
     document.getElementById("s-buffer").value = 120; // minutos por defecto
     document.getElementById("s-policy").value = "FLEXIBLE";
+    document.getElementById("s-images").value = "";
+    document.getElementById("s-images-preview").innerHTML = "";
     document.getElementById("space-modal").classList.remove("hidden");
     // Inicializa o refresca el mapa cuando se abre el modal
     initSpaceMap();
+
+    // Agregar listener para preview de imágenes (usar asignación para evitar múltiples listeners)
+    const imagesInput = document.getElementById("s-images");
+    if (imagesInput) imagesInput.onchange = previewImages;
 }
 
 function closeSpaceModal() {
@@ -102,7 +114,7 @@ function editSpace(id) {
 }
 
 async function saveSpace() {
-    const id   = document.getElementById("s-id").value;
+    let id   = document.getElementById("s-id").value;
     const name = document.getElementById("s-name").value.trim();
     const desc = document.getElementById("s-desc").value.trim();
     const price= numOrNull(document.getElementById("s-price").value);
@@ -148,9 +160,31 @@ async function saveSpace() {
             await API.updateOwnedSpace(Number(id), dto);
             alertBox("Espacio actualizado correctamente.", "success");
         } else {
-            await API.createOwnedSpace(dto);
+            const res = await API.createOwnedSpace(dto);
             alertBox("Espacio publicado con éxito.", "success");
+            // Si el backend devolvió el id, úsalo
+            if (res) {
+                if (typeof res === 'object' && (res.idSpace || res.id_space || res.id)) {
+                    id = res.idSpace || res.id_space || res.id;
+                }
+            }
+
+            // Si por alguna razón el backend no devuelve id, intentamos recuperar buscando por nombre/precio
+            if (!id) {
+                const owned = await API.myOwnedSpaces();
+                const created = (owned || []).find(s => s.nameSpace === name && Number(s.basePrice) === Number(price));
+                if (created) id = created.idSpace;
+            }
         }
+
+        // Cargar imágenes si existen
+        const imagesInput = document.getElementById("s-images");
+        if (id && imagesInput?.files && imagesInput.files.length > 0) {
+            await uploadSpaceImages(Number(id), imagesInput.files);
+            // Esperar un poco a que el backend procese las imágenes antes de recargar
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
         closeSpaceModal();
         await loadMySpaces();
     } catch (e) {
@@ -379,6 +413,61 @@ async function ownerComplete(id) {
         await API.completeReservation(id);
         alertBox("Reserva marcada como completada.", "success");
     } catch (e) { alertBox(e.message || "Error al completar."); }
+}
+
+// Función para previsualizar imágenes seleccionadas
+function previewImages() {
+    const input = document.getElementById("s-images");
+    const preview = document.getElementById("s-images-preview");
+    preview.innerHTML = "";
+
+    if (input.files) {
+        Array.from(input.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.style.width = "80px";
+                img.style.height = "80px";
+                img.style.borderRadius = "4px";
+                img.style.objectFit = "cover";
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+// Función para cargar imágenes del espacio
+async function uploadSpaceImages(idSpace, files) {
+    // Procesar archivos de forma secuencial y esperar a que cada upload termine
+    for (const file of files) {
+        await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target.result;
+                try {
+                    const dto = {
+                        idImage: null,
+                        idSpace: idSpace,
+                        fileName: file.name,
+                        urlImage: base64,
+                        dateSend: formatLocalDateTime(new Date())
+                    };
+                    await API.createImage(dto);
+                    console.log("Imagen cargada:", file.name);
+                } catch (err) {
+                    console.error("Error al cargar imagen:", err);
+                }
+                resolve();
+            };
+            reader.onerror = (err) => {
+                console.error("Error leyendo archivo:", err);
+                resolve();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 }
 
 renderNav();
